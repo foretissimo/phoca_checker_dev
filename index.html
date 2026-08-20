@@ -1,0 +1,1769 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+  <title>포카 체커 (Phoca Checker) - 포토카드 컬렉션 & 위시리스트</title>
+  <link rel="icon" href="data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 100 100%22><text y=%22.9em%22 font-size=%2290%22>✨</text></svg>">
+  <style>
+/* ==========================================================================
+   Phoca Checker - Complete Robust Responsive Stylesheet
+   ========================================================================== */
+
+:root {
+  --bg-primary: #0f1117;
+  --bg-secondary: #181c28;
+  --bg-card: #1e2334;
+  --bg-card-hover: #262c42;
+  --bg-hover: #2a3148;
+  
+  --text-primary: #f8fafc;
+  --text-secondary: #94a3b8;
+  --text-muted: #64748b;
+
+  --accent-primary: #6366f1;
+  --accent-hover: #4f46e5;
+  --accent-glow: rgba(99, 102, 241, 0.35);
+  
+  --success: #10b981;
+  --success-glow: rgba(16, 185, 129, 0.25);
+  --warning: #f59e0b;
+  --info: #38bdf8;
+  --border-color: rgba(255, 255, 255, 0.1);
+  --border-active: rgba(99, 102, 241, 0.6);
+
+  --radius-sm: 8px;
+  --radius-md: 12px;
+  --radius-lg: 18px;
+  --radius-full: 9999px;
+  --shadow-lg: 0 16px 40px rgba(0, 0, 0, 0.6);
+}
+
+* {
+  box-sizing: border-box;
+  margin: 0;
+  padding: 0;
+  -webkit-tap-highlight-color: transparent;
+}
+
+body {
+  font-family: -apple-system, BlinkMacSystemFont, "Pretendard", "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+  background-color: var(--bg-primary);
+  color: var(--text-primary);
+  min-height: 100vh;
+  display: flex;
+  flex-direction: column;
+  line-height: 1.5;
+  overflow-x: hidden;
+}
+
+/* --------------------------------------------------------------------------
+   App Header & Navbar
+   -------------------------------------------------------------------------- */
+.app-header {
+  background: rgba(15, 17, 23, 0.95);
+  backdrop-filter: blur(16px);
+  -webkit-backdrop-filter: blur(16px);
+  border-bottom: 1px solid var(--border-color);
+  padding: 0.75rem 1.25rem;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  position: sticky;
+  top: 0;
+  z-index: 100;
+  gap: 1rem;
+}
+
+.brand-section {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  cursor: pointer;
+  user-select: none;
+}
+
+.brand-icon {
+  width: 36px;
+  height: 36px;
+  background: linear-gradient(135deg, #ec4899, #8b5cf6);
+  border-radius: 10px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  box-shadow: 0 4px 14px rgba(139, 92, 246, 0.4);
+  color: #fff;
+}
+
+.brand-title {
+  font-size: 1.15rem;
+  font-weight: 700;
+  letter-spacing: -0.02em;
+  background: linear-gradient(90deg, #fff, #cbd5e1);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+}
+
+.nav-breadcrumbs {
+  display: flex;
+  align-items: center;
+  gap: 0.4rem;
+  font-size: 0.85rem;
+  color: var(--text-muted);
+  font-weight: 500;
+}
+
+.nav-breadcrumbs span.active {
+  color: #a5b4fc;
+  font-weight: 600;
+}
+
+.header-credits {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  font-size: 0.78rem;
+  color: var(--text-muted);
+}
+
+.credit-link {
+  color: #a5b4fc;
+  text-decoration: none;
+  font-weight: 600;
+  padding: 2px 6px;
+  border-radius: 4px;
+  background: rgba(99, 102, 241, 0.12);
+  transition: all 0.2s ease;
+}
+
+.credit-link:hover {
+  background: rgba(99, 102, 241, 0.25);
+  color: #ffffff;
+  text-decoration: underline;
+}
+
+.header-actions {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+}
+
+/* --------------------------------------------------------------------------
+   View Switching
+   -------------------------------------------------------------------------- */
+.view-container {
+  display: none;
+  width: 100%;
+}
+.view-container.active {
+  display: block;
+}
+
+/* --------------------------------------------------------------------------
+   1. Home View (Category Hub)
+   -------------------------------------------------------------------------- */
+.home-view {
+  max-width: 1120px;
+  margin: 0 auto;
+  padding: 2.5rem 1.25rem;
+  flex: 1;
+}
+
+.hero-banner {
+  text-align: center;
+  margin-bottom: 2.5rem;
+}
+
+.hero-badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.4rem;
+  padding: 0.35rem 0.85rem;
+  background: rgba(99, 102, 241, 0.15);
+  border: 1px solid rgba(99, 102, 241, 0.3);
+  border-radius: var(--radius-full);
+  color: #a5b4fc;
+  font-size: 0.82rem;
+  font-weight: 600;
+  margin-bottom: 0.85rem;
+}
+
+.hero-title {
+  font-size: 2rem;
+  font-weight: 800;
+  letter-spacing: -0.03em;
+  margin-bottom: 0.5rem;
+  color: #ffffff;
+}
+
+.hero-desc {
+  color: var(--text-secondary);
+  font-size: 0.95rem;
+  max-width: 540px;
+  margin: 0 auto;
+}
+
+.categories-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+  gap: 1.25rem;
+}
+
+.category-card {
+  background: var(--bg-card);
+  border: 1px solid var(--border-color);
+  border-radius: var(--radius-lg);
+  padding: 1.35rem;
+  position: relative;
+  overflow: hidden;
+  cursor: pointer;
+  transition: all 0.22s cubic-bezier(0.4, 0, 0.2, 1);
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+  min-height: 200px;
+}
+
+.category-card:hover {
+  transform: translateY(-4px);
+  border-color: var(--border-active);
+  box-shadow: 0 12px 32px rgba(99, 102, 241, 0.25);
+  background: var(--bg-card-hover);
+}
+
+.category-card.disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
+.cat-top {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  margin-bottom: 0.85rem;
+}
+
+.cat-icon-badge {
+  width: 44px;
+  height: 44px;
+  border-radius: 12px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 1.3rem;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3);
+}
+
+.cat-badge {
+  padding: 0.25rem 0.65rem;
+  border-radius: var(--radius-full);
+  font-size: 0.75rem;
+  font-weight: 700;
+  background: rgba(255, 255, 255, 0.1);
+  color: var(--text-primary);
+}
+
+.cat-title {
+  font-size: 1.2rem;
+  font-weight: 700;
+  margin-bottom: 0.25rem;
+}
+
+.cat-sub {
+  font-size: 0.82rem;
+  color: var(--text-muted);
+  margin-bottom: 1rem;
+}
+
+.cat-stats-row {
+  margin-top: auto;
+  padding-top: 0.85rem;
+  border-top: 1px solid var(--border-color);
+}
+
+.cat-progress-meta {
+  display: flex;
+  justify-content: space-between;
+  font-size: 0.8rem;
+  margin-bottom: 0.4rem;
+}
+
+/* --------------------------------------------------------------------------
+   2. Checker View
+   -------------------------------------------------------------------------- */
+.checker-view {
+  max-width: 1280px;
+  margin: 0 auto;
+  padding: 1rem 1.25rem;
+  display: flex;
+  flex-direction: column;
+  gap: 0.85rem;
+  flex: 1;
+}
+
+/* Top Control Bar */
+.control-bar {
+  background: var(--bg-card);
+  border: 1px solid var(--border-color);
+  border-radius: var(--radius-lg);
+  padding: 0.85rem 1.25rem;
+  box-shadow: var(--shadow-lg);
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: space-between;
+  gap: 0.85rem;
+}
+
+.template-selector-btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.65rem;
+  padding: 0.55rem 1rem;
+  background: var(--bg-secondary);
+  border: 1px solid var(--border-color);
+  border-radius: var(--radius-md);
+  color: var(--text-primary);
+  font-size: 0.92rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  max-width: 100%;
+}
+
+.template-selector-btn:hover {
+  border-color: var(--accent-primary);
+  background: var(--bg-hover);
+  box-shadow: 0 0 0 3px var(--accent-glow);
+}
+
+.template-tag-badge {
+  font-size: 0.72rem;
+  font-weight: 600;
+  padding: 2px 7px;
+  border-radius: var(--radius-full);
+  background: rgba(99, 102, 241, 0.2);
+  color: #a5b4fc;
+}
+
+.template-status-pill {
+  font-size: 0.72rem;
+  font-weight: 700;
+  padding: 2px 7px;
+  border-radius: var(--radius-full);
+}
+
+/* Segmented Control for Display Mode */
+.segmented-control {
+  display: flex;
+  background: var(--bg-secondary);
+  padding: 3px;
+  border-radius: var(--radius-md);
+  border: 1px solid var(--border-color);
+  gap: 3px;
+}
+
+.seg-btn {
+  padding: 0.5rem 0.85rem;
+  font-size: 0.82rem;
+  font-weight: 600;
+  border: none;
+  border-radius: 8px;
+  background: transparent;
+  color: var(--text-secondary);
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  gap: 0.4rem;
+  transition: all 0.2s ease;
+  white-space: nowrap;
+}
+
+.seg-btn:hover {
+  color: var(--text-primary);
+}
+
+.seg-btn.active {
+  background: var(--accent-primary);
+  color: #ffffff;
+  box-shadow: 0 2px 8px var(--accent-glow);
+}
+
+/* Buttons */
+.btn {
+  padding: 0.5rem 0.9rem;
+  font-size: 0.82rem;
+  font-weight: 600;
+  border-radius: var(--radius-sm);
+  border: 1px solid var(--border-color);
+  background: var(--bg-secondary);
+  color: var(--text-primary);
+  cursor: pointer;
+  display: inline-flex;
+  align-items: center;
+  gap: 0.45rem;
+  transition: all 0.2s ease;
+  user-select: none;
+}
+
+.btn:hover {
+  background: var(--bg-hover);
+  border-color: rgba(255, 255, 255, 0.18);
+  transform: translateY(-1px);
+}
+
+.btn:active {
+  transform: translateY(0);
+}
+
+.btn-primary {
+  background: linear-gradient(135deg, #6366f1, #4f46e5);
+  border: none;
+  color: #fff;
+  box-shadow: 0 4px 12px var(--accent-glow);
+}
+
+.btn-success {
+  background: linear-gradient(135deg, #10b981, #059669);
+  border: none;
+  color: #fff;
+  box-shadow: 0 4px 12px var(--success-glow);
+}
+
+.btn-purple {
+  background: linear-gradient(135deg, #8b5cf6, #ec4899);
+  border: none;
+  color: #fff;
+  box-shadow: 0 4px 12px rgba(236, 72, 153, 0.35);
+}
+
+.btn-sm {
+  padding: 0.4rem 0.7rem;
+  font-size: 0.78rem;
+}
+
+.btn-icon-only {
+  padding: 0.5rem;
+  border-radius: var(--radius-md);
+}
+
+.btn.active-mode {
+  background: #ec4899;
+  border-color: #f43f5e;
+  color: #fff;
+}
+
+/* Navigation Toolbar */
+.nav-pager-bar {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  background: var(--bg-secondary);
+  border: 1px solid var(--border-color);
+  border-radius: var(--radius-md);
+  padding: 0.5rem 0.85rem;
+  gap: 0.75rem;
+}
+
+.pager-stats {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  font-size: 0.85rem;
+  flex: 1;
+  justify-content: center;
+}
+
+.progress-track {
+  width: 140px;
+  height: 6px;
+  background: var(--bg-primary);
+  border-radius: var(--radius-full);
+  overflow: hidden;
+}
+
+.progress-fill {
+  height: 100%;
+  width: 0%;
+  background: linear-gradient(90deg, #6366f1, #10b981);
+  border-radius: var(--radius-full);
+  transition: width 0.3s ease;
+}
+
+/* Photocard Canvas Viewport */
+.canvas-section {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  min-height: 480px;
+  position: relative;
+}
+
+.image-wrapper {
+  position: relative;
+  max-width: 100%;
+  border-radius: var(--radius-md);
+  overflow: hidden;
+  box-shadow: 0 20px 48px rgba(0, 0, 0, 0.65);
+  border: 1px solid var(--border-color);
+  background: #000;
+  user-select: none;
+}
+
+.main-image {
+  display: block;
+  width: 100%;
+  height: auto;
+  max-height: 75vh;
+  object-fit: contain;
+  pointer-events: none;
+}
+
+.card-overlay-container {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  pointer-events: auto;
+}
+
+.photocard-slot {
+  position: absolute;
+  cursor: pointer;
+  transition: transform 0.15s cubic-bezier(0.4, 0, 0.2, 1), box-shadow 0.15s ease;
+  overflow: hidden;
+  box-sizing: border-box;
+  z-index: 10;
+}
+
+.photocard-slot:hover {
+  box-shadow: 0 0 0 2px rgba(99, 102, 241, 0.85), 0 8px 24px rgba(0,0,0,0.6);
+  transform: scale(1.015);
+  z-index: 20;
+}
+
+.photocard-slot:active {
+  transform: scale(0.985);
+}
+
+.card-mask {
+  width: 100%;
+  height: 100%;
+  position: absolute;
+  top: 0;
+  left: 0;
+  background: rgba(16, 17, 24, 0.68);
+  backdrop-filter: blur(2px);
+  -webkit-backdrop-filter: blur(2px);
+  opacity: 0;
+  transition: opacity 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  pointer-events: none;
+}
+
+.photocard-slot.masked .card-mask {
+  opacity: 1;
+}
+
+.mask-indicator {
+  width: 28px;
+  height: 28px;
+  border-radius: 50%;
+  background: rgba(255, 255, 255, 0.2);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: #ffffff;
+  transform: scale(0.7);
+  transition: transform 0.2s cubic-bezier(0.34, 1.56, 0.64, 1);
+}
+
+.photocard-slot.masked .mask-indicator {
+  transform: scale(1);
+}
+
+.image-mode-badge {
+  position: absolute;
+  top: 14px;
+  left: 14px;
+  z-index: 25;
+  padding: 3px 11px;
+  border-radius: var(--radius-full);
+  font-size: 0.78rem;
+  font-weight: 700;
+  background: rgba(15, 23, 42, 0.78);
+  backdrop-filter: blur(8px);
+  -webkit-backdrop-filter: blur(8px);
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.5);
+  user-select: none;
+  pointer-events: none;
+  transition: all 0.2s ease;
+  letter-spacing: 0.02em;
+}
+
+.image-mode-badge.unowned {
+  color: #38bdf8;
+  border: 1px solid rgba(56, 189, 248, 0.5);
+}
+
+.image-mode-badge.owned {
+  color: #34d399;
+  border: 1px solid rgba(16, 185, 129, 0.5);
+}
+
+.image-credit-banner {
+  margin-top: 0.75rem;
+  font-size: 0.82rem;
+  color: var(--text-muted);
+  text-align: center;
+}
+
+/* Modal Dialog */
+.modal-backdrop {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100vw;
+  height: 100vh;
+  background: rgba(0, 0, 0, 0.7);
+  backdrop-filter: blur(8px);
+  -webkit-backdrop-filter: blur(8px);
+  z-index: 900;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  opacity: 0;
+  visibility: hidden;
+  transition: all 0.22s ease;
+}
+
+.modal-backdrop.open {
+  opacity: 1;
+  visibility: visible;
+}
+
+.modal-box {
+  background: var(--bg-card);
+  border: 1px solid var(--border-color);
+  border-radius: var(--radius-lg);
+  padding: 1.5rem;
+  width: 440px;
+  max-width: 90vw;
+  box-shadow: var(--shadow-lg);
+  transform: scale(0.95);
+  transition: transform 0.22s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.modal-backdrop.open .modal-box {
+  transform: scale(1);
+}
+
+.modal-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 1rem;
+}
+
+.modal-title {
+  font-size: 1.1rem;
+  font-weight: 700;
+}
+
+.backup-option-card {
+  background: var(--bg-secondary);
+  border: 1px solid var(--border-color);
+  border-radius: var(--radius-md);
+  padding: 1rem;
+  margin-bottom: 0.75rem;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 0.75rem;
+}
+
+/* Info & Notice Bar */
+.notice-ticker-bar {
+  background: rgba(99, 102, 241, 0.12);
+  border: 1px solid rgba(99, 102, 241, 0.25);
+  border-radius: var(--radius-full);
+  padding: 0.5rem 1.15rem;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.65rem;
+  font-size: 0.84rem;
+  color: var(--text-primary);
+  cursor: pointer;
+  transition: all 0.2s ease;
+  max-width: 680px;
+  margin: 1.25rem auto 0;
+  user-select: none;
+}
+
+.notice-ticker-bar:hover {
+  background: rgba(99, 102, 241, 0.22);
+  border-color: rgba(99, 102, 241, 0.45);
+  transform: translateY(-1px);
+}
+
+.notice-ticker-badge {
+  font-weight: 700;
+  color: #a5b4fc;
+  display: inline-flex;
+  align-items: center;
+  gap: 0.3rem;
+}
+
+.notice-ticker-link {
+  color: #38bdf8;
+  font-weight: 600;
+  font-size: 0.78rem;
+}
+
+.info-modal-box {
+  width: 580px;
+  max-width: 92vw;
+  max-height: 85vh;
+  overflow-y: auto;
+}
+
+.info-section {
+  margin-bottom: 1.25rem;
+}
+
+.info-section-title {
+  font-size: 0.95rem;
+  font-weight: 700;
+  color: #a5b4fc;
+  display: flex;
+  align-items: center;
+  gap: 0.45rem;
+  margin-bottom: 0.65rem;
+  padding-bottom: 0.35rem;
+  border-bottom: 1px solid var(--border-color);
+}
+
+.info-card {
+  background: var(--bg-secondary);
+  border: 1px solid var(--border-color);
+  border-radius: var(--radius-md);
+  padding: 0.9rem 1.1rem;
+  font-size: 0.85rem;
+  line-height: 1.6;
+  color: var(--text-secondary);
+}
+
+.guide-step {
+  display: flex;
+  gap: 0.65rem;
+  margin-bottom: 0.75rem;
+}
+
+.guide-step:last-child {
+  margin-bottom: 0;
+}
+
+.guide-step-num {
+  width: 22px;
+  height: 22px;
+  border-radius: 50%;
+  background: rgba(99, 102, 241, 0.2);
+  color: #a5b4fc;
+  font-weight: 700;
+  font-size: 0.75rem;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+  margin-top: 2px;
+}
+
+.credit-person-card {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 0.75rem 0.9rem;
+  background: var(--bg-card);
+  border: 1px solid var(--border-color);
+  border-radius: var(--radius-sm);
+  margin-bottom: 0.5rem;
+}
+
+.credit-person-card:last-child {
+  margin-bottom: 0;
+}
+
+.credit-role {
+  font-weight: 600;
+  color: var(--text-primary);
+  font-size: 0.86rem;
+}
+
+/* --------------------------------------------------------------------------
+   3. Template Drawer
+   -------------------------------------------------------------------------- */
+.drawer-backdrop {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100vw;
+  height: 100vh;
+  background: rgba(0, 0, 0, 0.65);
+  backdrop-filter: blur(6px);
+  -webkit-backdrop-filter: blur(6px);
+  z-index: 500;
+  opacity: 0;
+  visibility: hidden;
+  transition: all 0.25s ease;
+}
+
+.drawer-backdrop.open {
+  opacity: 1;
+  visibility: visible;
+}
+
+.template-drawer {
+  position: fixed;
+  right: 0;
+  top: 0;
+  bottom: 0;
+  width: 440px;
+  max-width: 90vw;
+  background: var(--bg-secondary);
+  border-left: 1px solid var(--border-color);
+  box-shadow: -10px 0 40px rgba(0, 0, 0, 0.6);
+  z-index: 501;
+  display: flex;
+  flex-direction: column;
+  transform: translateX(100%);
+  transition: transform 0.28s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.drawer-backdrop.open .template-drawer {
+  transform: translateX(0);
+}
+
+.drawer-header {
+  padding: 1.25rem 1.5rem;
+  border-bottom: 1px solid var(--border-color);
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+
+.drawer-title {
+  font-size: 1.05rem;
+  font-weight: 700;
+}
+
+.drawer-search-box {
+  padding: 1rem 1.5rem 0.5rem;
+  display: flex;
+  flex-direction: column;
+  gap: 0.65rem;
+}
+
+.search-input-wrapper {
+  position: relative;
+}
+
+.search-input {
+  width: 100%;
+  padding: 0.6rem 1rem 0.6rem 2.3rem;
+  background: var(--bg-primary);
+  border: 1px solid var(--border-color);
+  border-radius: var(--radius-md);
+  color: var(--text-primary);
+  font-size: 0.88rem;
+  outline: none;
+}
+
+.search-icon {
+  position: absolute;
+  left: 0.8rem;
+  top: 50%;
+  transform: translateY(-50%);
+  color: var(--text-muted);
+  pointer-events: none;
+}
+
+.filter-pills-row {
+  display: flex;
+  gap: 0.4rem;
+  overflow-x: auto;
+  padding-bottom: 0.35rem;
+  scrollbar-width: none;
+}
+.filter-pills-row::-webkit-scrollbar {
+  display: none;
+}
+
+.pill-btn {
+  padding: 0.3rem 0.65rem;
+  font-size: 0.75rem;
+  font-weight: 600;
+  border-radius: var(--radius-full);
+  border: 1px solid var(--border-color);
+  background: var(--bg-primary);
+  color: var(--text-secondary);
+  cursor: pointer;
+  white-space: nowrap;
+}
+
+.pill-btn.active {
+  background: var(--accent-primary);
+  border-color: var(--accent-primary);
+  color: #ffffff;
+}
+
+.drawer-list-container {
+  flex: 1;
+  overflow-y: auto;
+  padding: 0.75rem 1.25rem 1.5rem;
+  display: flex;
+  flex-direction: column;
+  gap: 0.55rem;
+}
+
+.template-item-card {
+  background: var(--bg-card);
+  border: 1px solid var(--border-color);
+  border-radius: var(--radius-md);
+  padding: 0.8rem 1rem;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 0.75rem;
+  transition: all 0.2s ease;
+}
+
+.template-item-card:hover {
+  background: var(--bg-card-hover);
+  border-color: rgba(255, 255, 255, 0.2);
+  transform: translateX(-2px);
+}
+
+.template-item-card.current {
+  border-color: var(--accent-primary);
+  background: rgba(99, 102, 241, 0.15);
+  box-shadow: 0 0 0 1px var(--accent-primary);
+}
+
+.item-left {
+  display: flex;
+  align-items: center;
+  gap: 0.65rem;
+  flex: 1;
+  min-width: 0;
+}
+
+.item-number {
+  font-size: 0.72rem;
+  font-weight: 700;
+  padding: 2px 6px;
+  border-radius: 6px;
+  background: rgba(255, 255, 255, 0.08);
+  color: #cbd5e1;
+  min-width: 44px;
+  text-align: center;
+}
+
+.item-info {
+  display: flex;
+  flex-direction: column;
+  min-width: 0;
+}
+
+.item-title {
+  font-size: 0.88rem;
+  font-weight: 600;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.item-meta {
+  display: flex;
+  align-items: center;
+  gap: 0.4rem;
+  font-size: 0.72rem;
+  color: var(--text-muted);
+}
+
+.item-right {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-end;
+  gap: 0.25rem;
+}
+
+.badge-status {
+  font-size: 0.72rem;
+  font-weight: 700;
+  padding: 2px 7px;
+  border-radius: var(--radius-full);
+  display: inline-flex;
+  align-items: center;
+  gap: 0.25rem;
+  white-space: nowrap;
+}
+
+.badge-status.completed {
+  background: rgba(16, 185, 129, 0.2);
+  color: #34d399;
+  border: 1px solid rgba(16, 185, 129, 0.3);
+}
+
+.badge-status.in-progress {
+  background: rgba(99, 102, 241, 0.2);
+  color: #a5b4fc;
+  border: 1px solid rgba(99, 102, 241, 0.3);
+}
+
+.badge-status.empty {
+  background: rgba(255, 255, 255, 0.05);
+  color: var(--text-muted);
+  border: 1px solid var(--border-color);
+}
+
+.item-mini-progress {
+  width: 55px;
+  height: 4px;
+  background: var(--bg-primary);
+  border-radius: var(--radius-full);
+  overflow: hidden;
+}
+
+.item-mini-fill {
+  height: 100%;
+  background: linear-gradient(90deg, #6366f1, #10b981);
+}
+
+/* --------------------------------------------------------------------------
+   4. Visual Template Editor Drawer & Magnet Guides
+   -------------------------------------------------------------------------- */
+.editor-drawer {
+  display: none;
+  background: var(--bg-card);
+  border: 1px solid var(--border-color);
+  border-radius: var(--radius-lg);
+  padding: 1.25rem;
+  margin-top: 1rem;
+}
+
+.editor-drawer.active {
+  display: block;
+}
+
+.editor-card-box {
+  position: absolute;
+  border: 2px dashed #ec4899;
+  background: rgba(236, 72, 153, 0.22);
+  cursor: move;
+  box-sizing: border-box;
+  z-index: 30;
+}
+
+.editor-card-box.selected {
+  border: 2px solid #38bdf8;
+  background: rgba(56, 189, 248, 0.38);
+  box-shadow: 0 0 16px rgba(56, 189, 248, 0.6);
+}
+
+.editor-badge {
+  position: absolute;
+  top: 3px;
+  left: 3px;
+  background: rgba(15, 23, 42, 0.65);
+  backdrop-filter: blur(4px);
+  -webkit-backdrop-filter: blur(4px);
+  color: #38bdf8;
+  font-size: 10px;
+  font-weight: 700;
+  padding: 1px 5px;
+  border-radius: 4px;
+  border: 1px solid rgba(56, 189, 248, 0.35);
+  pointer-events: none;
+  max-width: calc(100% - 10px);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  transition: all 0.18s ease;
+  z-index: 5;
+}
+
+.editor-card-box:hover .editor-badge,
+.editor-card-box.selected .editor-badge {
+  max-width: 220px;
+  background: rgba(15, 23, 42, 0.95);
+  border-color: #38bdf8;
+  box-shadow: 0 4px 14px rgba(0, 0, 0, 0.7);
+  z-index: 50;
+  white-space: normal;
+}
+
+.resize-handle {
+  position: absolute;
+  width: 14px;
+  height: 14px;
+  background: #38bdf8;
+  border: 1px solid #fff;
+  border-radius: 3px;
+  right: -7px;
+  bottom: -7px;
+  cursor: nwse-resize;
+  z-index: 40;
+}
+
+/* Smart Magnet Snap Guide Lines */
+.snap-guide-h {
+  position: absolute;
+  left: 0;
+  width: 100%;
+  height: 1px;
+  background: #38bdf8;
+  box-shadow: 0 0 6px #38bdf8;
+  pointer-events: none;
+  z-index: 35;
+}
+
+.snap-guide-v {
+  position: absolute;
+  top: 0;
+  height: 100%;
+  width: 1px;
+  background: #38bdf8;
+  box-shadow: 0 0 6px #38bdf8;
+  pointer-events: none;
+  z-index: 35;
+}
+
+.editor-grid-form {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(120px, 1fr));
+  gap: 0.65rem;
+  margin-bottom: 1rem;
+}
+
+.form-field {
+  display: flex;
+  flex-direction: column;
+  gap: 0.3rem;
+}
+
+.form-field label {
+  font-size: 0.72rem;
+  color: var(--text-muted);
+}
+
+.form-field input, .form-field textarea {
+  padding: 0.45rem 0.6rem;
+  background: var(--bg-secondary);
+  border: 1px solid var(--border-color);
+  border-radius: var(--radius-sm);
+  color: var(--text-primary);
+  font-size: 0.82rem;
+  outline: none;
+}
+
+.form-field input:focus, .form-field textarea:focus {
+  border-color: var(--accent-primary);
+}
+
+/* --------------------------------------------------------------------------
+   App Footer
+   -------------------------------------------------------------------------- */
+.app-footer {
+  margin-top: auto;
+  border-top: 1px solid var(--border-color);
+  padding: 1.25rem;
+  text-align: center;
+  font-size: 0.82rem;
+  color: var(--text-muted);
+  background: var(--bg-primary);
+}
+
+/* Toast Notifications */
+.toast-container {
+  position: fixed;
+  bottom: 2rem;
+  right: 2rem;
+  display: flex;
+  flex-direction: column;
+  gap: 0.65rem;
+  z-index: 9999;
+  pointer-events: none;
+}
+
+.toast-item {
+  background: rgba(24, 27, 36, 0.95);
+  backdrop-filter: blur(12px);
+  color: #fff;
+  border: 1px solid rgba(255, 255, 255, 0.12);
+  padding: 0.75rem 1.25rem;
+  border-radius: var(--radius-md);
+  box-shadow: 0 10px 28px rgba(0, 0, 0, 0.5);
+  font-size: 0.88rem;
+  font-weight: 500;
+  animation: slideUp 0.25s cubic-bezier(0.4, 0, 0.2, 1);
+  transition: opacity 0.25s ease, transform 0.25s ease;
+}
+
+.toast-item.hide {
+  opacity: 0;
+  transform: translateY(10px);
+}
+
+@keyframes slideUp {
+  from { opacity: 0; transform: translateY(15px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+
+.spin {
+  animation: spin 1s linear infinite;
+}
+@keyframes spin {
+  100% { transform: rotate(360deg); }
+}
+
+/* Mobile Responsive */
+@media (max-width: 768px) {
+  .app-header {
+    padding: 0.6rem 1rem;
+    flex-wrap: wrap;
+  }
+  .header-credits {
+    display: none;
+  }
+  .hero-title {
+    font-size: 1.5rem;
+  }
+  .hero-banner {
+    margin-bottom: 1.5rem;
+  }
+  .checker-view {
+    padding: 0.75rem;
+  }
+  .control-bar {
+    padding: 0.75rem;
+    gap: 0.65rem;
+  }
+  .template-selector-btn {
+    width: 100%;
+    justify-content: space-between;
+  }
+  .segmented-control {
+    width: 100%;
+  }
+  .seg-btn {
+    flex: 1;
+    justify-content: center;
+    font-size: 0.78rem;
+    padding: 0.45rem;
+  }
+  .control-group-actions {
+    width: 100%;
+    display: flex;
+    justify-content: space-between;
+  }
+
+  .template-drawer {
+    right: 0;
+    left: 0;
+    top: auto;
+    bottom: 0;
+    width: 100vw;
+    max-width: 100vw;
+    height: 82vh;
+    border-radius: 20px 20px 0 0;
+    border-left: none;
+    border-top: 1px solid var(--border-color);
+    transform: translateY(100%);
+  }
+
+  .toast-container {
+    left: 1rem;
+    right: 1rem;
+    bottom: 1.5rem;
+  }
+}
+
+  </style>
+</head>
+<body>
+  <!-- Header & Navbar -->
+  <header class="app-header">
+    <div class="brand-section" id="btn-nav-home">
+      <div class="brand-icon">
+        <svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
+          <rect x="3" y="3" width="18" height="18" rx="2" ry="2"></rect>
+          <circle cx="8.5" cy="8.5" r="1.5"></circle>
+          <polyline points="21 15 16 10 5 21"></polyline>
+        </svg>
+      </div>
+      <div>
+        <h1 class="brand-title">포카 체커</h1>
+      </div>
+    </div>
+
+    <!-- Navigation Breadcrumbs -->
+    <div class="nav-breadcrumbs" id="nav-breadcrumbs">
+      <span id="nav-category-name" style="display: none;">> 포레스텔라</span>
+      <span id="nav-template-name" style="display: none;"></span>
+    </div>
+
+    <!-- Header Action Buttons -->
+    <div class="header-actions">
+      <button id="btn-open-info" class="btn btn-sm" title="공지사항, 사용 도움말, 만드는 사람들 안내">
+        <svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+          <path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"></path>
+          <circle cx="9" cy="7" r="4"></circle>
+          <path d="M23 21v-2a4 4 0 0 0-3-3.87"></path>
+          <path d="M16 3.13a4 4 0 0 1 0 7.75"></path>
+        </svg>
+        만드는 사람들
+      </button>
+
+      <button id="btn-export-all-merged" class="btn btn-purple btn-sm" title="현재 카테고리 전체 39종을 1장의 고화질 포스터 이미지로 일괄 다운로드">
+        <svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+          <rect x="3" y="3" width="18" height="18" rx="2" ry="2"></rect>
+          <line x1="3" y1="9" x2="21" y2="9"></line>
+          <line x1="9" y1="21" x2="9" y2="9"></line>
+        </svg>
+        전체 합본 다운로드
+      </button>
+
+      <button id="btn-open-backup" class="btn btn-sm" title="내 체크리스트 데이터 백업 및 복원 (기기 이동/공유)">
+        <svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+          <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path>
+          <polyline points="7 10 12 15 17 10"></polyline>
+          <line x1="12" y1="15" x2="12" y2="3"></line>
+        </svg>
+        백업 / 복원
+      </button>
+
+      <button id="toggle-editor-btn" class="btn btn-sm" title="영역 편집 / 자석 스냅 / 깃헙 직접 저장">
+        <svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+          <circle cx="12" cy="12" r="3"></circle>
+          <path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1 0 2.83 2 2 0 0 1-2.83 0l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-2 2 2 2 0 0 1-2-2v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83 0 2 2 0 0 1 0-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1-2-2 2 2 0 0 1 2-2h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 0-2.83 2 2 0 0 1 2.83 0l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 2-2 2 2 0 0 1 2 2v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 0 2 2 0 0 1 0 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 2 2 2 2 0 0 1-2 2h-.09a1.65 1.65 0 0 0-1.51 1z"></path>
+        </svg>
+        영역 편집기
+      </button>
+    </div>
+  </header>
+
+  <!-- ========================================================================
+       VIEW 1: Category Hub (Home Landing)
+       ======================================================================== -->
+  <main id="home-view" class="view-container home-view active" style="display: block;">
+    <div class="hero-banner">
+      <div class="hero-badge">
+        <span>✨</span> 포토카드 체크리스트 & 위시리스트 생성기
+      </div>
+      <h2 class="hero-title">카테고리를 선택하세요</h2>
+      <p class="hero-desc">보유한 포토카드를 클릭하여 체크하고, 1장 개별 다운로드 또는 전체 39종 합본 포스터로 다운로드하세요.</p>
+      
+      <!-- Single-line Interactive Notice Bar -->
+      <div id="btn-notice-ticker" class="notice-ticker-bar" title="공지사항 및 사용 도움말 열기">
+        <span class="notice-ticker-badge">📢 [공지]</span>
+        <span>포카 체커가 오픈하였습니다!</span>
+        <span class="notice-ticker-link">안내 & 만든이 보기 ></span>
+      </div>
+    </div>
+
+    <div class="categories-grid" id="categories-grid">
+      <!-- Generated Dynamically via app.js -->
+    </div>
+  </main>
+
+  <!-- ========================================================================
+       VIEW 2: Checker View
+       ======================================================================== -->
+  <main id="checker-view" class="view-container checker-view" style="display: none;">
+    <!-- Top Control Bar -->
+    <section class="control-bar">
+      <!-- 1. Current Template Trigger (Opens Drawer) -->
+      <button id="template-selector-btn" class="template-selector-btn" title="포토카드 목록 열기">
+        <svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
+          <line x1="3" y1="12" x2="21" y2="12"></line>
+          <line x1="3" y1="6" x2="21" y2="6"></line>
+          <line x1="3" y1="18" x2="21" y2="18"></line>
+        </svg>
+        <span id="current-template-title">fore1. 미스티크</span>
+        <span id="current-template-tag" class="template-tag-badge">#콘서트/MD</span>
+        <span id="current-template-status" class="template-status-pill badge-status empty">0/8장</span>
+        <svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2">
+          <polyline points="6 9 12 15 18 9"></polyline>
+        </svg>
+      </button>
+
+      <!-- 2. Display Mode Toggle -->
+      <div class="segmented-control">
+        <button id="mode-hide-owned" class="seg-btn active" title="보유 포카를 회색으로 가려 미보유 위시리스트 강조">
+          <svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2.5">
+            <path d="M17.94 17.94A10.07 10.07 0 0 1 12 20c-7 0-11-8-11-8a18.45 18.45 0 0 1 5.06-5.94M9.9 4.24A9.12 9.12 0 0 1 12 4c7 0 11 8 11 8a18.5 18.5 0 0 1-2.16 3.19m-6.72-1.07a3 3 0 1 1-4.24-4.24"></path>
+            <line x1="1" y1="1" x2="23" y2="23"></line>
+          </svg>
+          보유 포카 가리기 (위시리스트)
+        </button>
+        <button id="mode-hide-unowned" class="seg-btn" title="미보유 포카를 회색으로 가려 보유 컬렉션 강조">
+          <svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2.5">
+            <path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"></path>
+            <circle cx="12" cy="12" r="3"></circle>
+          </svg>
+          미보유 포카 가리기 (보유본)
+        </button>
+      </div>
+
+      <!-- 3. Bulk Actions & Export -->
+      <div class="control-group-actions" style="display: flex; gap: 0.4rem; align-items: center;">
+        <button id="btn-select-all" class="btn btn-sm" title="모두 보유로 선택">전체 선택</button>
+        <button id="btn-deselect-all" class="btn btn-sm" title="선택 해제">전체 해제</button>
+        <button id="btn-invert-selection" class="btn btn-sm" title="선택 반전">반전</button>
+        <button id="btn-export-png" class="btn btn-success btn-sm" title="완성된 체크리스트 고화질 PNG 다운로드 (1장)">
+          <svg viewBox="0 0 24 24" width="15" height="15" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+            <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path>
+            <polyline points="7 10 12 15 17 10"></polyline>
+            <line x1="12" y1="15" x2="12" y2="3"></line>
+          </svg>
+          다운로드 (1장)
+        </button>
+      </div>
+    </section>
+
+    <!-- Pager Bar (Prev / Next & Stats) -->
+    <section class="nav-pager-bar">
+      <button id="btn-prev-template" class="btn btn-sm" title="이전 포카판 (단축키: ←)">
+        <svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2.5">
+          <polyline points="15 18 9 12 15 6"></polyline>
+        </svg>
+        이전
+      </button>
+
+      <div class="pager-stats">
+        <span style="color: var(--text-muted);">진행률:</span>
+        <span id="stat-count" style="font-weight: 700; color: #a5b4fc;">0 / 0 장</span>
+        <span id="stat-percent" style="color: var(--text-muted);">(0%)</span>
+        <div class="progress-track">
+          <div id="progress-bar-fill" class="progress-fill"></div>
+        </div>
+        <span id="pager-info" style="font-size: 0.75rem; color: var(--text-muted); font-weight: 600;">1 / 39</span>
+      </div>
+
+      <button id="btn-next-template" class="btn btn-sm" title="다음 포카판 (단축키: →)">
+        다음
+        <svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2.5">
+          <polyline points="9 18 15 12 9 6"></polyline>
+        </svg>
+      </button>
+    </section>
+
+    <!-- Visual Editor Drawer (Smart Magnet & Direct GitHub Save) -->
+    <section id="editor-drawer" class="editor-drawer">
+      <div class="editor-header" style="display: flex; align-items: center; justify-content: space-between; margin-bottom: 0.85rem; flex-wrap: wrap; gap: 0.5rem;">
+        <div style="display: flex; align-items: center; gap: 0.75rem; flex-wrap: wrap;">
+          <h3 style="font-size: 1.05rem; font-weight: 700;">🛠️ 포토카드 영역 편집기</h3>
+          <label style="display: flex; align-items: center; gap: 0.35rem; font-size: 0.8rem; color: #38bdf8; cursor: pointer;">
+            <input type="checkbox" id="snap-magnet-toggle" checked>
+            🧲 마그넷 자석 스냅 켜짐
+          </label>
+          <label style="display: flex; align-items: center; gap: 0.35rem; font-size: 0.8rem; color: #cbd5e1; cursor: pointer;">
+            <input type="checkbox" id="compact-label-toggle">
+            번호만 표시
+          </label>
+        </div>
+        <button id="close-editor-btn" class="btn btn-sm">닫기</button>
+      </div>
+
+      <div class="form-field" style="margin-bottom: 0.75rem;">
+        <label>템플릿 제목</label>
+        <input type="text" id="editor-template-title" value="새 템플릿">
+      </div>
+
+      <h4 style="font-size: 0.82rem; color: #a5b4fc; margin-bottom: 0.5rem;">⚡ 1-Click 그리드 일괄 생성</h4>
+      <div class="editor-grid-form">
+        <div class="form-field">
+          <label>행 (Rows)</label>
+          <input type="number" id="grid-rows" value="2" min="1" max="10">
+        </div>
+        <div class="form-field">
+          <label>열 (Cols)</label>
+          <input type="number" id="grid-cols" value="4" min="1" max="10">
+        </div>
+        <div class="form-field">
+          <label>시작 X (%)</label>
+          <input type="number" id="grid-start-x" value="4.2" step="0.1">
+        </div>
+        <div class="form-field">
+          <label>시작 Y (%)</label>
+          <input type="number" id="grid-start-y" value="35.8" step="0.1">
+        </div>
+        <div class="form-field">
+          <label>카드 가로 (%)</label>
+          <input type="number" id="grid-card-w" value="14.37" step="0.1">
+        </div>
+        <div class="form-field">
+          <label>카드 세로 (%)</label>
+          <input type="number" id="grid-card-h" value="14.73" step="0.1">
+        </div>
+        <div class="form-field">
+          <label>가로 간격 (%)</label>
+          <input type="number" id="grid-gap-x" value="3.0" step="0.1">
+        </div>
+        <div class="form-field">
+          <label>세로 간격 (%)</label>
+          <input type="number" id="grid-gap-y" value="3.0" step="0.1">
+        </div>
+        <div class="form-field">
+          <label>모서리 둥글기 (px)</label>
+          <input type="number" id="grid-radius" value="10" min="0" max="40">
+        </div>
+      </div>
+
+      <div style="display: flex; gap: 0.5rem; flex-wrap: wrap; margin-bottom: 0.75rem;">
+        <button id="btn-generate-grid" class="btn btn-primary btn-sm">⚡ 그리드 생성</button>
+        <button id="btn-add-box" class="btn btn-sm">+ 개별 박스 추가</button>
+        <button id="btn-delete-box" class="btn btn-sm">선택 박스 삭제</button>
+        <button id="btn-clear-boxes" class="btn btn-sm">전체 초기화</button>
+        <button id="btn-apply-template" class="btn btn-success btn-sm">현재 화면에 적용</button>
+        <button id="btn-save-github" class="btn btn-purple btn-sm" title="수정된 템플릿 좌표를 GitHub에 커밋하여 즉시 배포">💾 깃헙에 저장 (즉시 배포)</button>
+      </div>
+
+      <div class="form-field">
+        <label>생성된 JSON 설정 데이터</label>
+        <textarea id="editor-json-output" class="json-textarea" style="height: 80px;" readonly></textarea>
+        <div style="margin-top: 0.4rem;">
+          <button id="btn-copy-json" class="btn btn-sm">📋 JSON 복사하기</button>
+        </div>
+      </div>
+    </section>
+
+    <!-- Main Canvas Viewport -->
+    <section class="canvas-section">
+      <div id="image-wrapper" class="image-wrapper">
+        <img id="main-sheet-image" class="main-image" src="" alt="포토카드 리스트 이미지">
+        <div id="card-overlay-container" class="card-overlay-container"></div>
+        
+        <!-- Top-Left Mode Tag Badge -->
+        <div id="image-mode-tag" class="image-mode-badge unowned">미보유</div>
+      </div>
+    </section>
+  </main>
+
+  <!-- ========================================================================
+       Template Drawer / Bottom Sheet Modal
+       ======================================================================== -->
+  <div id="drawer-backdrop" class="drawer-backdrop">
+    <div class="template-drawer">
+      <div class="drawer-header">
+        <div style="display: flex; align-items: center; gap: 0.5rem;">
+          <span style="font-size: 1.2rem;">📂</span>
+          <h3 class="drawer-title">포토카드 리스트 (39종)</h3>
+        </div>
+        <button id="close-drawer-btn" class="btn btn-sm btn-icon-only">
+          <svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2">
+            <line x1="18" y1="6" x2="6" y2="18"></line>
+            <line x1="6" y1="6" x2="18" y2="18"></line>
+          </svg>
+        </button>
+      </div>
+
+      <div class="drawer-search-box">
+        <div class="search-input-wrapper">
+          <svg class="search-icon" viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2">
+            <circle cx="11" cy="11" r="8"></circle>
+            <line x1="21" y1="21" x2="16.65" y2="16.65"></line>
+          </svg>
+          <input type="text" id="drawer-search-input" class="search-input" placeholder="포카판 제목 검색 (예: 월드트리, 키트...)">
+        </div>
+
+        <div class="filter-pills-row" id="drawer-tags-container"></div>
+
+        <button id="btn-drawer-export-merged" class="btn btn-purple btn-sm" style="width: 100%; justify-content: center; margin-top: 0.3rem;">
+          🖼️ 전체 39종 합본 포스터로 다운로드
+        </button>
+      </div>
+
+      <div class="drawer-list-container" id="drawer-list-container"></div>
+    </div>
+  </div>
+
+  <!-- ========================================================================
+       Information, Notice & Credits Modal Dialog
+       ======================================================================== -->
+  <div id="info-modal-backdrop" class="modal-backdrop">
+    <div class="modal-box info-modal-box">
+      <div class="modal-header">
+        <h3 class="modal-title">✨ 포카 체커 안내 & 만든 사람들</h3>
+        <button id="close-info-modal-btn" class="btn btn-sm btn-icon-only">
+          <svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2">
+            <line x1="18" y1="6" x2="6" y2="18"></line>
+            <line x1="6" y1="6" x2="18" y2="18"></line>
+          </svg>
+        </button>
+      </div>
+
+      <!-- Section 1: 공지사항 -->
+      <div class="info-section">
+        <div class="info-section-title">
+          <span>📢</span> 공지사항
+        </div>
+        <div class="info-card">
+          <div style="font-weight: 700; color: #f8fafc; margin-bottom: 0.35rem;">
+            🎉 포카 체커(Phoca Checker)가 정식 오픈하였습니다!
+          </div>
+          <p style="margin-bottom: 0.4rem;">
+            포레스텔라(Forestella) 공식 앨범, 시즌그리팅, 팬클럽 키트, 콘서트/MD, 특전 등 <strong>총 39종(762장)의 도안</strong>이 등록되었습니다.
+          </p>
+          <p style="font-size: 0.8rem; color: var(--text-muted);">
+            * 신규 포토카드 발매 시 지속적으로 업데이트될 예정입니다.
+          </p>
+        </div>
+      </div>
+
+      <!-- Section 2: 간단 사용법 (도움말) -->
+      <div class="info-section">
+        <div class="info-section-title">
+          <span>💡</span> 초간단 사용 도움말
+        </div>
+        <div class="info-card">
+          <div class="guide-step">
+            <div class="guide-step-num">1</div>
+            <div><strong>포토카드 체크</strong>: 내가 보유한 포토카드를 클릭하면 체크(가림)됩니다.</div>
+          </div>
+          <div class="guide-step">
+            <div class="guide-step-num">2</div>
+            <div>
+              <strong>모드 전환</strong>:
+              <ul style="padding-left: 1.1rem; margin-top: 0.2rem;">
+                <li><code>보유 포카 가리기</code>: 가진 포카를 가려 아직 못 구한 <strong>'미보유 위시리스트'</strong> 강조</li>
+                <li><code>미보유 포카 가리기</code>: 없는 포카를 가려 모아온 <strong>'내 보유 컬렉션'</strong> 확인</li>
+              </ul>
+            </div>
+          </div>
+          <div class="guide-step">
+            <div class="guide-step-num">3</div>
+            <div>
+              <strong>고화질 이미지 다운로드</strong>:
+              <ul style="padding-left: 1.1rem; margin-top: 0.2rem;">
+                <li><code>다운로드 (1장)</code>: 현재 포카판을 좌측 상단 '미보유/보유' 표시와 함께 고화질 PNG로 저장</li>
+                <li><code>전체 합본 다운로드</code>: 39종 전체 리스트를 4열 대형 포스터 1장으로 모아서 저장</li>
+              </ul>
+            </div>
+          </div>
+          <div class="guide-step">
+            <div class="guide-step-num">4</div>
+            <div>
+              <strong>데이터 백업 & 기기 이동</strong>:
+              체크 내역은 브라우저에 자동 보관되며, <code>[백업 / 복원]</code> 메뉴에서 언제든 파일로 내보내 스마트폰 ↔ PC 간 이동할 수 있습니다.
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Section 3: 만든 사람들 -->
+      <div class="info-section" style="margin-bottom: 0;">
+        <div class="info-section-title">
+          <span>👥</span> 만든 사람들 (Credits)
+        </div>
+        <div class="info-card" style="padding: 0.65rem;">
+          <div class="credit-person-card">
+            <div>
+              <div class="credit-role">기획 및 제작</div>
+              <div style="font-size: 0.8rem; color: var(--text-muted);">Phoca Checker Developer</div>
+            </div>
+            <a href="https://x.com/live_in_fore" target="_blank" rel="noopener" class="credit-link" style="font-size: 0.86rem; padding: 4px 10px;">
+              @live_in_fore ↗
+            </a>
+          </div>
+
+          <div class="credit-person-card">
+            <div>
+              <div class="credit-role">문의 채널</div>
+              <div style="font-size: 0.8rem; color: var(--text-muted);">오류 제보 및 피드백 건의</div>
+            </div>
+            <a href="https://spin-spin.com/live_in_fore?v=1787241739191" target="_blank" rel="noopener" class="credit-link" style="font-size: 0.86rem; padding: 4px 10px;">
+              스핀(Spin) ↗
+            </a>
+          </div>
+
+          <div class="credit-person-card">
+            <div>
+              <div class="credit-role">포토카드 도안 제공</div>
+              <div style="font-size: 0.8rem; color: var(--text-muted);">Photocard Template Provider</div>
+            </div>
+            <div style="display: flex; gap: 0.4rem;">
+              <a href="https://x.com/sy_fore" target="_blank" rel="noopener" class="credit-link" style="font-size: 0.86rem; padding: 4px 10px;">
+                @sy_fore ↗
+              </a>
+              <a href="https://t.co/fEts76yenI" target="_blank" rel="noopener" class="credit-link" style="font-size: 0.86rem; padding: 4px 10px;">
+                Notion ↗
+              </a>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ========================================================================
+       Backup / Restore Modal Dialog
+       ======================================================================== -->
+  <div id="backup-modal-backdrop" class="modal-backdrop">
+    <div class="modal-box">
+      <div class="modal-header">
+        <h3 class="modal-title">📁 체크리스트 백업 및 복원</h3>
+        <button id="close-backup-modal-btn" class="btn btn-sm btn-icon-only">
+          <svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2">
+            <line x1="18" y1="6" x2="6" y2="18"></line>
+            <line x1="6" y1="6" x2="18" y2="18"></line>
+          </svg>
+        </button>
+      </div>
+
+      <p style="font-size: 0.84rem; color: var(--text-secondary); margin-bottom: 1.25rem; line-height: 1.4;">
+        체크리스트는 방문자별 브라우저(localStorage)에 안전하게 저장됩니다.<br>
+        다른 기기(모바일/PC)로 이동하거나 보관할 때 파일로 내보내고 불러오세요.
+      </p>
+
+      <div class="backup-option-card">
+        <div>
+          <div style="font-weight: 700; font-size: 0.92rem; margin-bottom: 2px;">📤 데이터 백업 내보내기</div>
+          <div style="font-size: 0.78rem; color: var(--text-muted);">현재 체크 상태를 JSON 파일로 저장</div>
+        </div>
+        <button id="btn-export-backup" class="btn btn-primary btn-sm">다운로드</button>
+      </div>
+
+      <div class="backup-option-card">
+        <div>
+          <div style="font-weight: 700; font-size: 0.92rem; margin-bottom: 2px;">📥 백업 파일 불러오기</div>
+          <div style="font-size: 0.78rem; color: var(--text-muted);">기존 저장된 JSON 파일 복원</div>
+        </div>
+        <label for="backup-file-input" class="btn btn-success btn-sm" style="cursor: pointer;">
+          파일 선택
+        </label>
+        <input type="file" id="backup-file-input" accept=".json" style="display: none;">
+      </div>
+    </div>
+  </div>
+
+  <!-- Footer -->
+  <footer class="app-footer">
+    <p>포카 체커 (Phoca Checker) • <a href="#/info" style="color: #a5b4fc; text-decoration: underline; font-weight: 600;">만드는 사람들 & 공지/도움말</a> • <a href="https://spin-spin.com/live_in_fore?v=1787241739191" target="_blank" rel="noopener" class="credit-link" style="font-size: 0.78rem;">문의: 스핀 ↗</a></p>
+  </footer>
+
+  <!-- Toast Notification Container -->
+  <div id="toast-container" class="toast-container"></div>
+
+  <!-- Scripts -->
+  <script src="js/templates.js?v=8.1.0"></script>
+  <script src="js/canvas-export.js?v=8.1.0"></script>
+  <script src="js/editor.js?v=8.1.0"></script>
+  <script src="js/app.js?v=8.1.0"></script>
+</body>
+</html>
