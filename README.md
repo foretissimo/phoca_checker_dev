@@ -1,2 +1,2 @@
-# phoca_checker_dev
-Development &amp; Staging environment for Phoca Checker
+# phoca_checker
+GitHub Pages Photo Card Checker
