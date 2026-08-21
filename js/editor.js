@@ -24,10 +24,25 @@ class TemplateEditor {
     this.bindEvents();
   }
 
+  isDevEnvironment() {
+    const href = window.location.href;
+    const host = window.location.hostname;
+    return href.includes('phoca_checker_dev') || host === 'localhost' || host === '127.0.0.1' || window.location.protocol === 'file:';
+  }
+
   initElements() {
     this.editorDrawer = document.getElementById('editor-drawer');
     this.toggleBtn = document.getElementById('toggle-editor-btn');
     this.closeBtn = document.getElementById('close-editor-btn');
+
+    // Only show editor button in dev/staging/local environment
+    if (this.toggleBtn) {
+      if (this.isDevEnvironment()) {
+        this.toggleBtn.style.display = 'inline-flex';
+      } else {
+        this.toggleBtn.style.display = 'none';
+      }
+    }
 
     // Admin Token & Direct Save elements
     this.btnSaveGithub = document.getElementById('btn-save-github');
@@ -139,6 +154,9 @@ class TemplateEditor {
   }
 
   setEditorActive(active) {
+    if (active && !this.isDevEnvironment()) {
+      return;
+    }
     this.active = active;
     if (this.editorDrawer) {
       this.editorDrawer.classList.toggle('active', active);
