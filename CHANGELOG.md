@@ -4,6 +4,14 @@ All notable functional changes, architecture improvements, and bug fixes for the
 
 ---
 
+## [1.6.1] - 2026-08-21
+
+### 𝕏 Social Sharing & Clipboard Image Copy
+- **Hashtag Linebreak**: Added a newline before `#포레포카체커` in the Twitter composer text for cleaner formatting.
+- **Auto Card Image Copy**: Generates a collection progress summary card image and automatically copies it to the system clipboard upon clicking `[자랑하기]`, allowing users to paste (Cmd+V / Ctrl+V) the image directly into Twitter.
+
+---
+
 ## [1.6.0] - 2026-08-21
 
 ### 🎨 UI & UX Improvements
