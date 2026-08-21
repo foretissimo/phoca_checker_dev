@@ -298,9 +298,11 @@ class PhocaCheckerApp {
     if (!this.categoriesGrid) return;
     this.categoriesGrid.innerHTML = '';
 
-    this.categories.forEach(cat => {
+    const availableCategories = this.categories.filter(cat => cat.isAvailable !== false);
+
+    availableCategories.forEach(cat => {
       const card = document.createElement('div');
-      card.className = 'category-card' + (cat.isAvailable ? '' : ' disabled');
+      card.className = 'category-card';
 
       let totalCards = 0;
       let totalChecked = 0;
