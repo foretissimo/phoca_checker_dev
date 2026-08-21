@@ -429,6 +429,25 @@ body {
   box-shadow: 0 4px 12px rgba(236, 72, 153, 0.35);
 }
 
+.btn-x-share {
+  background: #0f1419;
+  border: 1px solid rgba(255, 255, 255, 0.25);
+  color: #ffffff;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.4);
+  font-weight: 600;
+  display: inline-flex;
+  align-items: center;
+  gap: 0.35rem;
+}
+
+.btn-x-share:hover {
+  background: #000000;
+  border-color: #ffffff;
+  color: #ffffff;
+  box-shadow: 0 4px 14px rgba(255, 255, 255, 0.2);
+  transform: translateY(-1px);
+}
+
 .btn-sm {
   padding: 0.4rem 0.7rem;
   font-size: 0.78rem;
