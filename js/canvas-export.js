@@ -535,45 +535,45 @@ class CanvasExporter {
   }
 
   /**
-   * Render stylish collection summary card canvas for Twitter / Social sharing (1200x675)
+   * Render stylish collection summary card canvas for Twitter / Social sharing (800x480)
    */
-  static renderSummaryCardCanvas({ categoryName = '포레스텔라', totalCards = 758, totalChecked = 0, percent = 0 }) {
-    const width = 1200;
-    const height = 675;
+  static async renderSummaryCardCanvas({ categoryName = '포레스텔라', subtitle = 'Forestella Photocard Collection', badge = '39종', totalCards = 758, totalChecked = 0, percent = 0, logoSrc = 'images/fore/forestella_logo.jpg' }) {
+    const width = 800;
+    const height = 480;
     const canvas = document.createElement('canvas');
     canvas.width = width;
     canvas.height = height;
     const ctx = canvas.getContext('2d');
 
-    // 1. Dark Gradient Background
-    const bgGrad = ctx.createLinearGradient(0, 0, width, height);
-    bgGrad.addColorStop(0, '#090d16');
-    bgGrad.addColorStop(0.5, '#0f172a');
-    bgGrad.addColorStop(1, '#1e1b4b');
-    ctx.fillStyle = bgGrad;
+    // Load logo image if provided
+    let logoImg = null;
+    if (logoSrc) {
+      logoImg = await new Promise((resolve) => {
+        const img = new Image();
+        img.crossOrigin = 'anonymous';
+        img.onload = () => resolve(img);
+        img.onerror = () => resolve(null);
+        img.src = logoSrc;
+      });
+    }
+
+    // 1. Outer Background (Deep space dark)
+    ctx.fillStyle = '#0f1117';
     ctx.fillRect(0, 0, width, height);
 
-    // Subtle Ambient Glows
-    ctx.save();
-    const glow1 = ctx.createRadialGradient(250, 150, 10, 250, 150, 400);
-    glow1.addColorStop(0, 'rgba(99, 102, 241, 0.25)');
-    glow1.addColorStop(1, 'rgba(99, 102, 241, 0)');
-    ctx.fillStyle = glow1;
+    // Subtle ambient glow
+    const glow = ctx.createRadialGradient(width / 2, height / 2, 40, width / 2, height / 2, 380);
+    glow.addColorStop(0, 'rgba(99, 102, 241, 0.15)');
+    glow.addColorStop(1, 'rgba(99, 102, 241, 0)');
+    ctx.fillStyle = glow;
     ctx.fillRect(0, 0, width, height);
 
-    const glow2 = ctx.createRadialGradient(950, 500, 10, 950, 500, 450);
-    glow2.addColorStop(0, 'rgba(236, 72, 153, 0.2)');
-    glow2.addColorStop(1, 'rgba(236, 72, 153, 0)');
-    ctx.fillStyle = glow2;
-    ctx.fillRect(0, 0, width, height);
-    ctx.restore();
-
-    // 2. Main Card Body
-    const cardX = 70;
-    const cardY = 50;
-    const cardW = width - 140;
-    const cardH = height - 100;
-    const cardRadius = 24;
+    // 2. Main Category Card Container
+    const cardX = 40;
+    const cardY = 32;
+    const cardW = width - 80; // 720
+    const cardH = height - 64; // 416
+    const cardRadius = 20;
 
     ctx.save();
     ctx.beginPath();
@@ -582,63 +582,103 @@ class CanvasExporter {
     } else {
       CanvasExporter.drawRoundRectPath(ctx, cardX, cardY, cardW, cardH, cardRadius);
     }
-    ctx.fillStyle = 'rgba(15, 23, 42, 0.88)';
+    ctx.fillStyle = '#181c28';
     ctx.fill();
-    ctx.lineWidth = 2;
-    ctx.strokeStyle = 'rgba(99, 102, 241, 0.35)';
+    ctx.lineWidth = 1.5;
+    ctx.strokeStyle = 'rgba(255, 255, 255, 0.12)';
     ctx.stroke();
 
-    // 3. App Badge
-    const badgeX = cardX + 50;
-    const badgeY = cardY + 45;
+    // 3. Top Section: Logo Badge & '39종' Badge
+    const padX = cardX + 36;
+    const padY = cardY + 32;
+
+    // Logo Badge (62x62)
+    const logoSize = 62;
+    const logoRadius = 16;
+    ctx.save();
     ctx.beginPath();
     if (typeof ctx.roundRect === 'function') {
-      ctx.roundRect(badgeX, badgeY, 240, 40, 20);
+      ctx.roundRect(padX, padY, logoSize, logoSize, logoRadius);
     } else {
-      CanvasExporter.drawRoundRectPath(ctx, badgeX, badgeY, 240, 40, 20);
+      CanvasExporter.drawRoundRectPath(ctx, padX, padY, logoSize, logoSize, logoRadius);
     }
-    ctx.fillStyle = 'rgba(99, 102, 241, 0.2)';
+    ctx.fillStyle = '#f7eee4';
     ctx.fill();
-    ctx.strokeStyle = 'rgba(99, 102, 241, 0.4)';
-    ctx.lineWidth = 1.5;
+    ctx.lineWidth = 1;
+    ctx.strokeStyle = 'rgba(255, 255, 255, 0.2)';
     ctx.stroke();
+    ctx.clip();
 
-    ctx.font = '600 17px -apple-system, BlinkMacSystemFont, "Pretendard", sans-serif';
-    ctx.fillStyle = '#a5b4fc';
+    if (logoImg) {
+      ctx.drawImage(logoImg, padX, padY, logoSize, logoSize);
+    } else {
+      ctx.font = '28px sans-serif';
+      ctx.textAlign = 'center';
+      ctx.textBaseline = 'middle';
+      ctx.fillText('✨', padX + logoSize / 2, padY + logoSize / 2);
+    }
+    ctx.restore();
+
+    // Item Count Badge (Top Right)
+    const badgeText = badge || '39종';
+    ctx.font = '700 15px -apple-system, BlinkMacSystemFont, "Pretendard", sans-serif';
+    const badgeW = ctx.measureText(badgeText).width + 24;
+    const badgeH = 32;
+    const badgeX = cardX + cardW - 36 - badgeW;
+    const badgeY = padY + 14;
+
+    ctx.save();
+    ctx.beginPath();
+    if (typeof ctx.roundRect === 'function') {
+      ctx.roundRect(badgeX, badgeY, badgeW, badgeH, 16);
+    } else {
+      CanvasExporter.drawRoundRectPath(ctx, badgeX, badgeY, badgeW, badgeH, 16);
+    }
+    ctx.fillStyle = 'rgba(255, 255, 255, 0.1)';
+    ctx.fill();
+    ctx.fillStyle = '#f8fafc';
     ctx.textAlign = 'center';
     ctx.textBaseline = 'middle';
-    ctx.fillText('✨ 포카 체커 (Phoca Checker)', badgeX + 120, badgeY + 20);
+    ctx.fillText(badgeText, badgeX + badgeW / 2, badgeY + badgeH / 2);
+    ctx.restore();
 
-    // Title
+    // 4. Middle Section: Title & Subtitle
+    const titleY = padY + logoSize + 40;
     ctx.textAlign = 'left';
-    ctx.font = '800 42px -apple-system, BlinkMacSystemFont, "Pretendard", sans-serif';
+    ctx.font = '800 32px -apple-system, BlinkMacSystemFont, "Pretendard", sans-serif';
     ctx.fillStyle = '#ffffff';
-    ctx.fillText(`🌲 ${categoryName} 포토카드 컬렉션`, badgeX, badgeY + 95);
+    ctx.fillText(categoryName, padX, titleY);
 
-    ctx.font = '500 21px -apple-system, BlinkMacSystemFont, "Pretendard", sans-serif';
+    ctx.font = '500 16px -apple-system, BlinkMacSystemFont, "Pretendard", sans-serif';
     ctx.fillStyle = '#94a3b8';
-    ctx.fillText('공식 앨범 • 시그 • 키트 • 콘서트/MD • 특전 (39종 수록)', badgeX, badgeY + 135);
+    ctx.fillText(subtitle, padX, titleY + 30);
 
-    // 4. Progress Stats
-    const statsY = badgeY + 220;
-    ctx.font = '700 28px -apple-system, BlinkMacSystemFont, "Pretendard", sans-serif';
-    ctx.fillStyle = '#cbd5e1';
-    ctx.fillText('수집 진행률', badgeX, statsY);
+    // Divider Line
+    const divY = titleY + 65;
+    ctx.strokeStyle = 'rgba(255, 255, 255, 0.08)';
+    ctx.lineWidth = 1;
+    ctx.beginPath();
+    ctx.moveTo(padX, divY);
+    ctx.lineTo(cardX + cardW - 36, divY);
+    ctx.stroke();
+
+    // 5. Bottom Section: Progress Meta & Bar
+    const statsY = divY + 38;
+    ctx.font = '600 17px -apple-system, BlinkMacSystemFont, "Pretendard", sans-serif';
+    ctx.fillStyle = '#94a3b8';
+    ctx.fillText('수집 진행률', padX, statsY);
 
     ctx.textAlign = 'right';
-    ctx.font = '800 52px -apple-system, BlinkMacSystemFont, "Pretendard", sans-serif';
-    const numGrad = ctx.createLinearGradient(cardX + cardW - 450, statsY, cardX + cardW - 50, statsY);
-    numGrad.addColorStop(0, '#38bdf8');
-    numGrad.addColorStop(1, '#a855f7');
-    ctx.fillStyle = numGrad;
-    ctx.fillText(`${totalChecked} / ${totalCards} 장 (${percent}%)`, cardX + cardW - 50, statsY);
+    ctx.font = '700 20px -apple-system, BlinkMacSystemFont, "Pretendard", sans-serif';
+    ctx.fillStyle = '#a5b4fc';
+    ctx.fillText(`${totalChecked} / ${totalCards} 장 (${percent}%)`, cardX + cardW - 36, statsY);
 
-    // 5. Glowing Progress Bar
-    const barX = badgeX;
-    const barY = statsY + 32;
-    const barW = cardW - 100;
-    const barH = 28;
-    const barRadius = 14;
+    // Progress Bar Track
+    const barX = padX;
+    const barY = statsY + 18;
+    const barW = cardW - 72;
+    const barH = 12;
+    const barRadius = 6;
 
     ctx.beginPath();
     if (typeof ctx.roundRect === 'function') {
@@ -646,9 +686,10 @@ class CanvasExporter {
     } else {
       CanvasExporter.drawRoundRectPath(ctx, barX, barY, barW, barH, barRadius);
     }
-    ctx.fillStyle = '#0b0f19';
+    ctx.fillStyle = '#0f1117';
     ctx.fill();
 
+    // Progress Bar Fill
     if (percent > 0) {
       const fillW = Math.max(barRadius * 2, Math.round((barW * percent) / 100));
       ctx.beginPath();
@@ -658,27 +699,49 @@ class CanvasExporter {
         CanvasExporter.drawRoundRectPath(ctx, barX, barY, fillW, barH, barRadius);
       }
       const fillGrad = ctx.createLinearGradient(barX, barY, barX + fillW, barY);
-      fillGrad.addColorStop(0, '#06b6d4');
+      fillGrad.addColorStop(0, '#38bdf8');
       fillGrad.addColorStop(0.5, '#6366f1');
-      fillGrad.addColorStop(1, '#ec4899');
+      fillGrad.addColorStop(1, '#a855f7');
       ctx.fillStyle = fillGrad;
       ctx.fill();
     }
 
-    // 6. Footer inside card
-    const footY = cardY + cardH - 45;
+    // 6. Card Footer URL & Hashtag
+    const footY = cardY + cardH - 18;
     ctx.textAlign = 'left';
-    ctx.font = '600 19px -apple-system, BlinkMacSystemFont, "Pretendard", sans-serif';
-    ctx.fillStyle = '#67e8f9';
-    ctx.fillText('🔗 https://foretissimo.github.io/phoca_checker/', badgeX, footY);
+    ctx.font = '500 13px -apple-system, BlinkMacSystemFont, "Pretendard", sans-serif';
+    ctx.fillStyle = '#475569';
+    ctx.fillText('✨ 포카 체커 • https://foretissimo.github.io/phoca_checker/', padX, footY);
 
     ctx.textAlign = 'right';
-    ctx.font = '700 20px -apple-system, BlinkMacSystemFont, "Pretendard", sans-serif';
-    ctx.fillStyle = '#f472b6';
-    ctx.fillText('#포레포카체커', cardX + cardW - 50, footY);
+    ctx.font = '600 13px -apple-system, BlinkMacSystemFont, "Pretendard", sans-serif';
+    ctx.fillStyle = '#6366f1';
+    ctx.fillText('#포레포카체커', cardX + cardW - 36, footY);
 
     ctx.restore();
     return canvas;
+  }
+
+  static async copyCanvasToClipboard(canvas) {
+    if (!navigator.clipboard || typeof ClipboardItem === 'undefined') {
+      return false;
+    }
+    return new Promise((resolve) => {
+      canvas.toBlob(async (blob) => {
+        if (!blob) {
+          resolve(false);
+          return;
+        }
+        try {
+          const item = new ClipboardItem({ 'image/png': blob });
+          await navigator.clipboard.write([item]);
+          resolve(true);
+        } catch (err) {
+          console.warn('Clipboard write failed:', err);
+          resolve(false);
+        }
+      }, 'image/png');
+    });
   }
 
   static downloadCanvas(canvas, filename) {
