@@ -6,6 +6,7 @@ const PRESET_CATEGORIES = [
     "subtitle": "Forestella Photocard Collection",
     "badge": "39종",
     "icon": "✨",
+    "logoImage": "images/fore/forestella_logo.jpg",
     "color": "linear-gradient(135deg, #6366f1, #8b5cf6)",
     "coverImage": "images/fore/fore1_미스티크 리스트 최최최최종 100.png",
     "itemCount": 39,
