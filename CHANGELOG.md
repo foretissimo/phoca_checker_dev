@@ -4,6 +4,18 @@ All notable functional changes, architecture improvements, and bug fixes for the
 
 ---
 
+## [1.5.0] - 2026-08-21
+
+### 🎨 UI & UX Improvements
+- **Focus on Forestella Category**:
+  - Hid placeholder/preparatory categories (2~5) to exclusively showcase the active Forestella category card.
+  - Centered category hub layout with optimal card dimensions.
+- **Enhanced Social Sharing (X / Twitter)**:
+  - Added auto-generation of high-resolution Collection Summary Card (1200x675) with clipboard copy & download.
+  - Set official hashtag to `#포레포카체커`.
+
+---
+
 ## [1.4.0] - 2026-08-21
 
 ### 🌟 Added
