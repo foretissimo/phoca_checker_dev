@@ -4,6 +4,16 @@ All notable functional changes, architecture improvements, and bug fixes for the
 
 ---
 
+## [1.5.1] - 2026-08-21
+
+### 📖 Documentation & Help
+- **Help Modal Updated**: Added Step 5 guide for the `[자랑하기]` feature in the help modal.
+
+### ⚡ Optimization
+- **Streamlined X Sharing**: Streamlined `자랑하기` to instantly launch the official 𝕏(Twitter) composer with progress percentage, card counts, and `#포레포카체커` hashtag.
+
+---
+
 ## [1.5.0] - 2026-08-21
 
 ### 🎨 UI & UX Improvements
