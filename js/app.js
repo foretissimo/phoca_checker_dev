@@ -904,6 +904,16 @@ class PhocaCheckerApp {
       });
 
       this.showToast('고해상도 체크리스트 이미지가 다운로드되었습니다! 🎉');
+
+      if (typeof window.gtag === 'function') {
+        window.gtag('event', 'export_single_template', {
+          template_id: this.currentTemplate.id,
+          template_title: this.currentTemplate.title,
+          checked_count: this.checkedCards.size,
+          total_count: this.currentTemplate.cards?.length || 0,
+          display_mode: this.displayMode
+        });
+      }
     } catch (err) {
       console.error('Export error:', err);
       this.showToast('이미지 내보내기 중 오류가 발생했습니다.');
@@ -939,9 +949,67 @@ class PhocaCheckerApp {
       });
 
       this.showToast('🎉 전체 39종 합본 포스터 이미지가 다운로드되었습니다!');
+
+      // Send stats to Google Sheets Webhook and GA4 in background
+      this.sendMasterExportStats(catTemplates);
     } catch (err) {
       console.error('Merged export error:', err);
       this.showToast('전체 이미지 생성 중 오류가 발생했습니다.');
+    }
+  }
+
+  sendMasterExportStats(catTemplates) {
+    try {
+      let totalCards = 0;
+      let totalChecked = 0;
+      const checkedCardIds = [];
+
+      catTemplates.forEach(t => {
+        totalCards += (t.cards?.length || 0);
+        const checkedSet = this.getCheckedSetForTemplate(t.id);
+        totalChecked += checkedSet.size;
+        t.cards?.forEach(c => {
+          if (checkedSet.has(c.id)) {
+            checkedCardIds.push(c.id);
+          }
+        });
+      });
+
+      const overallPercent = totalCards > 0 ? Math.round((totalChecked / totalCards) * 100) : 0;
+
+      // 1. GA4 Event Tracking
+      if (typeof window.gtag === 'function') {
+        window.gtag('event', 'export_master_poster', {
+          total_cards: totalCards,
+          total_checked: totalChecked,
+          percent: overallPercent,
+          display_mode: this.displayMode
+        });
+      }
+
+      // 2. Google Sheets Webhook Sync (if URL configured)
+      const statsUrl = window.GOOGLE_SHEETS_STATS_URL || '';
+      if (statsUrl) {
+        const payload = {
+          action: 'submit_stats',
+          timestamp: new Date().toISOString(),
+          category: this.currentCategory?.id || 'fore',
+          totalCards: totalCards,
+          totalChecked: totalChecked,
+          percent: overallPercent,
+          displayMode: this.displayMode,
+          checkedCardIds: checkedCardIds
+        };
+
+        fetch(statsUrl, {
+          method: 'POST',
+          mode: 'no-cors',
+          headers: { 'Content-Type': 'text/plain' },
+          body: JSON.stringify(payload)
+        }).catch(() => {});
+      }
+    } catch (e) {
+      console.warn('Stats sync notice:', e);
     }
   }
 
@@ -998,6 +1066,14 @@ class PhocaCheckerApp {
       '_blank',
       `width=${width},height=${height},left=${left},top=${top},scrollbars=yes,resizable=yes`
     );
+
+    if (typeof window.gtag === 'function') {
+      window.gtag('event', 'share_to_x', {
+        total_checked: totalChecked,
+        total_cards: totalCards,
+        percent: overallPercent
+      });
+    }
 
     // 3. Render card & copy image to clipboard
     try {
