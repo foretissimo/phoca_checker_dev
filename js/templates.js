@@ -10,50 +10,6 @@ const PRESET_CATEGORIES = [
     "coverImage": "images/fore/fore1_미스티크 리스트 최최최최종 100.png",
     "itemCount": 39,
     "isAvailable": true
-  },
-  {
-    "id": "cat2",
-    "name": "카테고리 2",
-    "subtitle": "추후 추가 예정",
-    "badge": "준비중",
-    "icon": "🌟",
-    "color": "linear-gradient(135deg, #ec4899, #f43f5e)",
-    "coverImage": "",
-    "itemCount": 0,
-    "isAvailable": false
-  },
-  {
-    "id": "cat3",
-    "name": "카테고리 3",
-    "subtitle": "추후 추가 예정",
-    "badge": "준비중",
-    "icon": "💫",
-    "color": "linear-gradient(135deg, #3b82f6, #06b6d4)",
-    "coverImage": "",
-    "itemCount": 0,
-    "isAvailable": false
-  },
-  {
-    "id": "cat4",
-    "name": "카테고리 4",
-    "subtitle": "추후 추가 예정",
-    "badge": "준비중",
-    "icon": "🍀",
-    "color": "linear-gradient(135deg, #10b981, #059669)",
-    "coverImage": "",
-    "itemCount": 0,
-    "isAvailable": false
-  },
-  {
-    "id": "cat5",
-    "name": "카테고리 5",
-    "subtitle": "추후 추가 예정",
-    "badge": "준비중",
-    "icon": "🪐",
-    "color": "linear-gradient(135deg, #f59e0b, #d97706)",
-    "coverImage": "",
-    "itemCount": 0,
-    "isAvailable": false
   }
 ];
 
