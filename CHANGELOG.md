@@ -4,6 +4,25 @@ All notable functional changes, architecture improvements, and bug fixes for the
 
 ---
 
+## [1.3.0] - 2026-08-21
+
+### 🔒 Security & Environment Isolation
+- **Visual Editor Restricted to Dev**:
+  - The `영역 편집기` button and editor drawer are strictly restricted to `phoca_checker_dev`, `localhost`, and `127.0.0.1`.
+  - Automatically hidden on production (`phoca_checker`) to prevent accidental unauthorized edits.
+
+### 🎨 UI & UX Improvements
+- **Credits Display Reordering**:
+  - Reordered Section 3 (만드는 사람들) in modal:
+    1. **오류 제보 및 피드백 문의** (스핀 / Spin)
+    2. **포토카드 도안 제공** (@sy_fore & Notion)
+    3. **기획 및 제작** (@live_in_fore)
+- **Notice Bar & Footer Simplification**:
+  - Removed extra subtext from the main home notice ticker bar for a cleaner banner.
+  - Simplified footer credit text to `만드는 사람들`.
+
+---
+
 ## [1.2.0] - 2026-08-21
 
 ### 🚀 Staging & Release Architecture
