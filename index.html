@@ -244,14 +244,30 @@ body {
 }
 
 .cat-icon-badge {
-  width: 44px;
-  height: 44px;
-  border-radius: 12px;
+  width: 52px;
+  height: 52px;
+  border-radius: 14px;
   display: flex;
   align-items: center;
   justify-content: center;
   font-size: 1.3rem;
-  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3);
+  box-shadow: 0 4px 14px rgba(0, 0, 0, 0.35);
+  flex-shrink: 0;
+}
+
+.cat-icon-badge.has-logo {
+  background: #f7eee4;
+  border: 1px solid rgba(255, 255, 255, 0.2);
+  overflow: hidden;
+  padding: 2px;
+}
+
+.cat-logo-img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  border-radius: 11px;
+  display: block;
 }
 
 .cat-badge {
