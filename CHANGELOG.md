@@ -4,6 +4,22 @@ All notable functional changes, architecture improvements, and bug fixes for the
 
 ---
 
+## [1.4.0] - 2026-08-21
+
+### 🌟 Added
+- **자랑하기 (Share to X / Twitter)**:
+  - Added dedicated `자랑하기` button with Twitter/X icon in header actions.
+  - Automatically calculates and populates overall collection percentage, collected/total card count, current template status, and hashtags (`#포레스텔라 #Forestella #포카체커`).
+
+### 🎨 UI & UX Improvements
+- **Simplified Mode Button Labels**:
+  - `보유 포카 가리기 (위시리스트)` → `보유 포카 가리기`
+  - `미보유 포카 가리기 (보유본)` → `미보유 포카 가리기`
+- **Template Coordinate Updates**:
+  - Synced visual editor coordinate adjustments for `fore10` and `fore18` (total 758 cards).
+
+---
+
 ## [1.3.0] - 2026-08-21
 
 ### 🔒 Security & Environment Isolation
