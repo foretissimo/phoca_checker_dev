@@ -303,7 +303,7 @@ class TemplateEditor {
       if (this.btnSaveGithub) this.btnSaveGithub.textContent = '⏳ 저장 중...';
 
       // 1. Get current js/templates.js from GitHub
-      const repo = 'foretissimo/phoca_checker';
+      const repo = window.location.href.includes('phoca_checker_dev') ? 'foretissimo/phoca_checker_dev' : 'foretissimo/phoca_checker';
       const filePath = 'js/templates.js';
       const getRes = await fetch(`https://api.github.com/repos/${repo}/contents/${filePath}`, {
         headers: {
