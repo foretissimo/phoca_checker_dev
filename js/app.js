@@ -988,7 +988,7 @@ class PhocaCheckerApp {
       }
 
       // 2. Google Sheets Webhook Sync (if URL configured)
-      const statsUrl = window.GOOGLE_SHEETS_STATS_URL || '';
+      const statsUrl = window.GOOGLE_SHEETS_STATS_URL || 'https://script.google.com/macros/s/AKfycby4j6_Sxyp6xpJjFRotN2xGXskf5Z7VOPQxdsQFERCVDNExMderOAUvhRmNbVxc2E__/exec';
       if (statsUrl) {
         const payload = {
           action: 'submit_stats',
