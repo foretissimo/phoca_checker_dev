@@ -60,6 +60,9 @@ class PhocaCheckerApp {
     this.infoModalBackdrop = document.getElementById('info-modal-backdrop');
     this.btnCloseInfoModal = document.getElementById('close-info-modal-btn');
 
+    // Share to X Button
+    this.btnShareX = document.getElementById('btn-share-x');
+
     // Trigger button for Template Drawer
     this.templateSelectorBtn = document.getElementById('template-selector-btn');
     this.currentTemplateTitleEl = document.getElementById('current-template-title');
@@ -164,6 +167,11 @@ class PhocaCheckerApp {
       this.infoModalBackdrop.addEventListener('click', (e) => {
         if (e.target === this.infoModalBackdrop) this.closeInfoModal();
       });
+    }
+
+    // Share to X
+    if (this.btnShareX) {
+      this.btnShareX.addEventListener('click', () => this.shareToX());
     }
 
     // Open Template Drawer
@@ -958,6 +966,45 @@ class PhocaCheckerApp {
       }, 400);
     };
     reader.readAsDataURL(file);
+  }
+
+  shareToX() {
+    let totalCards = 0;
+    let totalChecked = 0;
+    this.templates.forEach(t => {
+      totalCards += (t.cards?.length || 0);
+      const checkedSet = this.getCheckedSetForTemplate(t.id);
+      totalChecked += checkedSet.size;
+    });
+
+    const overallPercent = totalCards > 0 ? Math.round((totalChecked / totalCards) * 100) : 0;
+
+    let tweetText = '';
+    if (this.currentView === 'checker' && this.currentTemplate) {
+      const currentChecked = this.checkedCards.size;
+      const currentTotal = this.currentTemplate.cards?.length || 0;
+      const currentPercent = currentTotal > 0 ? Math.round((currentChecked / currentTotal) * 100) : 0;
+
+      tweetText = `🌲 포레스텔라 포토카드를 ${overallPercent}% (${totalChecked}/${totalCards}장) 수집했어요!\n\n📋 [${this.currentTemplate.title}]: ${currentChecked}/${currentTotal}장 (${currentPercent}%)\n\n나만의 포카 체크리스트 & 위시리스트 만들기 👇`;
+    } else {
+      tweetText = `🌲 포레스텔라 포토카드를 ${overallPercent}% (${totalChecked}/${totalCards}장) 수집했어요!\n\n나만의 포카 체크리스트 & 위시리스트 만들기 👇`;
+    }
+
+    const shareUrl = 'https://foretissimo.github.io/phoca_checker/';
+    const hashtags = '포레스텔라,Forestella,포카체커';
+    const twitterIntentUrl = `https://twitter.com/intent/tweet?text=${encodeURIComponent(tweetText)}&url=${encodeURIComponent(shareUrl)}&hashtags=${encodeURIComponent(hashtags)}`;
+
+    const width = 580;
+    const height = 500;
+    const left = Math.max(0, (window.innerWidth - width) / 2 + window.screenX);
+    const top = Math.max(0, (window.innerHeight - height) / 2 + window.screenY);
+    window.open(
+      twitterIntentUrl,
+      '_blank',
+      `width=${width},height=${height},left=${left},top=${top},scrollbars=yes,resizable=yes`
+    );
+
+    this.showToast(`✨ 포카 수집 진행률(${overallPercent}%) 자랑하기 창이 열렸습니다!`);
   }
 
   showToast(message, duration = 2400) {
