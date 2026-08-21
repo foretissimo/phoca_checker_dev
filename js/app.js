@@ -968,7 +968,7 @@ class PhocaCheckerApp {
     reader.readAsDataURL(file);
   }
 
-  shareToX() {
+  async shareToX() {
     let totalCards = 0;
     let totalChecked = 0;
     this.templates.forEach(t => {
@@ -980,20 +980,91 @@ class PhocaCheckerApp {
     const overallPercent = totalCards > 0 ? Math.round((totalChecked / totalCards) * 100) : 0;
 
     let tweetText = '';
-    if (this.currentView === 'checker' && this.currentTemplate) {
+    let canvas = null;
+    let filename = '';
+
+    if (this.currentView === 'checker' && this.currentTemplate && this.mainImage?.complete) {
       const currentChecked = this.checkedCards.size;
       const currentTotal = this.currentTemplate.cards?.length || 0;
       const currentPercent = currentTotal > 0 ? Math.round((currentChecked / currentTotal) * 100) : 0;
 
-      tweetText = `🌲 포레스텔라 포토카드를 ${overallPercent}% (${totalChecked}/${totalCards}장) 수집했어요!\n\n📋 [${this.currentTemplate.title}]: ${currentChecked}/${currentTotal}장 (${currentPercent}%)\n\n나만의 포카 체크리스트 & 위시리스트 만들기 👇`;
+      tweetText = `🌲 포레스텔라 포토카드를 ${overallPercent}% (${totalChecked}/${totalCards}장) 수집했어요! ✨\n\n📋 [${this.currentTemplate.title}]: ${currentChecked}/${currentTotal}장 (${currentPercent}%)\n\n나만의 포카 체크리스트 & 위시리스트 만들기 👇`;
+      
+      try {
+        canvas = CanvasExporter.getSingleTemplateCanvas({
+          imageElement: this.mainImage,
+          templateTitle: this.currentTemplate.title,
+          cards: this.currentTemplate.cards || [],
+          checkedCardIds: this.checkedCards,
+          displayMode: this.displayMode
+        });
+        filename = `포카체커_${this.currentTemplate.title}_${currentPercent}%.png`;
+      } catch (e) {
+        console.warn('Single template canvas generation error:', e);
+      }
     } else {
-      tweetText = `🌲 포레스텔라 포토카드를 ${overallPercent}% (${totalChecked}/${totalCards}장) 수집했어요!\n\n나만의 포카 체크리스트 & 위시리스트 만들기 👇`;
+      tweetText = `🌲 포레스텔라 포토카드를 ${overallPercent}% (${totalChecked}/${totalCards}장) 수집했어요! ✨\n\n나만의 포카 체크리스트 & 위시리스트 만들기 👇`;
+      try {
+        canvas = CanvasExporter.renderSummaryCardCanvas({
+          categoryName: '포레스텔라',
+          totalCards,
+          totalChecked,
+          percent: overallPercent
+        });
+        filename = `포카체커_수집현황_${overallPercent}%.png`;
+      } catch (e) {
+        console.warn('Summary card canvas generation error:', e);
+      }
     }
 
     const shareUrl = 'https://foretissimo.github.io/phoca_checker/';
-    const hashtags = '포레스텔라,Forestella,포카체커';
+    const hashtags = '포레포카체커';
     const twitterIntentUrl = `https://twitter.com/intent/tweet?text=${encodeURIComponent(tweetText)}&url=${encodeURIComponent(shareUrl)}&hashtags=${encodeURIComponent(hashtags)}`;
 
+    // Try Web Share API with image file on Mobile
+    if (canvas && navigator.canShare) {
+      try {
+        const blob = await new Promise(r => canvas.toBlob(r, 'image/png'));
+        if (blob) {
+          const file = new File([blob], filename, { type: 'image/png' });
+          if (navigator.canShare({ files: [file] })) {
+            await navigator.share({
+              title: '포카 체커',
+              text: tweetText + '\n' + shareUrl + '\n#포레포카체커',
+              files: [file]
+            });
+            this.showToast('✨ 공유가 완료되었습니다!');
+            return;
+          }
+        }
+      } catch (err) {
+        // Continue to fallback
+      }
+    }
+
+    // Desktop & Fallback flow:
+    // 1. Copy image to Clipboard for instant Cmd+V pasting into Twitter
+    let copiedToClipboard = false;
+    if (canvas && navigator.clipboard && window.ClipboardItem) {
+      try {
+        const blob = await new Promise(r => canvas.toBlob(r, 'image/png'));
+        if (blob) {
+          await navigator.clipboard.write([
+            new ClipboardItem({ 'image/png': blob })
+          ]);
+          copiedToClipboard = true;
+        }
+      } catch (e) {
+        console.warn('Clipboard write failed:', e);
+      }
+    }
+
+    // 2. Download the image so the user has the file handy
+    if (canvas) {
+      CanvasExporter.downloadCanvas(canvas, filename);
+    }
+
+    // 3. Open Twitter intent in popup window
     const width = 580;
     const height = 500;
     const left = Math.max(0, (window.innerWidth - width) / 2 + window.screenX);
@@ -1004,7 +1075,11 @@ class PhocaCheckerApp {
       `width=${width},height=${height},left=${left},top=${top},scrollbars=yes,resizable=yes`
     );
 
-    this.showToast(`✨ 포카 수집 진행률(${overallPercent}%) 자랑하기 창이 열렸습니다!`);
+    if (copiedToClipboard) {
+      this.showToast(`📸 이미지가 복사&저장되었습니다! 트윗 창에서 [Cmd+V / 붙여넣기] 하세요!`, 3600);
+    } else {
+      this.showToast(`✨ 수집 현황(${overallPercent}%) 자랑하기 창이 열렸습니다!`, 3000);
+    }
   }
 
   showToast(message, duration = 2400) {
