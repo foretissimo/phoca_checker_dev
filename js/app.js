@@ -972,7 +972,7 @@ class PhocaCheckerApp {
     reader.readAsDataURL(file);
   }
 
-  shareToX() {
+  async shareToX() {
     let totalCards = 0;
     let totalChecked = 0;
     this.templates.forEach(t => {
@@ -983,15 +983,14 @@ class PhocaCheckerApp {
 
     const overallPercent = totalCards > 0 ? Math.round((totalChecked / totalCards) * 100) : 0;
 
-    const tweetText = `🌲 포레스텔라 포토카드를 ${overallPercent}% (${totalChecked}/${totalCards}장) 수집했어요! ✨\n\n나만의 포카 체크리스트 & 위시리스트 만들기 👇`;
-
+    // 1. Tweet text with explicit newline before hashtag
+    const tweetText = `🌲 포레스텔라 포토카드를 ${overallPercent}% (${totalChecked}/${totalCards}장) 수집했어요! ✨\n\n나만의 포카 체크리스트 & 위시리스트 만들기 👇\n\n#포레포카체커`;
     const shareUrl = 'https://foretissimo.github.io/phoca_checker/';
-    const hashtags = '포레포카체커';
-    const twitterIntentUrl = `https://twitter.com/intent/tweet?text=${encodeURIComponent(tweetText)}&url=${encodeURIComponent(shareUrl)}&hashtags=${encodeURIComponent(hashtags)}`;
+    const twitterIntentUrl = `https://twitter.com/intent/tweet?text=${encodeURIComponent(tweetText)}&url=${encodeURIComponent(shareUrl)}`;
 
-    // Open Twitter intent in popup window
+    // 2. Open Twitter composer immediately (preserves user gesture)
     const width = 580;
-    const height = 500;
+    const height = 520;
     const left = Math.max(0, (window.innerWidth - width) / 2 + window.screenX);
     const top = Math.max(0, (window.innerHeight - height) / 2 + window.screenY);
     window.open(
@@ -999,6 +998,30 @@ class PhocaCheckerApp {
       '_blank',
       `width=${width},height=${height},left=${left},top=${top},scrollbars=yes,resizable=yes`
     );
+
+    // 3. Render card & copy image to clipboard
+    try {
+      if (typeof CanvasExporter !== 'undefined' && typeof CanvasExporter.renderSummaryCardCanvas === 'function') {
+        const cat = this.categories.find(c => c.id === 'fore') || this.categories[0] || {};
+        const canvas = await CanvasExporter.renderSummaryCardCanvas({
+          categoryName: cat.name || '포레스텔라',
+          subtitle: cat.subtitle || 'Forestella Photocard Collection',
+          badge: cat.badge || (cat.itemCount + '종'),
+          totalCards: totalCards,
+          totalChecked: totalChecked,
+          percent: overallPercent,
+          logoSrc: cat.logoImage || 'images/fore/forestella_logo.jpg'
+        });
+
+        const copied = await CanvasExporter.copyCanvasToClipboard(canvas);
+        if (copied) {
+          this.showToast('📋 수집 카드 이미지가 복사되었습니다! 트위터 창에 붙여넣기(Cmd+V / Ctrl+V)하세요 ✨', 5000);
+          return;
+        }
+      }
+    } catch (err) {
+      console.warn('Image clipboard copy notice:', err);
+    }
 
     this.showToast(`✨ 𝕏(트위터) 자랑하기 창이 열렸습니다!`, 2500);
   }
