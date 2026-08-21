@@ -4,6 +4,17 @@ All notable functional changes, architecture improvements, and bug fixes for the
 
 ---
 
+## [1.7.0] - 2026-08-21
+
+### 📊 Analytics & Statistical Insights
+- **Google Analytics 4 (GA4) Tag Added**:
+  - Integrated official GA4 tracking (`G-EYJEM4QMZY`) in `<head>` for traffic, user flow, and feature engagement metrics.
+  - Added custom GA4 event tracking for `export_master_poster`, `export_single_template`, and `share_to_x`.
+- **Real-time Card Ownership Statistics (Google Sheets Integration)**:
+  - Integrated background stats webhook triggered upon master poster generation to aggregate card-by-card ownership and popularity metrics in Google Spreadsheets in real time.
+
+---
+
 ## [1.6.1] - 2026-08-21
 
 ### 𝕏 Social Sharing & Clipboard Image Copy
