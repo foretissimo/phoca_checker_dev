@@ -317,12 +317,14 @@ class PhocaCheckerApp {
 
       const percent = totalCards > 0 ? Math.round((totalChecked / totalCards) * 100) : 0;
 
+      const iconBadgeHtml = cat.logoImage
+        ? `<div class="cat-icon-badge has-logo"><img src="${cat.logoImage}" alt="${cat.name} 로고" class="cat-logo-img"></div>`
+        : `<div class="cat-icon-badge" style="background: ${cat.color}; color: #fff;">${cat.icon}</div>`;
+
       card.innerHTML = `
         <div>
           <div class="cat-top">
-            <div class="cat-icon-badge" style="background: ${cat.color}; color: #fff;">
-              ${cat.icon}
-            </div>
+            ${iconBadgeHtml}
             <span class="cat-badge">${cat.badge || (cat.itemCount + '종')}</span>
           </div>
           <h3 class="cat-title">${cat.name}</h3>
@@ -981,16 +983,7 @@ class PhocaCheckerApp {
 
     const overallPercent = totalCards > 0 ? Math.round((totalChecked / totalCards) * 100) : 0;
 
-    let tweetText = '';
-    if (this.currentView === 'checker' && this.currentTemplate) {
-      const currentChecked = this.checkedCards.size;
-      const currentTotal = this.currentTemplate.cards?.length || 0;
-      const currentPercent = currentTotal > 0 ? Math.round((currentChecked / currentTotal) * 100) : 0;
-
-      tweetText = `🌲 포레스텔라 포토카드를 ${overallPercent}% (${totalChecked}/${totalCards}장) 수집했어요! ✨\n\n📋 [${this.currentTemplate.title}]: ${currentChecked}/${currentTotal}장 (${currentPercent}%)\n\n나만의 포카 체크리스트 & 위시리스트 만들기 👇`;
-    } else {
-      tweetText = `🌲 포레스텔라 포토카드를 ${overallPercent}% (${totalChecked}/${totalCards}장) 수집했어요! ✨\n\n나만의 포카 체크리스트 & 위시리스트 만들기 👇`;
-    }
+    const tweetText = `🌲 포레스텔라 포토카드를 ${overallPercent}% (${totalChecked}/${totalCards}장) 수집했어요! ✨\n\n나만의 포카 체크리스트 & 위시리스트 만들기 👇`;
 
     const shareUrl = 'https://foretissimo.github.io/phoca_checker/';
     const hashtags = '포레포카체커';
