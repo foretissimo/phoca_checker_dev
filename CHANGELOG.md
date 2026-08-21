@@ -4,6 +4,19 @@ All notable functional changes, architecture improvements, and bug fixes for the
 
 ---
 
+## [1.6.0] - 2026-08-21
+
+### 🎨 UI & UX Improvements
+- **Category Official Logo Added**:
+  - Replaced the default emoji icon in the Forestella category card with the official crest logo emblem.
+  - Added specialized badge container styling (`.cat-icon-badge.has-logo`) for crisp and elegant rendering.
+
+### 𝕏 Social Sharing
+- **Simplified Sharing Text**:
+  - Updated the `[자랑하기]` text to exclusively show overall collection progress (% and total cards) regardless of current template view, keeping tweets clean and concise.
+
+---
+
 ## [1.5.1] - 2026-08-21
 
 ### 📖 Documentation & Help
