@@ -1,0 +1,18 @@
+{
+  "name": "phoca-checker",
+  "version": "1.8.0",
+  "description": "포토카드 체크리스트 & 위시리스트 생성기",
+  "main": "index.html",
+  "scripts": {
+    "start": "./start.sh",
+    "dev": "./start.sh",
+    "serve": "python3 -m http.server 8000"
+  },
+  "keywords": [
+    "photocard",
+    "checklist",
+    "forestella"
+  ],
+  "author": "live_in_fore",
+  "license": "MIT"
+}
