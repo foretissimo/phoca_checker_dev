@@ -4,6 +4,22 @@ All notable functional changes, architecture improvements, and bug fixes for the
 
 ---
 
+## [1.8.0] - 2026-08-27
+
+### 🖼️ Filtered Merged Poster Export (All / Owned / Unowned)
+- **Modal-based Merged Poster Downloader**:
+  - Added full support for 3 export options: All Boards (Wishlist / Collection modes), Completed / Owned Boards only, and Incomplete / Unowned Wishlist Boards only.
+  - Real-time count badges and one-click dedicated download buttons within the modal.
+- **High-Resolution Poster & Layout Improvements**:
+  - Streamlined poster aesthetics by displaying the '보유'/'미보유' mode pill badge exclusively at the top header without redundant cell overlays.
+  - Consistent header collection stats across all poster modes referencing total category card counts.
+  - Adaptive layout & font sizing to perfectly render 1-board single posters with zero text clipping or overlap.
+  - Unified credit attributions: removed top header credit and clearly included both `@sy_fore` (templates) and `@live_in_fore` (creator) in both merged poster and single export footers.
+- **Developer Experience**:
+  - Added `./start.sh` and `npm start` scripts for instant local server launch with browser auto-opening.
+
+---
+
 ## [1.7.0] - 2026-08-21
 
 ### 📊 Analytics & Statistical Insights
