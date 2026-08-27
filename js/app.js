@@ -60,6 +60,17 @@ class PhocaCheckerApp {
     this.infoModalBackdrop = document.getElementById('info-modal-backdrop');
     this.btnCloseInfoModal = document.getElementById('close-info-modal-btn');
 
+    // Merged Export Modal
+    this.mergedExportModalBackdrop = document.getElementById('merged-export-modal-backdrop');
+    this.btnCloseMergedModal = document.getElementById('close-merged-modal-btn');
+    this.mergedCountAll = document.getElementById('merged-count-all');
+    this.mergedCountOwned = document.getElementById('merged-count-owned');
+    this.mergedCountUnowned = document.getElementById('merged-count-unowned');
+    this.btnExportMergedAllUnowned = document.getElementById('btn-export-merged-all-unowned');
+    this.btnExportMergedAllOwned = document.getElementById('btn-export-merged-all-owned');
+    this.btnDoExportMergedOwned = document.getElementById('btn-do-export-merged-owned');
+    this.btnDoExportMergedUnowned = document.getElementById('btn-do-export-merged-unowned');
+
     // Share to X Button
     this.btnShareX = document.getElementById('btn-share-x');
 
@@ -167,6 +178,28 @@ class PhocaCheckerApp {
       this.infoModalBackdrop.addEventListener('click', (e) => {
         if (e.target === this.infoModalBackdrop) this.closeInfoModal();
       });
+    }
+
+    // Merged Export Modal Events
+    if (this.btnCloseMergedModal) {
+      this.btnCloseMergedModal.addEventListener('click', () => this.closeMergedExportModal());
+    }
+    if (this.mergedExportModalBackdrop) {
+      this.mergedExportModalBackdrop.addEventListener('click', (e) => {
+        if (e.target === this.mergedExportModalBackdrop) this.closeMergedExportModal();
+      });
+    }
+    if (this.btnExportMergedAllUnowned) {
+      this.btnExportMergedAllUnowned.addEventListener('click', () => this.exportFilteredMergedImage('all', 'hide-owned'));
+    }
+    if (this.btnExportMergedAllOwned) {
+      this.btnExportMergedAllOwned.addEventListener('click', () => this.exportFilteredMergedImage('all', 'hide-unowned'));
+    }
+    if (this.btnDoExportMergedOwned) {
+      this.btnDoExportMergedOwned.addEventListener('click', () => this.exportFilteredMergedImage('owned', 'hide-unowned'));
+    }
+    if (this.btnDoExportMergedUnowned) {
+      this.btnDoExportMergedUnowned.addEventListener('click', () => this.exportFilteredMergedImage('unowned', 'hide-owned'));
     }
 
     // Share to X
@@ -932,30 +965,123 @@ class PhocaCheckerApp {
     }
   }
 
-  async exportAllMergedImage() {
+  // --------------------------------------------------------------------------
+  // Merged Poster Exports & Filter Modal
+  // --------------------------------------------------------------------------
+  openMergedExportModal() {
+    if (!this.mergedExportModalBackdrop) return;
+    this.updateMergedExportModalCounts();
+    this.updateModeButtonsUI();
+    this.mergedExportModalBackdrop.classList.add('open');
+  }
+
+  closeMergedExportModal() {
+    if (!this.mergedExportModalBackdrop) return;
+    this.mergedExportModalBackdrop.classList.remove('open');
+  }
+
+  updateMergedExportModalCounts() {
+    const catTemplates = this.templates.filter(t => t.categoryId === (this.currentCategory?.id || 'fore'));
+    const totalBoards = catTemplates.length;
+
+    let ownedBoards = 0;
+    let unownedBoards = 0;
+
+    catTemplates.forEach(t => {
+      const total = t.cards?.length || 0;
+      const checkedSet = this.getCheckedSetForTemplate(t.id);
+      const owned = checkedSet.size;
+
+      if (total > 0 && owned === total) {
+        ownedBoards++;
+      } else if (total > 0 && owned < total) {
+        unownedBoards++;
+      }
+    });
+
+    if (this.mergedCountAll) {
+      this.mergedCountAll.textContent = `${totalBoards}개 판`;
+    }
+    if (this.mergedCountOwned) {
+      this.mergedCountOwned.textContent = `${ownedBoards}개 판`;
+      this.mergedCountOwned.className = `badge-count ${ownedBoards > 0 ? 'success' : 'empty'}`;
+    }
+    if (this.mergedCountUnowned) {
+      this.mergedCountUnowned.textContent = `${unownedBoards}개 판`;
+      this.mergedCountUnowned.className = `badge-count ${unownedBoards > 0 ? 'warning' : 'empty'}`;
+    }
+  }
+
+  async exportFilteredMergedImage(filterType = 'all', overrideMode = null) {
     try {
-      this.showToast('전체 39종 고화질 합본 이미지를 생성 중입니다. 잠시만 기다려 주세요...', 8000);
-      
       const catTemplates = this.templates.filter(t => t.categoryId === (this.currentCategory?.id || 'fore'));
+      
+      let targetTemplates = catTemplates;
+      let filterName = '전체 39종';
+
+      // Determine effective display mode based on filter type or explicit override
+      let effectiveMode = overrideMode;
+      if (!effectiveMode) {
+        if (filterType === 'owned') effectiveMode = 'hide-unowned'; // Always show owned cards
+        else if (filterType === 'unowned') effectiveMode = 'hide-owned'; // Always hide owned cards (show wishlist)
+        else effectiveMode = this.displayMode;
+      }
+
+      const modeLabelStr = effectiveMode === 'hide-owned' ? '미보유 위시' : '보유 컬렉션';
+
+      if (filterType === 'owned') {
+        targetTemplates = catTemplates.filter(t => {
+          const total = t.cards?.length || 0;
+          const checkedSet = this.getCheckedSetForTemplate(t.id);
+          return total > 0 && checkedSet.size === total;
+        });
+        filterName = `올클리어(전체 보유) ${targetTemplates.length}종`;
+      } else if (filterType === 'unowned') {
+        targetTemplates = catTemplates.filter(t => {
+          const total = t.cards?.length || 0;
+          const checkedSet = this.getCheckedSetForTemplate(t.id);
+          return total > 0 && checkedSet.size < total;
+        });
+        filterName = `미보유 위시 ${targetTemplates.length}종`;
+      } else {
+        filterName = `전체 ${targetTemplates.length}종 (${modeLabelStr})`;
+      }
+
+      if (targetTemplates.length === 0) {
+        const msg = filterType === 'owned' 
+          ? '아직 전체 수집 완료(올클리어)된 이미지판이 없습니다. 포카를 먼저 체크해주세요!' 
+          : '미보유 포카가 있는 이미지판이 없습니다. 모든 판을 완료하셨습니다! 🎉';
+        this.showToast(msg, 4000);
+        return;
+      }
+
+      this.closeMergedExportModal();
+      this.showToast(`${filterName} 고화질 합본 이미지를 생성 중입니다. 잠시만 기다려 주세요...`, 8000);
 
       await CanvasExporter.exportCategoryMergedPng({
-        templates: catTemplates,
+        templates: targetTemplates,
+        allCategoryTemplates: catTemplates,
         getCheckedSetFn: (id) => this.getCheckedSetForTemplate(id),
         categoryName: this.currentCategory?.name || '포레스텔라',
-        displayMode: this.displayMode,
+        displayMode: effectiveMode,
+        filterType: filterType,
         onProgress: (cur, total, msg) => {
           this.showToast(msg, 3000);
         }
       });
 
-      this.showToast('🎉 전체 39종 합본 포스터 이미지가 다운로드되었습니다!');
+      this.showToast(`🎉 ${filterName} 합본 포스터 이미지가 다운로드되었습니다!`);
 
       // Send stats to Google Sheets Webhook and GA4 in background
-      this.sendMasterExportStats(catTemplates);
+      this.sendMasterExportStats(targetTemplates);
     } catch (err) {
       console.error('Merged export error:', err);
-      this.showToast('전체 이미지 생성 중 오류가 발생했습니다.');
+      this.showToast('합본 이미지 생성 중 오류가 발생했습니다.');
     }
+  }
+
+  async exportAllMergedImage() {
+    this.openMergedExportModal();
   }
 
   sendMasterExportStats(catTemplates) {
