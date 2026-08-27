@@ -164,8 +164,10 @@ class CanvasExporter {
     ctx.fillStyle = '#94a3b8';
     ctx.fillText(`모드: ${modeLabel}`, naturalWidth * 0.025, bannerY + bannerHeight * 0.78);
 
-    // Right: Attribution Credits
-    const creditText = '출처: @sy_fore (x.com/sy_fore) | Notion (t.co/fEts76yenI)';
+    // Right: Attribution Credits (matched with merged poster footer)
+    const creditText = naturalWidth >= 1000
+      ? '도안 출처: @sy_fore (x.com/sy_fore) • 제작: @live_in_fore (x.com/live_in_fore)'
+      : '도안: @sy_fore • 제작: @live_in_fore';
     const textWidth = ctx.measureText(creditText).width;
     ctx.fillStyle = '#cbd5e1';
     ctx.fillText(creditText, naturalWidth * 0.975 - textWidth, bannerY + bannerHeight * 0.60);
@@ -177,13 +179,16 @@ class CanvasExporter {
   }
 
   /**
-   * Export all templates in category merged into a single multi-column master poster
+   * Export templates in category merged into a multi-column master poster
+   * Supports 'all', 'owned' (completed only), 'unowned' (with missing cards)
    */
   static async exportCategoryMergedPng({
     templates,
+    allCategoryTemplates = [],
     getCheckedSetFn,
     categoryName = '포레스텔라',
     displayMode = 'hide-owned',
+    filterType = 'all', // 'all' | 'owned' | 'unowned'
     onProgress = () => {}
   }) {
     if (!templates || templates.length === 0) return false;
@@ -213,18 +218,36 @@ class CanvasExporter {
       loadedCount++;
     }
 
-    onProgress(templates.length, templates.length, '고화질 전체 포스터 합성 중...');
+    onProgress(templates.length, templates.length, '고화질 합본 포스터 합성 중...');
 
-    // Layout configuration: 4 columns poster
-    const cols = 4;
+    // Layout configuration: dynamic columns (1 to 4 depending on count)
+    const cols = Math.min(4, Math.max(1, loadedItems.length));
     const rows = Math.ceil(loadedItems.length / cols);
     const cellWidth = 900;
-    const cardSpacing = 40;
-    const headerHeight = 220;
-    const footerHeight = 120;
-    const cellHeaderHeight = 50;
+    
+    // Adaptive spacing & header dimensions based on column count
+    let cardSpacing = 40;
+    let headerHeight = 220;
+    let footerHeight = 120;
+    let cellHeaderHeight = 50;
 
-    // Calculate maximum aspect ratio for row heights
+    if (cols === 1) {
+      cardSpacing = 28;
+      headerHeight = 150;
+      footerHeight = 85;
+      cellHeaderHeight = 44;
+    } else if (cols === 2) {
+      cardSpacing = 32;
+      headerHeight = 180;
+      footerHeight = 95;
+      cellHeaderHeight = 46;
+    } else if (cols === 3) {
+      cardSpacing = 36;
+      headerHeight = 200;
+      footerHeight = 110;
+      cellHeaderHeight = 48;
+    }
+
     const posterWidth = cellWidth * cols + cardSpacing * (cols + 1);
     
     // Compute cell heights per row
@@ -252,12 +275,14 @@ class CanvasExporter {
     ctx.fillStyle = '#0b0d14';
     ctx.fillRect(0, 0, posterWidth, totalHeight);
 
-    // Calculate total collection stats
+    // Calculate total collection stats (always across all templates in category)
+    const statSourceTemplates = (allCategoryTemplates && allCategoryTemplates.length > 0) ? allCategoryTemplates : loadedItems.map(item => item.template);
     let totalCardsAll = 0;
     let totalOwnedAll = 0;
-    loadedItems.forEach(item => {
-      totalCardsAll += (item.template.cards?.length || 0);
-      totalOwnedAll += item.checkedSet.size;
+    statSourceTemplates.forEach(t => {
+      totalCardsAll += (t.cards?.length || 0);
+      const checkedSet = getCheckedSetFn(t.id);
+      totalOwnedAll += checkedSet.size;
     });
     const totalPercent = totalCardsAll > 0 ? Math.round((totalOwnedAll / totalCardsAll) * 100) : 0;
 
@@ -272,23 +297,77 @@ class CanvasExporter {
     grad.addColorStop(0.5, '#ec4899');
     grad.addColorStop(1, '#10b981');
     ctx.fillStyle = grad;
-    ctx.fillRect(0, 0, posterWidth, 8);
+    ctx.fillRect(0, 0, posterWidth, Math.max(5, Math.round(headerHeight * 0.035)));
 
+    // Filter-specific title (compact & clean)
+    let headerTitle = `✨ ${categoryName} 포토카드 전체 합본 (${loadedItems.length}종)`;
+    let filterFilenameLabel = `전체${loadedItems.length}종`;
+    if (filterType === 'owned') {
+      headerTitle = `✨ ${categoryName} 포토카드 올클리어 합본 (${loadedItems.length}종)`;
+      filterFilenameLabel = `전체보유${loadedItems.length}종`;
+    } else if (filterType === 'unowned') {
+      headerTitle = `✨ ${categoryName} 포토카드 미보유 위시 합본 (${loadedItems.length}종)`;
+      filterFilenameLabel = `미보유${loadedItems.length}종`;
+    }
+
+    // Adaptive font sizes & badge sizing
+    const modeTagText = displayMode === 'hide-owned' ? '미보유' : '보유';
+    const headerTagFontSize = cols === 1 ? 17 : (cols === 2 ? 21 : 25);
+    ctx.font = `bold ${headerTagFontSize}px -apple-system, BlinkMacSystemFont, "Pretendard", sans-serif`;
+    
+    const headerTagPaddingX = cols === 1 ? 14 : 18;
+    const headerTagPaddingY = cols === 1 ? 6 : 8;
+    const headerTagMetrics = ctx.measureText(modeTagText);
+    const headerTagWidth = headerTagMetrics.width + headerTagPaddingX * 2;
+    const headerTagHeight = headerTagFontSize + headerTagPaddingY * 2;
+    const headerTagX = cardSpacing * 1.25;
+    const headerTagY = cols === 1 ? 34 : (cols === 2 ? 42 : 50);
+    const headerTagRadius = Math.round(headerTagHeight / 2);
+
+    ctx.beginPath();
+    if (typeof ctx.roundRect === 'function') {
+      ctx.roundRect(headerTagX, headerTagY, headerTagWidth, headerTagHeight, headerTagRadius);
+    } else {
+      CanvasExporter.drawRoundRectPath(ctx, headerTagX, headerTagY, headerTagWidth, headerTagHeight, headerTagRadius);
+    }
+    ctx.fillStyle = 'rgba(15, 23, 42, 0.85)';
+    ctx.fill();
+    ctx.lineWidth = 1.5;
+    ctx.strokeStyle = displayMode === 'hide-owned' ? '#38bdf8' : '#34d399';
+    ctx.stroke();
+
+    ctx.fillStyle = displayMode === 'hide-owned' ? '#38bdf8' : '#34d399';
+    ctx.textAlign = 'center';
+    ctx.textBaseline = 'middle';
+    ctx.fillText(modeTagText, headerTagX + headerTagWidth / 2, headerTagY + headerTagHeight / 2 + 1);
+
+    // Title text vertically centered with mode badge
+    const badgeCenterY = headerTagY + headerTagHeight / 2;
+    const titleStartX = headerTagX + headerTagWidth + (cols === 1 ? 14 : 20);
+
+    // Dynamic title font size calculation to guarantee NO CLIPPING
+    let titleFontSize = cols === 1 ? 24 : (cols === 2 ? 32 : 40);
+    let maxTitleWidth = posterWidth - titleStartX - cardSpacing * 1.25;
+    ctx.font = `bold ${titleFontSize}px -apple-system, BlinkMacSystemFont, "Pretendard", sans-serif`;
+    
+    while (ctx.measureText(headerTitle).width > maxTitleWidth && titleFontSize > 15) {
+      titleFontSize -= 1;
+      ctx.font = `bold ${titleFontSize}px -apple-system, BlinkMacSystemFont, "Pretendard", sans-serif`;
+    }
+
+    ctx.textAlign = 'left';
+    ctx.textBaseline = 'middle';
     ctx.fillStyle = '#ffffff';
-    ctx.font = 'bold 52px -apple-system, BlinkMacSystemFont, "Pretendard", sans-serif';
-    ctx.fillText(`✨ ${categoryName} 포토카드 전체 컬렉션 현황`, cardSpacing * 1.5, 90);
+    ctx.fillText(headerTitle, titleStartX, badgeCenterY);
 
-    ctx.font = '500 28px -apple-system, BlinkMacSystemFont, "Pretendard", sans-serif';
+    // Subtitle statistics
+    const subFontSize = cols === 1 ? 14 : (cols === 2 ? 18 : 22);
+    ctx.font = `500 ${subFontSize}px -apple-system, BlinkMacSystemFont, "Pretendard", sans-serif`;
     ctx.fillStyle = '#94a3b8';
-    const modeDesc = displayMode === 'hide-owned' ? '보유 포토카드 가림 (미보유 위시리스트 강조)' : '미보유 포토카드 가림 (보유 컬렉션 강조)';
-    ctx.fillText(`수집 현황: ${totalOwnedAll} / ${totalCardsAll} 장 (${totalPercent}%)  •  총 ${loadedItems.length}종 템플릿  •  ${modeDesc}`, cardSpacing * 1.5, 145);
-
-    // Credit in header
-    ctx.font = '600 24px -apple-system, BlinkMacSystemFont, "Pretendard", sans-serif';
-    ctx.fillStyle = '#cbd5e1';
-    const headerCredit = '도안 출처: @sy_fore (x.com/sy_fore) | Notion (t.co/fEts76yenI)';
-    const creditW = ctx.measureText(headerCredit).width;
-    ctx.fillText(headerCredit, posterWidth - cardSpacing * 1.5 - creditW, 115);
+    ctx.textBaseline = 'middle';
+    const subY = headerTagY + headerTagHeight + (cols === 1 ? 24 : 32);
+    const modeDesc = displayMode === 'hide-owned' ? '보유 가림 (미보유 위시 강조)' : '미보유 가림 (보유 컬렉션 강조)';
+    ctx.fillText(`수집 현황: ${totalOwnedAll} / ${totalCardsAll} 장 (${totalPercent}%)  •  선택된 도안: ${loadedItems.length}종  •  ${modeDesc}`, headerTagX, subY);
 
     ctx.restore();
 
@@ -315,7 +394,7 @@ class CanvasExporter {
         ctx.fillStyle = '#1c2132';
         ctx.beginPath();
         if (typeof ctx.roundRect === 'function') {
-          ctx.roundRect(cellX, cellY, cellWidth, cellHeaderHeight, [8, 8, 0, 0]);
+          ctx.roundRect(cellX, cellY, cellWidth, cellHeaderHeight, [10, 10, 0, 0]);
         } else {
           ctx.rect(cellX, cellY, cellWidth, cellHeaderHeight);
         }
@@ -327,13 +406,13 @@ class CanvasExporter {
 
         ctx.font = 'bold 20px -apple-system, BlinkMacSystemFont, "Pretendard", sans-serif';
         ctx.fillStyle = '#f8fafc';
-        ctx.fillText(`${t.title}`, cellX + 16, cellY + 32);
+        ctx.fillText(`${t.title}`, cellX + 18, cellY + 32);
 
         ctx.font = 'bold 18px -apple-system, BlinkMacSystemFont, "Pretendard", sans-serif';
         ctx.fillStyle = isDone ? '#34d399' : (tOwned > 0 ? '#a5b4fc' : '#64748b');
         const badgeTxt = isDone ? `완료 ${tOwned}/${tTotal} ✓` : `${tOwned}/${tTotal}장`;
         const badgeW = ctx.measureText(badgeTxt).width;
-        ctx.fillText(badgeTxt, cellX + cellWidth - 16 - badgeW, cellY + 32);
+        ctx.fillText(badgeTxt, cellX + cellWidth - 18 - badgeW, cellY + 32);
         ctx.restore();
 
         // Draw Template Image & Overlays
@@ -368,6 +447,27 @@ class CanvasExporter {
               ctx.lineWidth = 1;
               ctx.strokeStyle = 'rgba(255, 255, 255, 0.2)';
               ctx.stroke();
+
+              // Check icon inside masked card
+              const iconSize = Math.min(cw * 0.28, ch * 0.28, 38);
+              const iconX = cx + (cw - iconSize) / 2;
+              const iconY = cy + (ch - iconSize) / 2;
+
+              ctx.beginPath();
+              ctx.arc(iconX + iconSize / 2, iconY + iconSize / 2, iconSize / 2, 0, Math.PI * 2);
+              ctx.fillStyle = 'rgba(0, 0, 0, 0.45)';
+              ctx.fill();
+
+              ctx.beginPath();
+              ctx.lineWidth = Math.max(2, iconSize * 0.12);
+              ctx.strokeStyle = '#ffffff';
+              ctx.lineCap = 'round';
+              ctx.lineJoin = 'round';
+              ctx.moveTo(iconX + iconSize * 0.28, iconY + iconSize * 0.52);
+              ctx.lineTo(iconX + iconSize * 0.44, iconY + iconSize * 0.70);
+              ctx.lineTo(iconX + iconSize * 0.75, iconY + iconSize * 0.32);
+              ctx.stroke();
+
               ctx.restore();
             }
           });
@@ -382,14 +482,25 @@ class CanvasExporter {
     ctx.fillStyle = '#141724';
     ctx.fillRect(0, totalHeight - footerHeight, posterWidth, footerHeight);
 
-    ctx.font = '500 22px -apple-system, BlinkMacSystemFont, "Pretendard", sans-serif';
+    let footerFontSize = cols === 1 ? 13 : (cols === 2 ? 16 : 20);
+    ctx.font = `500 ${footerFontSize}px -apple-system, BlinkMacSystemFont, "Pretendard", sans-serif`;
     ctx.fillStyle = '#94a3b8';
-    const footerTxt = `포카 체커 (Phoca Checker) • 포토카드 출처: @sy_fore (x.com/sy_fore) | Notion (t.co/fEts76yenI) • 생성일시: ${new Date().toLocaleDateString('ko-KR')}`;
-    ctx.fillText(footerTxt, cardSpacing * 1.5, totalHeight - footerHeight / 2 + 8);
+    ctx.textBaseline = 'middle';
+
+    const footerTxt = cols === 1
+      ? `포카 체커 • 도안: @sy_fore • 제작: @live_in_fore • ${new Date().toLocaleDateString('ko-KR')}`
+      : `포카 체커 (Phoca Checker) • 도안 출처: @sy_fore (x.com/sy_fore) • 제작: @live_in_fore (x.com/live_in_fore) • 생성일시: ${new Date().toLocaleDateString('ko-KR')}`;
+    
+    while (ctx.measureText(footerTxt).width > (posterWidth - cardSpacing * 2.5) && footerFontSize > 10) {
+      footerFontSize -= 1;
+      ctx.font = `500 ${footerFontSize}px -apple-system, BlinkMacSystemFont, "Pretendard", sans-serif`;
+    }
+
+    ctx.fillText(footerTxt, cardSpacing * 1.25, totalHeight - footerHeight / 2);
     ctx.restore();
 
     // 4. Trigger Master Poster Download
-    const filename = `포카체커_${categoryName}_전체39종_컬렉션_${displayMode === 'hide-owned' ? '위시리스트' : '보유본'}.png`;
+    const filename = `포카체커_${categoryName}_${filterFilenameLabel}_합본_${displayMode === 'hide-owned' ? '위시리스트' : '보유본'}.png`;
     return CanvasExporter.downloadCanvas(canvas, filename);
   }
 
@@ -525,7 +636,9 @@ class CanvasExporter {
     ctx.fillStyle = '#94a3b8';
     ctx.fillText(`모드: ${modeLabel} • #포레포카체커`, naturalWidth * 0.025, bannerY + bannerHeight * 0.78);
 
-    const creditText = '🔗 https://foretissimo.github.io/phoca_checker/';
+    const creditText = naturalWidth >= 1000
+      ? '도안 출처: @sy_fore (x.com/sy_fore) • 제작: @live_in_fore (x.com/live_in_fore)'
+      : '도안: @sy_fore • 제작: @live_in_fore';
     const textWidth = ctx.measureText(creditText).width;
     ctx.fillStyle = '#cbd5e1';
     ctx.fillText(creditText, naturalWidth * 0.975 - textWidth, bannerY + bannerHeight * 0.60);
