@@ -710,6 +710,110 @@ body {
   gap: 0.75rem;
 }
 
+.merged-option-card {
+  background: var(--bg-secondary);
+  border: 1px solid var(--border-color);
+  border-radius: var(--radius-md);
+  padding: 0.9rem 1rem;
+  margin-bottom: 0.75rem;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 0.75rem;
+  transition: all 0.2s ease;
+}
+
+.merged-option-card:hover {
+  border-color: rgba(99, 102, 241, 0.4);
+  background: rgba(30, 35, 52, 0.85);
+}
+
+.merged-card-info {
+  display: flex;
+  flex-direction: column;
+  gap: 3px;
+}
+
+.merged-card-title {
+  font-weight: 700;
+  font-size: 0.92rem;
+  display: flex;
+  align-items: center;
+  gap: 0.45rem;
+}
+
+.merged-card-desc {
+  font-size: 0.78rem;
+  color: var(--text-muted);
+}
+
+.badge-count {
+  display: inline-block;
+  padding: 1px 7px;
+  font-size: 0.74rem;
+  font-weight: 600;
+  border-radius: var(--radius-full);
+  background: rgba(99, 102, 241, 0.18);
+  color: #a5b4fc;
+}
+
+.badge-count.success {
+  background: rgba(16, 185, 129, 0.18);
+  color: #34d399;
+}
+
+.badge-count.warning {
+  background: rgba(56, 189, 248, 0.18);
+  color: #38bdf8;
+}
+
+.badge-count.empty {
+  background: rgba(148, 163, 184, 0.12);
+  color: #64748b;
+}
+
+.merged-mode-box {
+  background: rgba(15, 17, 23, 0.6);
+  border: 1px solid var(--border-color);
+  border-radius: var(--radius-md);
+  padding: 0.65rem 0.85rem;
+  margin-bottom: 1rem;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 0.5rem;
+}
+
+.merged-mode-label {
+  font-size: 0.82rem;
+  font-weight: 600;
+  color: var(--text-secondary);
+}
+
+.merged-mode-group {
+  display: flex;
+  gap: 0.35rem;
+}
+
+.merged-mode-btn {
+  padding: 4px 10px;
+  font-size: 0.76rem;
+  font-weight: 600;
+  border-radius: var(--radius-full);
+  border: 1px solid var(--border-color);
+  background: var(--bg-card);
+  color: var(--text-muted);
+  cursor: pointer;
+  transition: all 0.18s ease;
+}
+
+.merged-mode-btn.active {
+  background: var(--accent-primary);
+  border-color: var(--accent-primary);
+  color: #ffffff;
+  box-shadow: 0 2px 8px var(--accent-glow);
+}
+
 /* Info & Notice Bar */
 .notice-ticker-bar {
   background: rgba(99, 102, 241, 0.12);
@@ -1642,15 +1746,15 @@ body {
       <!-- Section 1: 공지사항 -->
       <div class="info-section">
         <div class="info-section-title">
-          <span>📢</span> 공지사항
+          <span>📢</span> 공지사항 & 업데이트
         </div>
         <div class="info-card">
           <div style="font-weight: 700; color: #f8fafc; margin-bottom: 0.35rem;">
-            🎉 포카 체커(Phoca Checker) 정식 오픈!
+            ✨ [업데이트] 합본 이미지 분리 다운로드 기능 추가
           </div>
-          <p style="margin-bottom: 0.4rem; line-height: 1.45;">
-            포레스텔라 공식 앨범, 시그, 키트, 콘서트/MD, 특전 등 <strong>총 39종(758장)</strong> 도안이 등록되었습니다.<br>
-            <span style="font-size: 0.8rem; color: var(--text-muted);">* 신규 도안 추가 및 영역 수정 사항은 지속적으로 반영됩니다.</span>
+          <p style="margin-bottom: 0.4rem; line-height: 1.45; font-size: 0.84rem;">
+            합본 다운로드 시 <strong>전체 합본 (위시/컬렉션)</strong>, <strong>올클리어(전체 보유)판 합본</strong>, <strong>미보유(위시)판 합본</strong>을 선택하여 고화질 포스터로 저장할 수 있습니다.<br>
+            <span style="font-size: 0.8rem; color: var(--text-muted);">* 1장/소량 합본 레이아웃 최적화 및 하단 출처·제작자 표기가 깔끔하게 정돈되었습니다.</span>
           </p>
           <div style="margin-top: 0.5rem; display: flex; gap: 0.4rem; justify-content: flex-end;">
             <a href="https://github.com/foretissimo/phoca_checker/blob/main/NOTICES.md" target="_blank" rel="noopener" class="credit-link" style="font-size: 0.78rem; padding: 4px 8px;">
@@ -1686,7 +1790,7 @@ body {
               <strong>고화질 이미지 다운로드</strong>:
               <ul style="padding-left: 1.1rem; margin-top: 0.2rem;">
                 <li><code>다운로드 (1장)</code>: 현재 포카판을 좌측 상단 '미보유/보유' 표시와 함께 고화질 PNG로 저장</li>
-                <li><code>전체 합본 다운로드</code>: 39종 전체 리스트를 4열 대형 포스터 1장으로 모아서 저장</li>
+                <li><code>합본 다운로드</code>: 전체 / 보유(올클리어) / 미보유 도안판을 선택하여 '보유/미보유' 라벨과 함께 고화질 포스터 합본으로 저장</li>
               </ul>
             </div>
           </div>
@@ -1758,6 +1862,9 @@ body {
   <!-- ========================================================================
        Backup / Restore Modal Dialog
        ======================================================================== -->
+  <!-- ========================================================================
+       Backup / Restore Modal Dialog
+       ======================================================================== -->
   <div id="backup-modal-backdrop" class="modal-backdrop">
     <div class="modal-box">
       <div class="modal-header">
@@ -1796,6 +1903,72 @@ body {
     </div>
   </div>
 
+  <!-- ========================================================================
+       Merged Export Selection Modal Dialog
+       ======================================================================== -->
+  <div id="merged-export-modal-backdrop" class="modal-backdrop">
+    <div class="modal-box" style="width: 500px;">
+      <div class="modal-header">
+        <h3 class="modal-title">🖼️ 합본 포스터 다운로드</h3>
+        <button id="close-merged-modal-btn" class="btn btn-sm btn-icon-only">
+          <svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2">
+            <line x1="18" y1="6" x2="6" y2="18"></line>
+            <line x1="6" y1="6" x2="18" y2="18"></line>
+          </svg>
+        </button>
+      </div>
+
+      <p style="font-size: 0.84rem; color: var(--text-secondary); margin-bottom: 1rem; line-height: 1.45;">
+        원하는 목적에 맞는 이미지판을 골라 1장의 고화질 포스터로 다운로드합니다.
+      </p>
+
+      <!-- Option 1: All Templates (Choose Wishlist vs Collection) -->
+      <div class="merged-option-card" style="flex-direction: column; align-items: stretch; gap: 0.65rem;">
+        <div style="display: flex; align-items: center; justify-content: space-between;">
+          <div class="merged-card-info">
+            <div class="merged-card-title">
+              <span>🗂️ 전체 이미지판 합본</span>
+              <span id="merged-count-all" class="badge-count">39개 판</span>
+            </div>
+            <div class="merged-card-desc">모든 이미지판을 모아 1장의 대형 포스터로 생성</div>
+          </div>
+        </div>
+        <div style="display: flex; gap: 0.5rem; justify-content: flex-end; padding-top: 0.35rem; border-top: 1px solid rgba(255,255,255,0.06);">
+          <button id="btn-export-merged-all-unowned" class="btn btn-sm" style="flex: 1; justify-content: center; font-size: 0.78rem; background: rgba(56, 189, 248, 0.12); border: 1px solid rgba(56, 189, 248, 0.35); color: #38bdf8;" title="보유한 포카를 가려 미보유 위시리스트를 강조하는 전체 합본">
+            미보유 위시 합본
+          </button>
+          <button id="btn-export-merged-all-owned" class="btn btn-sm" style="flex: 1; justify-content: center; font-size: 0.78rem; background: rgba(52, 211, 153, 0.12); border: 1px solid rgba(52, 211, 153, 0.35); color: #34d399;" title="모은 포카를 보여주는 보유 컬렉션 강조 전체 합본">
+            보유 컬렉션 합본
+          </button>
+        </div>
+      </div>
+
+      <!-- Option 2: Owned / Completed Templates only (Always Owned Collection mode) -->
+      <div class="merged-option-card">
+        <div class="merged-card-info">
+          <div class="merged-card-title">
+            <span>✨ 올클리어 (전체 보유판)</span>
+            <span id="merged-count-owned" class="badge-count success">0개 판</span>
+          </div>
+          <div class="merged-card-desc">100% 수집 완료한 판만 골라 <strong>보유 컬렉션</strong>으로 생성</div>
+        </div>
+        <button id="btn-do-export-merged-owned" class="btn btn-success btn-sm">보유 합본 다운로드</button>
+      </div>
+
+      <!-- Option 3: Unowned / Incomplete Templates only (Always Unowned Wishlist mode) -->
+      <div class="merged-option-card">
+        <div class="merged-card-info">
+          <div class="merged-card-title">
+            <span>🔍 미보유 (위시리스트판)</span>
+            <span id="merged-count-unowned" class="badge-count warning">0개 판</span>
+          </div>
+          <div class="merged-card-desc">미보유 포카가 남은 판만 골라 <strong>미보유 위시</strong>로 생성</div>
+        </div>
+        <button id="btn-do-export-merged-unowned" class="btn btn-purple btn-sm">미보유 합본 다운로드</button>
+      </div>
+    </div>
+  </div>
+
   <!-- Footer -->
   <footer class="app-footer">
     <p>포카 체커 (Phoca Checker) • <a href="#/info" style="color: #a5b4fc; text-decoration: underline; font-weight: 600;">만드는 사람들</a> • <a href="https://spin-spin.com/live_in_fore?v=1787241739191" target="_blank" rel="noopener" class="credit-link" style="font-size: 0.78rem;">문의: 스핀 ↗</a></p>
@@ -1805,9 +1978,9 @@ body {
   <div id="toast-container" class="toast-container"></div>
 
   <!-- Scripts -->
-  <script src="js/templates.js?v=8.9.0"></script>
-  <script src="js/canvas-export.js?v=8.9.0"></script>
-  <script src="js/editor.js?v=8.9.0"></script>
-  <script src="js/app.js?v=8.9.0"></script>
+  <script src="js/templates.js?v=9.0.0"></script>
+  <script src="js/canvas-export.js?v=9.0.0"></script>
+  <script src="js/editor.js?v=9.0.0"></script>
+  <script src="js/app.js?v=9.0.0"></script>
 </body>
 </html>
