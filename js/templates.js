@@ -375,7 +375,7 @@ const PRESET_TEMPLATES = [
     "title": "fore4. 월드트리 앨범 특전",
     "rawName": "월드트리 앨범 특전",
     "tag": "특전",
-    "image": "images/fore/fore4_월드트리_앨범_특전_리스트_최최최최종_80.webp",
+    "image": "images/fore/fore4_월드트리_앨범_특전_리스트_최최최최종_80.jpg",
     "cards": [
       {
         "id": "fore4_1",
@@ -1329,7 +1329,7 @@ const PRESET_TEMPLATES = [
     "title": "fore8. 유토피아 특전",
     "rawName": "유토피아 특전",
     "tag": "특전",
-    "image": "images/fore/fore8_유토피아_특전_리스트_최종_100.webp",
+    "image": "images/fore/fore8_유토피아_특전_리스트_최종_100.jpg",
     "cards": [
       {
         "id": "fore8_1",
@@ -5477,7 +5477,7 @@ const PRESET_TEMPLATES = [
     "title": "fore26. 포레시피",
     "rawName": "포레시피",
     "tag": "기타",
-    "image": "images/fore/fore26_포레시피_리스트_최최최최종_100.webp",
+    "image": "images/fore/fore26_포레시피_리스트_최최최최종_100.jpg",
     "cards": [
       {
         "id": "fore26_pob_1",
@@ -5981,7 +5981,7 @@ const PRESET_TEMPLATES = [
     "title": "fore30. 22-23 더로얄",
     "rawName": "22-23 더로얄",
     "tag": "콘서트/MD",
-    "image": "images/fore/fore30_22-23_더로얄_리스트_최최종_72.webp",
+    "image": "images/fore/fore30_22-23_더로얄_리스트_최최종_72.jpg",
     "cards": [
       {
         "id": "fore30_left_1",
