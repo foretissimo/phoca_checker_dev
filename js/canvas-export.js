@@ -15,6 +15,8 @@ class CanvasExporter {
     overlayColor = 'rgba(25, 25, 28, 0.68)',
     filename = 'photocard_checklist.png',
     showCheckIcon = true,
+    stampStyle = 'stamp',
+    customStampSrc = null,
   }) {
     if (!imageElement || !imageElement.complete) {
       throw new Error('Image is not ready for export');
@@ -33,6 +35,11 @@ class CanvasExporter {
     // Background fill
     ctx.fillStyle = '#0f1117';
     ctx.fillRect(0, 0, canvas.width, canvas.height);
+
+    // Preload complete marker (stamp / custom image) only in hide-owned mode
+    const marker = displayMode === 'hide-owned'
+      ? await CanvasExporter.loadCompleteMarker(stampStyle, customStampSrc)
+      : null;
 
     // 1. Draw base original image at native resolution
     ctx.drawImage(imageElement, 0, 0, naturalWidth, naturalHeight);
@@ -77,36 +84,41 @@ class CanvasExporter {
         ctx.strokeStyle = 'rgba(255, 255, 255, 0.22)';
         ctx.stroke();
 
-        // Optional check icon on masked cards
+        // Draw stamp / custom image / check icon on masked cards
         if (showCheckIcon) {
-          const iconSize = Math.min(w * 0.28, h * 0.28, 44);
-          const iconX = x + (w - iconSize) / 2;
-          const iconY = y + (h - iconSize) / 2;
-          
-          ctx.beginPath();
-          ctx.arc(iconX + iconSize / 2, iconY + iconSize / 2, iconSize / 2, 0, Math.PI * 2);
-          ctx.fillStyle = 'rgba(0, 0, 0, 0.45)';
-          ctx.fill();
+          if (marker) {
+            CanvasExporter.drawCompleteMarker(ctx, marker, x, y, w, h);
+          } else {
+            const iconSize = Math.min(w * 0.28, h * 0.28, 44);
+            const iconX = x + (w - iconSize) / 2;
+            const iconY = y + (h - iconSize) / 2;
+            
+            ctx.beginPath();
+            ctx.arc(iconX + iconSize / 2, iconY + iconSize / 2, iconSize / 2, 0, Math.PI * 2);
+            ctx.fillStyle = 'rgba(0, 0, 0, 0.45)';
+            ctx.fill();
 
-          ctx.beginPath();
-          ctx.lineWidth = Math.max(2, iconSize * 0.12);
-          ctx.strokeStyle = '#ffffff';
-          ctx.lineCap = 'round';
-          ctx.lineJoin = 'round';
-          
-          ctx.moveTo(iconX + iconSize * 0.28, iconY + iconSize * 0.52);
-          ctx.lineTo(iconX + iconSize * 0.44, iconY + iconSize * 0.70);
-          ctx.lineTo(iconX + iconSize * 0.75, iconY + iconSize * 0.32);
-          ctx.stroke();
+            ctx.beginPath();
+            ctx.lineWidth = Math.max(2, iconSize * 0.12);
+            ctx.strokeStyle = '#ffffff';
+            ctx.lineCap = 'round';
+            ctx.lineJoin = 'round';
+            
+            ctx.moveTo(iconX + iconSize * 0.28, iconY + iconSize * 0.52);
+            ctx.lineTo(iconX + iconSize * 0.44, iconY + iconSize * 0.70);
+            ctx.lineTo(iconX + iconSize * 0.75, iconY + iconSize * 0.32);
+            ctx.stroke();
+          }
         }
 
         ctx.restore();
       }
     });
 
-    // 2.5 Draw Top-Left Mode Pill Badge ('미보유' or '보유')
+    // 2.5 Draw Top-Left Mode Pill Badge ('미보유' / '보유' / '완성')
     ctx.save();
-    const modeTagText = displayMode === 'hide-owned' ? '미보유' : '보유';
+    const modeTag = CanvasExporter.getModeTag(displayMode, cards, checkedCardIds);
+    const modeTagText = modeTag.text;
     const tagFontSize = Math.max(16, Math.round(naturalWidth * 0.022));
     ctx.font = `bold ${tagFontSize}px -apple-system, BlinkMacSystemFont, "Pretendard", "Segoe UI", sans-serif`;
 
@@ -130,10 +142,10 @@ class CanvasExporter {
     ctx.fill();
 
     ctx.lineWidth = Math.max(1.5, Math.round(naturalWidth / 800));
-    ctx.strokeStyle = displayMode === 'hide-owned' ? '#38bdf8' : '#34d399';
+    ctx.strokeStyle = modeTag.color;
     ctx.stroke();
 
-    ctx.fillStyle = displayMode === 'hide-owned' ? '#38bdf8' : '#34d399';
+    ctx.fillStyle = modeTag.color;
     ctx.textAlign = 'center';
     ctx.textBaseline = 'middle';
     ctx.fillText(modeTagText, tagX + tagWidth / 2, tagY + tagHeight / 2 + 1);
@@ -189,6 +201,8 @@ class CanvasExporter {
     categoryName = '포레스텔라',
     displayMode = 'hide-owned',
     filterType = 'all', // 'all' | 'owned' | 'unowned'
+    stampStyle = 'stamp', // 'check' | 'stamp' | 'custom'
+    customStampSrc = null,
     onProgress = () => {}
   }) {
     if (!templates || templates.length === 0) return false;
@@ -219,6 +233,11 @@ class CanvasExporter {
     }
 
     onProgress(templates.length, templates.length, '고화질 합본 포스터 합성 중...');
+
+    // Preload complete marker (stamp / custom image) only in hide-owned mode
+    const marker = displayMode === 'hide-owned'
+      ? await CanvasExporter.loadCompleteMarker(stampStyle, customStampSrc)
+      : null;
 
     // Layout configuration: dynamic columns (1 to 4 depending on count)
     const cols = Math.min(4, Math.max(1, loadedItems.length));
@@ -448,25 +467,29 @@ class CanvasExporter {
               ctx.strokeStyle = 'rgba(255, 255, 255, 0.2)';
               ctx.stroke();
 
-              // Check icon inside masked card
-              const iconSize = Math.min(cw * 0.28, ch * 0.28, 38);
-              const iconX = cx + (cw - iconSize) / 2;
-              const iconY = cy + (ch - iconSize) / 2;
+              // Draw stamp / custom image / check icon inside masked card
+              if (marker) {
+                CanvasExporter.drawCompleteMarker(ctx, marker, cx, cy, cw, ch);
+              } else {
+                const iconSize = Math.min(cw * 0.28, ch * 0.28, 38);
+                const iconX = cx + (cw - iconSize) / 2;
+                const iconY = cy + (ch - iconSize) / 2;
 
-              ctx.beginPath();
-              ctx.arc(iconX + iconSize / 2, iconY + iconSize / 2, iconSize / 2, 0, Math.PI * 2);
-              ctx.fillStyle = 'rgba(0, 0, 0, 0.45)';
-              ctx.fill();
+                ctx.beginPath();
+                ctx.arc(iconX + iconSize / 2, iconY + iconSize / 2, iconSize / 2, 0, Math.PI * 2);
+                ctx.fillStyle = 'rgba(0, 0, 0, 0.45)';
+                ctx.fill();
 
-              ctx.beginPath();
-              ctx.lineWidth = Math.max(2, iconSize * 0.12);
-              ctx.strokeStyle = '#ffffff';
-              ctx.lineCap = 'round';
-              ctx.lineJoin = 'round';
-              ctx.moveTo(iconX + iconSize * 0.28, iconY + iconSize * 0.52);
-              ctx.lineTo(iconX + iconSize * 0.44, iconY + iconSize * 0.70);
-              ctx.lineTo(iconX + iconSize * 0.75, iconY + iconSize * 0.32);
-              ctx.stroke();
+                ctx.beginPath();
+                ctx.lineWidth = Math.max(2, iconSize * 0.12);
+                ctx.strokeStyle = '#ffffff';
+                ctx.lineCap = 'round';
+                ctx.lineJoin = 'round';
+                ctx.moveTo(iconX + iconSize * 0.28, iconY + iconSize * 0.52);
+                ctx.lineTo(iconX + iconSize * 0.44, iconY + iconSize * 0.70);
+                ctx.lineTo(iconX + iconSize * 0.75, iconY + iconSize * 0.32);
+                ctx.stroke();
+              }
 
               ctx.restore();
             }
@@ -594,7 +617,8 @@ class CanvasExporter {
     const tagX = naturalWidth * 0.02;
     const tagY = naturalHeight * 0.015;
     const tagRadius = Math.round(tagHeight * 0.25);
-    const modeTagText = displayMode === 'hide-owned' ? '미보유' : '보유';
+    const modeTag = CanvasExporter.getModeTag(displayMode, cards, checkedCardIds);
+    const modeTagText = modeTag.text;
 
     ctx.font = `bold ${Math.max(13, Math.round(tagHeight * 0.55))}px -apple-system, BlinkMacSystemFont, "Pretendard", "Segoe UI", sans-serif`;
     ctx.beginPath();
@@ -606,9 +630,9 @@ class CanvasExporter {
     ctx.fillStyle = 'rgba(0, 0, 0, 0.65)';
     ctx.fill();
     ctx.lineWidth = Math.max(1.5, Math.round(naturalWidth / 800));
-    ctx.strokeStyle = displayMode === 'hide-owned' ? '#38bdf8' : '#34d399';
+    ctx.strokeStyle = modeTag.color;
     ctx.stroke();
-    ctx.fillStyle = displayMode === 'hide-owned' ? '#38bdf8' : '#34d399';
+    ctx.fillStyle = modeTag.color;
     ctx.textAlign = 'center';
     ctx.textBaseline = 'middle';
     ctx.fillText(modeTagText, tagX + tagWidth / 2, tagY + tagHeight / 2 + 1);
@@ -875,6 +899,93 @@ class CanvasExporter {
         resolve(true);
       }, 'image/png');
     });
+  }
+
+  /**
+   * Top-left mode label. In hide-owned (미보유) mode, a fully-owned board shows '완성'.
+   */
+  static getModeTag(displayMode, cards = [], checkedSet = new Set()) {
+    const isComplete = displayMode === 'hide-owned'
+      && cards.length > 0
+      && cards.every(c => checkedSet.has(c.id));
+    if (isComplete) return { text: '완성', color: '#fbbf24' };
+    return displayMode === 'hide-owned'
+      ? { text: '미보유', color: '#38bdf8' }
+      : { text: '보유', color: '#34d399' };
+  }
+
+  /**
+   * Load completion marker image. Returns null for 'check' style (fallback to check icon).
+   */
+  static async loadCompleteMarker(stampStyle = 'stamp', customStampSrc = null) {
+    let src = null;
+    let type = null;
+    if (stampStyle === 'custom' && customStampSrc) {
+      src = customStampSrc;
+      type = 'custom';
+    } else if (stampStyle === 'stamp') {
+      src = 'images/stamp_complete.png';
+      type = 'stamp';
+    }
+    if (!src) return null;
+
+    const img = new Image();
+    const ok = await new Promise((resolve) => {
+      img.onload = () => resolve(true);
+      img.onerror = () => resolve(false);
+      img.src = src;
+    });
+    return (ok && img.naturalWidth > 0) ? { type, img } : null;
+  }
+
+  /**
+   * Draw completion marker centered in card rect (stamp or circular custom image)
+   */
+  static drawCompleteMarker(ctx, marker, x, y, w, h) {
+    const img = marker.img;
+    if (marker.type === 'custom') {
+      const size = Math.min(w, h) * 0.64;
+      const r = size / 2;
+      const cx = x + w / 2;
+      const cy = y + h / 2;
+
+      // Soft shadow base
+      ctx.save();
+      ctx.shadowColor = 'rgba(0, 0, 0, 0.45)';
+      ctx.shadowBlur = Math.max(4, size * 0.08);
+      ctx.beginPath();
+      ctx.arc(cx, cy, r, 0, Math.PI * 2);
+      ctx.fillStyle = '#ffffff';
+      ctx.fill();
+      ctx.restore();
+
+      // Circular cover-fit image
+      ctx.save();
+      ctx.beginPath();
+      ctx.arc(cx, cy, r, 0, Math.PI * 2);
+      ctx.clip();
+      const iw = img.naturalWidth;
+      const ih = img.naturalHeight;
+      const s = Math.min(iw, ih);
+      ctx.drawImage(img, (iw - s) / 2, (ih - s) / 2, s, s, cx - r, cy - r, size, size);
+      ctx.restore();
+
+      // White ring
+      ctx.save();
+      ctx.beginPath();
+      ctx.arc(cx, cy, r, 0, Math.PI * 2);
+      ctx.lineWidth = Math.max(2, size * 0.045);
+      ctx.strokeStyle = 'rgba(255, 255, 255, 0.92)';
+      ctx.stroke();
+      ctx.restore();
+    } else {
+      const stampSize = Math.min(w * 0.72, h * 0.72);
+      ctx.save();
+      ctx.translate(x + w / 2, y + h / 2);
+      ctx.rotate(-3 * Math.PI / 180);
+      ctx.drawImage(img, -stampSize / 2, -stampSize / 2, stampSize, stampSize);
+      ctx.restore();
+    }
   }
 
   static drawRoundRectPath(ctx, x, y, width, height, radius) {
