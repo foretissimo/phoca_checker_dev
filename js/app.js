@@ -17,6 +17,10 @@ class PhocaCheckerApp {
     // Display mode: 'hide-owned' | 'hide-unowned'
     this.displayMode = 'hide-owned';
     this.overlayOpacity = 0.68;
+
+    // Complete marker style for owned cards in hide-owned mode: 'check' | 'stamp' | 'custom'
+    this.stampStyle = 'stamp';
+    this.customStampSrc = null; // user-uploaded circular image (data URL)
     
     // Drawer Filters
     this.drawerTagFilter = 'all';
@@ -102,6 +106,13 @@ class PhocaCheckerApp {
     // Display Mode Toggles
     this.modeHideOwnedBtn = document.getElementById('mode-hide-owned');
     this.modeHideUnownedBtn = document.getElementById('mode-hide-unowned');
+
+    // Complete Marker Style (check / stamp / custom image)
+    this.stampStyleGroup = document.getElementById('stamp-style-group');
+    this.stampBtnCheck = document.getElementById('stamp-style-check');
+    this.stampBtnStamp = document.getElementById('stamp-style-stamp');
+    this.stampBtnCustom = document.getElementById('stamp-style-custom');
+    this.stampImageInput = document.getElementById('stamp-image-input');
     
     // Bulk Actions
     this.btnSelectAll = document.getElementById('btn-select-all');
@@ -246,6 +257,24 @@ class PhocaCheckerApp {
       this.modeHideUnownedBtn.addEventListener('click', () => this.setDisplayMode('hide-unowned'));
     }
 
+    // Complete Marker Style
+    if (this.stampBtnCheck) {
+      this.stampBtnCheck.addEventListener('click', () => this.setStampStyle('check'));
+    }
+    if (this.stampBtnStamp) {
+      this.stampBtnStamp.addEventListener('click', () => this.setStampStyle('stamp'));
+    }
+    if (this.stampBtnCustom) {
+      this.stampBtnCustom.addEventListener('click', () => this.onCustomStampButtonClick());
+    }
+    if (this.stampImageInput) {
+      this.stampImageInput.addEventListener('change', (e) => {
+        const file = e.target.files?.[0];
+        if (file) this.handleStampImageUpload(file);
+        e.target.value = '';
+      });
+    }
+
     // Bulk Actions
     if (this.btnSelectAll) {
       this.btnSelectAll.addEventListener('click', () => this.selectAllCards());
@@ -286,6 +315,11 @@ class PhocaCheckerApp {
     try {
       const savedMode = localStorage.getItem('phoca_display_mode');
       if (savedMode) this.displayMode = savedMode;
+
+      const savedStampStyle = localStorage.getItem('phoca_stamp_style');
+      if (['check', 'stamp', 'custom'].includes(savedStampStyle)) this.stampStyle = savedStampStyle;
+      this.customStampSrc = localStorage.getItem('phoca_custom_stamp') || null;
+      if (this.stampStyle === 'custom' && !this.customStampSrc) this.stampStyle = 'stamp';
     } catch (e) {
       console.warn('LocalStorage load error:', e);
     }
@@ -764,14 +798,123 @@ class PhocaCheckerApp {
         this.modeHideUnownedBtn.classList.add('active');
       }
     }
+    this.updateStampStyleUI();
+  }
+
+  // --------------------------------------------------------------------------
+  // Complete Marker Style (보유 포카 가리기 전용: 체크 / 도장 / 내 이미지)
+  // --------------------------------------------------------------------------
+  setStampStyle(style, { silent = false } = {}) {
+    if (style === 'custom' && !this.customStampSrc) {
+      this.stampImageInput?.click();
+      return;
+    }
+    this.stampStyle = style;
+    try {
+      localStorage.setItem('phoca_stamp_style', style);
+    } catch (e) {}
+    this.updateStampStyleUI();
+    this.renderCards();
+
+    if (!silent) {
+      const labels = { check: '체크 표시', stamp: 'COMPLETE 도장', custom: '내 이미지' };
+      this.showToast(`완료 표시: ${labels[style]}`);
+    }
+  }
+
+  onCustomStampButtonClick() {
+    // 이미 '내 이미지'가 선택된 상태에서 다시 누르면 이미지 변경
+    if (this.stampStyle === 'custom' || !this.customStampSrc) {
+      this.stampImageInput?.click();
+    } else {
+      this.setStampStyle('custom');
+    }
+  }
+
+  handleStampImageUpload(file) {
+    if (!file.type || !file.type.startsWith('image/')) {
+      this.showToast('이미지 파일만 업로드할 수 있습니다.');
+      return;
+    }
+    const reader = new FileReader();
+    reader.onload = (e) => {
+      const img = new Image();
+      img.onload = () => {
+        // 정사각형 중앙 크롭 + 256px 리사이즈 (localStorage 용량 절약)
+        const SIZE = 256;
+        const s = Math.min(img.naturalWidth, img.naturalHeight);
+        const canvas = document.createElement('canvas');
+        canvas.width = SIZE;
+        canvas.height = SIZE;
+        const ctx = canvas.getContext('2d');
+        ctx.imageSmoothingQuality = 'high';
+        ctx.drawImage(img, (img.naturalWidth - s) / 2, (img.naturalHeight - s) / 2, s, s, 0, 0, SIZE, SIZE);
+        const dataUrl = canvas.toDataURL('image/png');
+
+        this.customStampSrc = dataUrl;
+        let saved = true;
+        try {
+          localStorage.setItem('phoca_custom_stamp', dataUrl);
+        } catch (err) {
+          saved = false;
+        }
+        this.setStampStyle('custom', { silent: true });
+        this.showToast(saved
+          ? '내 이미지가 완료 표시로 적용되었습니다! 🎉'
+          : '이미지가 적용되었지만 저장 공간이 부족해 새로고침 시 사라질 수 있어요.', 3500);
+      };
+      img.onerror = () => this.showToast('이미지를 불러오지 못했습니다.');
+      img.src = e.target.result;
+    };
+    reader.readAsDataURL(file);
+  }
+
+  updateStampStyleUI() {
+    if (this.stampStyleGroup) {
+      // 완료 표시는 '보유 포카 가리기' 모드에서만 의미가 있으므로 그때만 노출
+      this.stampStyleGroup.style.display = this.displayMode === 'hide-owned' ? '' : 'none';
+    }
+    const map = { check: this.stampBtnCheck, stamp: this.stampBtnStamp, custom: this.stampBtnCustom };
+    Object.entries(map).forEach(([key, btn]) => {
+      if (btn) btn.classList.toggle('active', this.stampStyle === key);
+    });
+    if (this.stampBtnCustom) {
+      const thumb = this.stampBtnCustom.querySelector('.stamp-custom-thumb');
+      const icon = this.stampBtnCustom.querySelector('.stamp-custom-icon');
+      if (thumb && icon) {
+        if (this.customStampSrc) {
+          thumb.src = this.customStampSrc;
+          thumb.style.display = '';
+          icon.style.display = 'none';
+        } else {
+          thumb.removeAttribute('src');
+          thumb.style.display = 'none';
+          icon.style.display = '';
+        }
+      }
+      this.stampBtnCustom.title = this.customStampSrc
+        ? (this.stampStyle === 'custom' ? '다시 눌러 이미지 변경' : '내 이미지로 완료 표시')
+        : '내 이미지를 업로드해 완료 표시로 사용';
+    }
+  }
+
+  isCurrentTemplateComplete() {
+    const cards = this.currentTemplate?.cards || [];
+    return cards.length > 0 && cards.every(c => this.checkedCards.has(c.id));
   }
 
   updateImageModeBadge() {
     if (!this.imageModeTag) return;
     if (this.displayMode === 'hide-owned') {
-      this.imageModeTag.textContent = '미보유';
-      this.imageModeTag.className = 'image-mode-badge unowned';
-      this.imageModeTag.title = '보유한 포토카드를 가려 미보유 위시리스트를 확인하는 모드입니다.';
+      if (this.isCurrentTemplateComplete()) {
+        this.imageModeTag.textContent = '완성';
+        this.imageModeTag.className = 'image-mode-badge complete';
+        this.imageModeTag.title = '이 판의 포토카드를 모두 모았습니다!';
+      } else {
+        this.imageModeTag.textContent = '미보유';
+        this.imageModeTag.className = 'image-mode-badge unowned';
+        this.imageModeTag.title = '보유한 포토카드를 가려 미보유 위시리스트를 확인하는 모드입니다.';
+      }
     } else {
       this.imageModeTag.textContent = '보유';
       this.imageModeTag.className = 'image-mode-badge owned';
@@ -851,13 +994,29 @@ class PhocaCheckerApp {
       cardEl.style.borderRadius = `${card.radius || 10}px`;
       cardEl.title = `${card.name || '포토카드'} (${isChecked ? '보유' : '미보유'}) - 클릭하여 변경`;
 
-      cardEl.innerHTML = `
-        <div class="card-mask" style="border-radius: inherit;">
-          <div class="mask-indicator">
+      // Complete Marker: 보유 포카 가리기 모드(hide-owned)에서 마스킹된 카드(=보유한 카드)에만 적용
+      // 미보유 포카 가리기 모드(hide-unowned)에서는 기존 체크 동그라미 유지
+      const useMarker = (this.displayMode === 'hide-owned' && isMasked);
+      const checkHtml = `<div class="mask-indicator">
             <svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
               <polyline points="20 6 9 17 4 12"></polyline>
             </svg>
-          </div>
+          </div>`;
+
+      let indicatorHtml = checkHtml;
+      if (useMarker && this.stampStyle === 'stamp') {
+        indicatorHtml = `<div class="mask-indicator is-stamp">
+            <img src="images/stamp_complete.png" alt="COMPLETE" class="stamp-img">
+          </div>`;
+      } else if (useMarker && this.stampStyle === 'custom' && this.customStampSrc) {
+        indicatorHtml = `<div class="mask-indicator is-custom">
+            <img src="${this.customStampSrc}" alt="완료" class="custom-stamp-img">
+          </div>`;
+      }
+
+      cardEl.innerHTML = `
+        <div class="card-mask" style="border-radius: inherit;">
+          ${indicatorHtml}
         </div>
       `;
 
@@ -885,6 +1044,7 @@ class PhocaCheckerApp {
     if (this.progressBar) {
       this.progressBar.style.width = `${percent}%`;
     }
+    this.updateImageModeBadge();
   }
 
   updateCurrentStatusBadge() {
@@ -933,7 +1093,9 @@ class PhocaCheckerApp {
         displayMode: this.displayMode,
         overlayColor: `rgba(16, 17, 24, ${this.overlayOpacity})`,
         filename: filename,
-        showCheckIcon: true
+        showCheckIcon: true,
+        stampStyle: this.stampStyle,
+        customStampSrc: this.customStampSrc
       });
 
       this.showToast('고해상도 체크리스트 이미지가 다운로드되었습니다! 🎉');
@@ -959,7 +1121,7 @@ class PhocaCheckerApp {
             <polyline points="7 10 12 15 17 10"></polyline>
             <line x1="12" y1="15" x2="12" y2="3"></line>
           </svg>
-          다운로드
+          다운로드 (1장)
         `;
       }
     }
@@ -1065,6 +1227,8 @@ class PhocaCheckerApp {
         categoryName: this.currentCategory?.name || '포레스텔라',
         displayMode: effectiveMode,
         filterType: filterType,
+        stampStyle: this.stampStyle,
+        customStampSrc: this.customStampSrc,
         onProgress: (cur, total, msg) => {
           this.showToast(msg, 3000);
         }
