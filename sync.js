@@ -1,6 +1,7 @@
 const fs = require('fs');
 const path = require('path');
 const https = require('https');
+const crypto = require('crypto');
 
 // Load .env
 function loadEnv() {
@@ -67,31 +68,10 @@ function githubRequest(method, endpoint, data = null) {
   });
 }
 
-async function uploadOrUpdateFile(targetRepo, filePath, commitMessage) {
-  const relativePath = path.relative(__dirname, filePath).replace(/\\/g, '/');
-  const content = fs.readFileSync(filePath);
-  const base64Content = content.toString('base64');
-
-  let sha = null;
-  try {
-    const existing = await githubRequest('GET', `/repos/${OWNER}/${targetRepo}/contents/${encodeURIComponent(relativePath)}`);
-    sha = existing.sha;
-  } catch (e) {
-    if (e.status !== 404) {}
-  }
-
-  const payload = {
-    message: commitMessage || `Deploy: ${relativePath}`,
-    content: base64Content,
-    branch: 'main'
-  };
-  if (sha) {
-    payload.sha = sha;
-  }
-
-  const result = await githubRequest('PUT', `/repos/${OWNER}/${targetRepo}/contents/${encodeURIComponent(relativePath)}`, payload);
-  console.log(`[Synced -> ${targetRepo}] ${relativePath} -> Commit: ${result.commit.sha.substring(0, 7)}`);
-  return result;
+function computeBlobSha(buf) {
+  return crypto.createHash('sha1')
+    .update(Buffer.concat([Buffer.from(`blob ${buf.length}\0`), buf]))
+    .digest('hex');
 }
 
 function getAllFiles(dirPath, arrayOfFiles = []) {
@@ -110,6 +90,14 @@ function getAllFiles(dirPath, arrayOfFiles = []) {
   });
 
   return arrayOfFiles;
+}
+
+async function uploadBlob(targetRepo, buffer) {
+  const res = await githubRequest('POST', `/repos/${OWNER}/${targetRepo}/git/blobs`, {
+    content: buffer.toString('base64'),
+    encoding: 'base64'
+  });
+  return res.sha;
 }
 
 async function enablePages(targetRepo) {
@@ -134,22 +122,126 @@ async function enablePages(targetRepo) {
   }
 }
 
-async function syncToRepo(targetRepo) {
+async function syncToRepo(targetRepo, customCommitMessage = null) {
   const repoName = targetRepo || process.argv[2] || process.env.GITHUB_REPO_NAME || 'phoca_checker';
-  console.log(`\n🚀 Starting sync for ${OWNER}/${repoName}...`);
+  console.log(`\n🚀 Starting atomic single-commit sync for ${OWNER}/${repoName}...`);
+
   try {
     const repoInfo = await githubRequest('GET', `/repos/${OWNER}/${repoName}`);
-    console.log(`Connected to: ${repoInfo.full_name} (${repoInfo.html_url})\n`);
+    console.log(`Connected to: ${repoInfo.full_name} (${repoInfo.html_url})`);
 
-    const filesToSync = getAllFiles(__dirname);
-    console.log(`Found ${filesToSync.length} files to sync...`);
+    // 1. Get latest commit on main branch
+    const ref = await githubRequest('GET', `/repos/${OWNER}/${repoName}/git/refs/heads/main`);
+    const latestCommitSha = ref.object.sha;
+    const latestCommit = await githubRequest('GET', `/repos/${OWNER}/${repoName}/git/commits/${latestCommitSha}`);
+    const baseTreeSha = latestCommit.tree.sha;
 
-    for (const file of filesToSync) {
-      const rel = path.relative(__dirname, file);
-      await uploadOrUpdateFile(repoName, file, `Deploy: ${rel}`);
+    // 2. Get remote tree (recursive)
+    const remoteTreeRes = await githubRequest('GET', `/repos/${OWNER}/${repoName}/git/trees/${baseTreeSha}?recursive=1`);
+    const remoteBlobs = new Map();
+    if (remoteTreeRes.tree && Array.isArray(remoteTreeRes.tree)) {
+      for (const item of remoteTreeRes.tree) {
+        if (item.type === 'blob') {
+          remoteBlobs.set(item.path.normalize('NFC'), item.sha);
+        }
+      }
     }
 
-    console.log(`\n✅ All files synced successfully to ${repoName}!`);
+    // 3. Scan local files and calculate blob SHAs
+    const localFiles = getAllFiles(__dirname);
+    const localMap = new Map();
+    const filesToUpload = [];
+
+    for (const filePath of localFiles) {
+      const relPath = path.relative(__dirname, filePath).replace(/\\/g, '/').normalize('NFC');
+      const buf = fs.readFileSync(filePath);
+      const sha = computeBlobSha(buf);
+      localMap.set(relPath, { filePath, buf, sha });
+
+      const remoteSha = remoteBlobs.get(relPath);
+      if (remoteSha !== sha) {
+        filesToUpload.push({ relPath, filePath, buf, sha, isNew: !remoteSha });
+      }
+    }
+
+    // 4. Check for deleted files (exist on remote but not locally)
+    const deletedFiles = [];
+    for (const [remotePath] of remoteBlobs) {
+      if (!localMap.has(remotePath)) {
+        deletedFiles.push(remotePath);
+      }
+    }
+
+    console.log(`Total local files: ${localFiles.length}`);
+    console.log(`Remote blobs: ${remoteBlobs.size}`);
+    console.log(`Changed / New files: ${filesToUpload.length}`);
+    console.log(`Deleted files: ${deletedFiles.length}`);
+
+    // If no changes, exit without creating a commit or triggering Actions
+    if (filesToUpload.length === 0 && deletedFiles.length === 0) {
+      console.log(`\n✨ Everything is already up to date! (0 files changed)`);
+      console.log(`⏩ No commits created, skipping GitHub Actions build.`);
+      await enablePages(repoName);
+      console.log(`\n🎉 Site live at: https://${OWNER}.github.io/${repoName}/\n`);
+      return;
+    }
+
+    // 5. Upload new/changed blobs
+    console.log(`\n📦 Uploading ${filesToUpload.length} blob(s)...`);
+    const treeEntries = [];
+
+    for (let i = 0; i < filesToUpload.length; i++) {
+      const item = filesToUpload[i];
+      process.stdout.write(`  [${i + 1}/${filesToUpload.length}] Uploading ${item.relPath}... `);
+      const blobSha = await uploadBlob(repoName, item.buf);
+      treeEntries.push({
+        path: item.relPath,
+        mode: '100644',
+        type: 'blob',
+        sha: blobSha
+      });
+      console.log(`done (${blobSha.substring(0, 7)})`);
+    }
+
+    // Add deleted entries (sha: null deletes from tree)
+    for (const delPath of deletedFiles) {
+      console.log(`  🗑️ Removing deleted file: ${delPath}`);
+      treeEntries.push({
+        path: delPath,
+        mode: '100644',
+        type: 'blob',
+        sha: null
+      });
+    }
+
+    // 6. Create single new tree layered on base_tree
+    console.log('\n🌲 Creating new Git tree...');
+    const newTree = await githubRequest('POST', `/repos/${OWNER}/${repoName}/git/trees`, {
+      base_tree: baseTreeSha,
+      tree: treeEntries
+    });
+    console.log(`Tree created: ${newTree.sha.substring(0, 7)}`);
+
+    // 7. Create single commit
+    const defaultMsg = `Deploy: ${filesToUpload.length} file(s) updated, ${deletedFiles.length} removed`;
+    const message = customCommitMessage || defaultMsg;
+    console.log(`\n📝 Creating commit: "${message}"...`);
+    const newCommit = await githubRequest('POST', `/repos/${OWNER}/${repoName}/git/commits`, {
+      message,
+      tree: newTree.sha,
+      parents: [latestCommitSha]
+    });
+    console.log(`Commit created: ${newCommit.sha.substring(0, 7)}`);
+
+    // 8. Update main branch reference to point to new commit
+    console.log('🔗 Updating main branch ref...');
+    await githubRequest('PATCH', `/repos/${OWNER}/${repoName}/git/refs/heads/main`, {
+      sha: newCommit.sha
+    });
+
+    console.log(`\n✅ Successfully deployed to ${repoName} in exactly 1 commit!`);
+    console.log(`⚡ Only 1 GitHub Actions workflow run triggered!`);
+
     await enablePages(repoName);
     console.log(`\n🎉 Site live at: https://${OWNER}.github.io/${repoName}/\n`);
   } catch (err) {
@@ -161,4 +253,4 @@ if (require.main === module) {
   syncToRepo();
 }
 
-module.exports = { githubRequest, uploadOrUpdateFile, syncToRepo };
+module.exports = { githubRequest, syncToRepo };
