@@ -4,6 +4,27 @@ All notable functional changes, architecture improvements, and bug fixes for the
 
 ---
 
+## [v2026.10.25] - 2026-10-25
+
+### ✨ Complete Marker Customization & '(완성)' Label Transition
+- **Marker Selector & Custom Image Upload**:
+  - Support 3 completion markers for owned cards in hide-owned mode: `[Check]`, `[COMPLETE Stamp]`, and `[Custom Image]`.
+  - Local image upload: square center-cropped & resized to circular badge (`border-radius: 50%`) with white border ring and soft drop shadow.
+  - Seamless composite rendering on both single PNG export and master collage poster.
+- **Top-Left Mode Badge Transition to `(완성)`**:
+  - When all cards in the active template are checked in `hide-owned` mode, the top-left mode tag transforms from `(미보유)` to gold `(완성)`.
+  - Single canvas export automatically reflects the golden `(완성)` badge.
+- **Mobile Responsive Layout & Design Polish**:
+  - Pager bar separated into two rows on mobile with stats on top and balanced 50:50 Prev/Next buttons below.
+  - Premium dark surface styling, indigo hover glow, and micro-interaction arrow shifts.
+  - Responsive 1:1:1 equal flex resizing for bulk selection buttons (`[Select All]`, `[Deselect All]`, `[Invert]`) and complete marker buttons.
+- **Header Navigation Renamed**:
+  - Renamed top menu button from `만드는 사람들` to `공지사항`.
+- **Photocard Template Assets Updated**:
+  - High-res unblurred assets replaced for `fore4`, `fore8`, `fore26`, and `fore30`.
+
+---
+
 ## [1.8.0] - 2026-08-27
 
 ### 🖼️ Filtered Merged Poster Export (All / Owned / Unowned)
