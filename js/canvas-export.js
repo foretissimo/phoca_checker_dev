@@ -705,8 +705,26 @@ class CanvasExporter {
           const imgH = img.naturalHeight || img.height;
           const sx = (fav.x / 100) * imgW;
           const sy = (fav.y / 100) * imgH;
-          const sw = (fav.w / 100) * imgW;
-          const sh = (fav.h / 100) * imgH;
+          const sw = Math.max(1, (fav.w / 100) * imgW);
+          const sh = Math.max(1, (fav.h / 100) * imgH);
+          const cardRatio = sw / sh;
+          const cellRatio = cellW / cellH;
+
+          // Adaptively fit photocard without stretching (horizontal or vertical)
+          let drawW, drawH;
+          if (cardRatio > cellRatio) {
+            // Horizontal (wider than cell)
+            drawW = cellW;
+            drawH = Math.round(cellW / cardRatio);
+          } else {
+            // Vertical (taller than cell)
+            drawH = cellH;
+            drawW = Math.round(cellH * cardRatio);
+          }
+
+          const drawX = Math.round(cardX + (cellW - drawW) / 2);
+          const drawY = Math.round(cardY + (cellH - drawH) / 2);
+          const dynamicRadius = Math.min(14, Math.round(drawH * 0.08));
 
           // Shadow under card
           ctx.save();
@@ -716,9 +734,9 @@ class CanvasExporter {
           ctx.fillStyle = '#171926';
           ctx.beginPath();
           if (typeof ctx.roundRect === 'function') {
-            ctx.roundRect(cardX, cardY, cardW, cardH, cardRadius);
+            ctx.roundRect(drawX, drawY, drawW, drawH, dynamicRadius);
           } else {
-            CanvasExporter.drawRoundRectPath(ctx, cardX, cardY, cardW, cardH, cardRadius);
+            CanvasExporter.drawRoundRectPath(ctx, drawX, drawY, drawW, drawH, dynamicRadius);
           }
           ctx.fill();
           ctx.restore();
@@ -727,21 +745,21 @@ class CanvasExporter {
           ctx.save();
           ctx.beginPath();
           if (typeof ctx.roundRect === 'function') {
-            ctx.roundRect(cardX, cardY, cardW, cardH, cardRadius);
+            ctx.roundRect(drawX, drawY, drawW, drawH, dynamicRadius);
           } else {
-            CanvasExporter.drawRoundRectPath(ctx, cardX, cardY, cardW, cardH, cardRadius);
+            CanvasExporter.drawRoundRectPath(ctx, drawX, drawY, drawW, drawH, dynamicRadius);
           }
           ctx.clip();
-          ctx.drawImage(img, sx, sy, sw, sh, cardX, cardY, cardW, cardH);
+          ctx.drawImage(img, sx, sy, sw, sh, drawX, drawY, drawW, drawH);
           ctx.restore();
 
           // Card border
           ctx.save();
           ctx.beginPath();
           if (typeof ctx.roundRect === 'function') {
-            ctx.roundRect(cardX, cardY, cardW, cardH, cardRadius);
+            ctx.roundRect(drawX, drawY, drawW, drawH, dynamicRadius);
           } else {
-            CanvasExporter.drawRoundRectPath(ctx, cardX, cardY, cardW, cardH, cardRadius);
+            CanvasExporter.drawRoundRectPath(ctx, drawX, drawY, drawW, drawH, dynamicRadius);
           }
           ctx.lineWidth = 2.5;
           ctx.strokeStyle = '#ef4444';
@@ -749,8 +767,8 @@ class CanvasExporter {
 
           // Red Heart Badge (Top-Right)
           const heartBadgeR = 12;
-          const bX = cardX + cardW - 14;
-          const bY = cardY + 14;
+          const bX = drawX + drawW - 14;
+          const bY = drawY + 14;
           ctx.beginPath();
           ctx.arc(bX, bY, heartBadgeR, 0, Math.PI * 2);
           ctx.fillStyle = '#ef4444';
@@ -1034,11 +1052,10 @@ class CanvasExporter {
     ctx.stroke();
 
     // 3. Featured Favorite Photocard (로고 대신 최애포카 1장이 들어감)
-    const photoX = 26;
-    const photoY = 26;
-    const photoW = 84;
-    const photoH = 124;
-    const photoRadius = 10;
+    // 세로(Portrait) 또는 가로(Landscape) 포카 모두 자연스럽게 어울리도록 반응형 비율 배치
+    const colCenterX = 70; // Left showcase column center
+    const maxPhotoW = 96;
+    const maxPhotoH = 122;
 
     if (featuredImg && favToDraw) {
       // Crop photocard from template
@@ -1046,35 +1063,75 @@ class CanvasExporter {
       const imgH = featuredImg.naturalHeight || featuredImg.height;
       const sx = (favToDraw.x / 100) * imgW;
       const sy = (favToDraw.y / 100) * imgH;
-      const sw = (favToDraw.w / 100) * imgW;
-      const sh = (favToDraw.h / 100) * imgH;
+      const sw = Math.max(1, (favToDraw.w / 100) * imgW);
+      const sh = Math.max(1, (favToDraw.h / 100) * imgH);
+      const cardAspect = sw / sh;
 
+      // Fit maintaining exact aspect ratio (세로/가로 왜곡 없음)
+      const boxRatio = maxPhotoW / maxPhotoH; // ~0.787
+      let drawW, drawH;
+      if (cardAspect > boxRatio) {
+        // Horizontal (Landscape) or square
+        drawW = maxPhotoW;
+        drawH = Math.round(maxPhotoW / cardAspect);
+      } else {
+        // Vertical (Portrait)
+        drawH = maxPhotoH;
+        drawW = Math.round(maxPhotoH * cardAspect);
+      }
+
+      // Center the photocard + labels group vertically in the left showcase area [24px ~ 184px]
+      const leftColCenterY = 104;
+      const labelGap = 10;
+      const labelTotalH = 26; // 2 lines of labels
+      const totalGroupH = drawH + labelGap + labelTotalH;
+
+      const drawX = Math.round(colCenterX - drawW / 2);
+      const drawY = Math.round(leftColCenterY - totalGroupH / 2);
+      const photoRadius = Math.min(10, Math.round(drawH * 0.09));
+
+      // Realistic Card Drop Shadow
+      ctx.save();
+      ctx.shadowColor = 'rgba(0, 0, 0, 0.75)';
+      ctx.shadowBlur = 14;
+      ctx.shadowOffsetY = 6;
+      ctx.fillStyle = '#171926';
+      ctx.beginPath();
+      if (typeof ctx.roundRect === 'function') {
+        ctx.roundRect(drawX, drawY, drawW, drawH, photoRadius);
+      } else {
+        CanvasExporter.drawRoundRectPath(ctx, drawX, drawY, drawW, drawH, photoRadius);
+      }
+      ctx.fill();
+      ctx.restore();
+
+      // Photocard image (clipped)
       ctx.save();
       ctx.beginPath();
       if (typeof ctx.roundRect === 'function') {
-        ctx.roundRect(photoX, photoY, photoW, photoH, photoRadius);
+        ctx.roundRect(drawX, drawY, drawW, drawH, photoRadius);
       } else {
-        CanvasExporter.drawRoundRectPath(ctx, photoX, photoY, photoW, photoH, photoRadius);
+        CanvasExporter.drawRoundRectPath(ctx, drawX, drawY, drawW, drawH, photoRadius);
       }
       ctx.clip();
-      ctx.drawImage(featuredImg, sx, sy, sw, sh, photoX, photoY, photoW, photoH);
+      ctx.drawImage(featuredImg, sx, sy, sw, sh, drawX, drawY, drawW, drawH);
       ctx.restore();
 
       // Border around photocard
       ctx.save();
       ctx.beginPath();
       if (typeof ctx.roundRect === 'function') {
-        ctx.roundRect(photoX, photoY, photoW, photoH, photoRadius);
+        ctx.roundRect(drawX, drawY, drawW, drawH, photoRadius);
       } else {
-        CanvasExporter.drawRoundRectPath(ctx, photoX, photoY, photoW, photoH, photoRadius);
+        CanvasExporter.drawRoundRectPath(ctx, drawX, drawY, drawW, drawH, photoRadius);
       }
       ctx.lineWidth = 1.8;
       ctx.strokeStyle = '#ef4444';
       ctx.stroke();
 
       // Mini Red Heart Badge on top-right of featured card
-      const bX = photoX + photoW - 10;
-      const bY = photoY + 10;
+      const bX = drawX + drawW - 8;
+      const bY = drawY + 8;
       ctx.beginPath();
       ctx.arc(bX, bY, 8, 0, Math.PI * 2);
       ctx.fillStyle = '#ef4444';
@@ -1092,23 +1149,29 @@ class CanvasExporter {
       ctx.font = '700 10px -apple-system, BlinkMacSystemFont, "Pretendard", sans-serif';
       ctx.fillStyle = '#f1f5f9';
       let cardLabel = favToDraw.name || '최애 포카';
-      if (cardLabel.length > 9) cardLabel = cardLabel.substring(0, 8) + '…';
-      ctx.fillText(cardLabel, photoX + photoW / 2, photoY + photoH + 14);
+      if (cardLabel.length > 10) cardLabel = cardLabel.substring(0, 9) + '…';
+      ctx.fillText(cardLabel, colCenterX, drawY + drawH + 13);
 
       ctx.font = '500 9px -apple-system, BlinkMacSystemFont, "Pretendard", sans-serif';
       ctx.fillStyle = '#64748b';
       let sheetLabel = (favToDraw.templateTitle || '').replace(/^fore\d+\.\s*/, '');
-      if (sheetLabel.length > 9) sheetLabel = sheetLabel.substring(0, 8) + '…';
-      ctx.fillText(sheetLabel, photoX + photoW / 2, photoY + photoH + 26);
+      if (sheetLabel.length > 11) sheetLabel = sheetLabel.substring(0, 10) + '…';
+      ctx.fillText(sheetLabel, colCenterX, drawY + drawH + 25);
       ctx.restore();
     } else {
       // Fallback placeholder / Logo
+      const logoW = 80;
+      const logoH = 80;
+      const logoX = Math.round(colCenterX - logoW / 2);
+      const logoY = 46;
+      const logoRadius = 10;
+
       ctx.save();
       ctx.beginPath();
       if (typeof ctx.roundRect === 'function') {
-        ctx.roundRect(photoX, photoY, photoW, photoH, photoRadius);
+        ctx.roundRect(logoX, logoY, logoW, logoH, logoRadius);
       } else {
-        CanvasExporter.drawRoundRectPath(ctx, photoX, photoY, photoW, photoH, photoRadius);
+        CanvasExporter.drawRoundRectPath(ctx, logoX, logoY, logoW, logoH, logoRadius);
       }
       ctx.fillStyle = '#171b2b';
       ctx.fill();
@@ -1120,22 +1183,22 @@ class CanvasExporter {
 
       if (fallbackLogoImg) {
         ctx.clip();
-        ctx.drawImage(fallbackLogoImg, photoX, photoY + (photoH - photoW) / 2, photoW, photoW);
+        ctx.drawImage(fallbackLogoImg, logoX, logoY, logoW, logoH);
       } else {
         ctx.font = '24px sans-serif';
         ctx.textAlign = 'center';
         ctx.textBaseline = 'middle';
-        ctx.fillText('💖', photoX + photoW / 2, photoY + photoH / 2 - 10);
+        ctx.fillText('💖', colCenterX, logoY + logoH / 2 - 10);
         ctx.font = '600 10px -apple-system, BlinkMacSystemFont, "Pretendard", sans-serif';
         ctx.fillStyle = '#94a3b8';
-        ctx.fillText('최애포카', photoX + photoW / 2, photoY + photoH / 2 + 14);
+        ctx.fillText('최애포카', colCenterX, logoY + logoH / 2 + 14);
       }
       ctx.restore();
     }
 
     // 4. Right Area: Title & Nickname & Progress
-    const rightX = photoX + photoW + 16;
-    const rightW = cardX + cardW - 14 - rightX; // 230px
+    const rightX = 132;
+    const rightW = cardX + cardW - 14 - rightX; // 222px
 
     // Requirement 2: Title format "닉네임님의 포레스텔라 포토카드 컬렉션"
     ctx.save();

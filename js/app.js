@@ -1743,10 +1743,28 @@ class PhocaCheckerApp {
       const imgH = img.naturalHeight || img.height;
       const sx = (fav.x / 100) * imgW;
       const sy = (fav.y / 100) * imgH;
-      const sw = (fav.w / 100) * imgW;
-      const sh = (fav.h / 100) * imgH;
-      ctx.clearRect(0, 0, canvas.width, canvas.height);
-      ctx.drawImage(img, sx, sy, sw, sh, 0, 0, canvas.width, canvas.height);
+      const sw = Math.max(1, (fav.w / 100) * imgW);
+      const sh = Math.max(1, (fav.h / 100) * imgH);
+
+      const cW = canvas.width;
+      const cH = canvas.height;
+      const cardRatio = sw / sh;
+      const canvasRatio = cW / cH;
+
+      let dW, dH;
+      if (cardRatio > canvasRatio) {
+        dW = cW;
+        dH = Math.round(cW / cardRatio);
+      } else {
+        dH = cH;
+        dW = Math.round(cH * cardRatio);
+      }
+      const dX = Math.round((cW - dW) / 2);
+      const dY = Math.round((cH - dH) / 2);
+
+      ctx.fillStyle = '#0f121d';
+      ctx.fillRect(0, 0, cW, cH);
+      ctx.drawImage(img, sx, sy, sw, sh, dX, dY, dW, dH);
     };
 
     if (this.templateImgCache.has(fav.imageSrc)) {
