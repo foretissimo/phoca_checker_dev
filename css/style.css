@@ -318,10 +318,24 @@ body {
   padding: 0.85rem 1.25rem;
   box-shadow: var(--shadow-lg);
   display: flex;
-  flex-wrap: wrap;
+  flex-direction: column;
+  gap: 0.65rem;
+}
+
+.control-bar-main-row {
+  display: flex;
   align-items: center;
   justify-content: space-between;
+  flex-wrap: wrap;
   gap: 0.85rem;
+  width: 100%;
+}
+
+.control-group-left {
+  display: flex;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 0.65rem;
 }
 
 .template-selector-btn {
@@ -370,10 +384,14 @@ body {
   border-radius: var(--radius-md);
   border: 1px solid var(--border-color);
   gap: 3px;
+  height: 40px;
+  box-sizing: border-box;
+  align-items: center;
 }
 
 .seg-btn {
-  padding: 0.5rem 0.85rem;
+  padding: 0 0.85rem;
+  height: 100%;
   font-size: 0.82rem;
   font-weight: 600;
   border: none;
@@ -386,6 +404,7 @@ body {
   gap: 0.4rem;
   transition: all 0.2s ease;
   white-space: nowrap;
+  box-sizing: border-box;
 }
 
 .seg-btn:hover {
@@ -398,11 +417,15 @@ body {
   box-shadow: 0 2px 8px var(--accent-glow);
 }
 
-/* Complete Marker Style Selector (체크 / COMPLETE 도장 / 내 이미지) */
+/* Complete Marker Style Selector (체크 / COMPLETE 도장 / 내 이미지) - 메뉴의 왼쪽 하단 */
 .stamp-style-group {
   display: inline-flex;
   align-items: center;
-  gap: 0.45rem;
+  gap: 0.5rem;
+  align-self: flex-start;
+  padding-top: 0.5rem;
+  border-top: 1px solid rgba(255, 255, 255, 0.08);
+  width: 100%;
 }
 
 .stamp-style-label {
@@ -463,6 +486,7 @@ body {
   display: flex;
   align-items: center;
   gap: 0.45rem;
+  margin-left: auto;
 }
 
 .bulk-select-group {
@@ -1604,24 +1628,45 @@ body {
     padding: 0.75rem;
     gap: 0.65rem;
   }
+  .control-bar-main-row {
+    width: 100%;
+    display: flex;
+    flex-direction: column;
+    gap: 0.65rem;
+  }
+  .control-group-left {
+    width: 100%;
+    display: flex;
+    flex-direction: column;
+    gap: 0.65rem;
+  }
   .template-selector-btn {
     width: 100%;
     justify-content: space-between;
   }
   .segmented-control {
     width: 100%;
+    height: 38px;
   }
   .seg-btn {
     flex: 1;
     justify-content: center;
     font-size: 0.78rem;
-    padding: 0.45rem;
+    padding: 0 0.45rem;
+  }
+  .btn-fav-nav-btn {
+    width: 100%;
+    height: 38px;
+    justify-content: center;
+    font-size: 0.8rem;
   }
   .stamp-style-group {
     width: 100%;
     display: flex;
     align-items: center;
     gap: 0.45rem;
+    padding-top: 0.5rem;
+    border-top: 1px solid rgba(255, 255, 255, 0.08);
   }
   .stamp-style-label {
     font-size: 0.76rem;
@@ -1641,28 +1686,9 @@ body {
     font-size: 0.76rem;
     padding: 0.45rem 0.25rem;
   }
-  .favorite-top-control-group {
-    width: 100%;
-    display: flex;
-    align-items: center;
-    gap: 0.4rem;
-  }
-  .btn-fav-mode {
-    flex: 1.1;
-    justify-content: center;
-    font-size: 0.78rem;
-    padding: 0.5rem 0.35rem;
-    white-space: nowrap;
-  }
-  .btn-fav-card-open {
-    flex: 1;
-    justify-content: center;
-    font-size: 0.78rem;
-    padding: 0.5rem 0.35rem;
-    white-space: nowrap;
-  }
   .control-group-actions {
     width: 100%;
+    margin-left: 0;
     display: flex;
     align-items: center;
     gap: 0.4rem;
@@ -1837,18 +1863,20 @@ body {
 }
 
 /* Favorite Heart Button on Photocard Slot */
-/* Favorite Heart Button on Photocard Slot (Requirement 4: 배경색 제거, 반투명, 선택 시 붉은색) */
+/* Favorite Heart Button on Photocard Slot (하트 배경 완전 제거 & 미선택 시에도 선명한 시인성 확보) */
 .photocard-slot .card-favorite-btn {
   position: absolute;
   top: 4px;
   right: 4px;
-  width: 26px;
-  height: 26px;
-  background: transparent;
-  border: none;
-  box-shadow: none;
-  backdrop-filter: none;
-  -webkit-backdrop-filter: none;
+  width: 28px;
+  height: 28px;
+  background: none !important;
+  background-color: transparent !important;
+  border: none !important;
+  outline: none !important;
+  box-shadow: none !important;
+  backdrop-filter: none !important;
+  -webkit-backdrop-filter: none !important;
   color: #ffffff;
   display: flex;
   align-items: center;
@@ -1856,25 +1884,27 @@ body {
   cursor: pointer;
   z-index: 50; /* Always above mask and stamp so it is NEVER covered */
   padding: 0;
+  margin: 0;
   transition: transform 0.18s cubic-bezier(0.34, 1.56, 0.64, 1), opacity 0.18s ease;
-  opacity: 0.55; /* 반투명 기본 상태 */
+  opacity: 0.85; /* 미선택 시에도 선명하게 보이도록 시인성 향상 */
   pointer-events: auto;
-  filter: drop-shadow(0 1px 3px rgba(0, 0, 0, 0.95));
+  -webkit-tap-highlight-color: transparent;
 }
 
 .photocard-slot .card-favorite-btn svg {
-  width: 18px;
-  height: 18px;
+  width: 20px;
+  height: 20px;
   stroke: #ffffff;
-  fill: none;
-  stroke-width: 2.4;
+  fill: rgba(0, 0, 0, 0.35); /* 은은한 반투명 채움으로 어떤 배경 사진에서도 하트 모양이 선명히 보임 */
+  stroke-width: 2.2;
+  filter: drop-shadow(0 1px 3px rgba(0, 0, 0, 0.95)) drop-shadow(0 0 2px rgba(0, 0, 0, 0.9));
   transition: all 0.18s ease;
 }
 
-/* Show button brightly on hover or when in favorite selection mode */
+/* Show button brightly on hover */
 .photocard-slot:hover .card-favorite-btn,
 .card-overlay-container.is-fav-mode-active .photocard-slot .card-favorite-btn {
-  opacity: 0.95;
+  opacity: 1;
   transform: scale(1.15);
 }
 
@@ -1883,35 +1913,33 @@ body {
   opacity: 1;
 }
 
-/* Card Slot when Favorite Mode is active */
-.card-overlay-container.is-fav-mode-active .photocard-slot {
-  cursor: pointer;
-}
-.card-overlay-container.is-fav-mode-active .photocard-slot:hover {
-  box-shadow: 0 0 0 2px #ef4444, 0 8px 24px rgba(239, 68, 68, 0.35);
+.photocard-slot .card-favorite-btn:hover svg {
+  stroke: #fda4af;
+  fill: rgba(239, 68, 68, 0.45);
+  filter: drop-shadow(0 0 6px rgba(244, 63, 94, 0.8));
 }
 
-/* Selected state: Red heart (선택된 하트는 붉은색) */
+/* Selected state: Red heart (선택된 최애 하트는 붉은색) */
 .photocard-slot.is-favorite {
   box-shadow: 0 0 0 2px rgba(239, 68, 68, 0.9), 0 4px 18px rgba(239, 68, 68, 0.35);
 }
 
 .photocard-slot.is-favorite .card-favorite-btn {
   opacity: 1;
-  background: transparent;
-  border: none;
-  box-shadow: none;
-  transform: scale(1.08);
+  background: none !important;
+  border: none !important;
+  box-shadow: none !important;
+  transform: scale(1.1);
 }
 
 .photocard-slot.is-favorite .card-favorite-btn svg {
   stroke: #ef4444;
   fill: #ef4444;
-  filter: drop-shadow(0 0 5px rgba(239, 68, 68, 0.85));
+  filter: drop-shadow(0 0 8px rgba(239, 68, 68, 0.9)) drop-shadow(0 1px 3px rgba(0, 0, 0, 0.8));
 }
 
 .photocard-slot.is-favorite .card-favorite-btn:hover {
-  transform: scale(1.25);
+  transform: scale(1.28);
 }
 
 /* Summary Card Modal (Compact 400px card container) */
@@ -2021,6 +2049,8 @@ body {
   overflow: hidden;
   position: relative;
   background: #141724;
+}
+
 .featured-card-chip .chip-thumb-canvas {
   width: 100%;
   height: 100%;
@@ -2102,160 +2132,360 @@ body {
   border-radius: 4px;
 }
 
-/* Favorite Photocard Gallery Modal (최애포카 모아보기) */
-.fav-gallery-modal-box {
-  width: 740px;
-  max-width: 95vw;
-  max-height: 90vh;
-  overflow-y: auto;
-  background: #101320;
-  border: 1px solid rgba(255, 255, 255, 0.12);
-  border-radius: var(--radius-lg);
-  padding: 1.25rem 1.4rem;
-  box-shadow: 0 24px 60px rgba(0, 0, 0, 0.85);
-}
-
-.fav-gallery-grid {
-  display: grid;
-  grid-template-columns: repeat(auto-fill, minmax(122px, 1fr));
-  gap: 0.85rem;
-  margin-top: 0.85rem;
-  max-height: 60vh;
-  overflow-y: auto;
-  padding: 0.25rem;
-}
-
-.fav-gallery-card {
-  background: #090b14;
-  border: 1.5px solid rgba(255, 255, 255, 0.09);
+/* ==========================================================================
+   Favorites Page & Controls
+   ========================================================================== */
+.btn-fav-nav-btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.45rem;
+  padding: 0 0.85rem;
+  height: 40px;
+  box-sizing: border-box;
+  background: rgba(244, 63, 94, 0.12);
+  border: 1px solid rgba(244, 63, 94, 0.35);
+  color: #fecdd3;
   border-radius: var(--radius-md);
-  padding: 0.5rem;
-  display: flex;
-  flex-direction: column;
-  position: relative;
-  transition: all 0.2s cubic-bezier(0.34, 1.56, 0.64, 1);
-}
-
-.fav-gallery-card:hover {
-  transform: translateY(-2px);
-  border-color: rgba(239, 68, 68, 0.55);
-  box-shadow: 0 6px 20px rgba(239, 68, 68, 0.25);
-}
-
-.card-remove-fav-btn {
-  position: absolute;
-  top: 6px;
-  right: 6px;
-  width: 22px;
-  height: 22px;
-  border-radius: 50%;
-  background: rgba(15, 23, 42, 0.85);
-  border: 1px solid rgba(255, 255, 255, 0.25);
-  color: #fda4af;
-  font-size: 14px;
-  font-weight: 700;
-  display: flex;
-  align-items: center;
-  justify-content: center;
+  font-size: 0.82rem;
+  font-weight: 600;
   cursor: pointer;
-  z-index: 5;
-  transition: all 0.15s ease;
-  line-height: 1;
-  padding: 0;
-}
-
-.card-remove-fav-btn:hover {
-  background: #ef4444;
-  color: #ffffff;
-  border-color: #ef4444;
-  transform: scale(1.15);
-}
-
-.fav-gallery-card .card-thumb-area {
-  width: 100%;
-  height: 144px;
-  background: #141724;
-  border-radius: var(--radius-sm);
-  overflow: hidden;
-  position: relative;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-}
-
-.fav-gallery-card .card-thumb-canvas {
-  width: 100%;
-  height: 100%;
-  display: block;
-}
-
-.fav-gallery-card .card-info-area {
-  margin-top: 0.5rem;
-  display: flex;
-  flex-direction: column;
-  gap: 0.2rem;
-}
-
-.fav-gallery-card .card-title {
-  font-size: 0.78rem;
-  font-weight: 700;
-  color: #f1f5f9;
+  transition: all 0.2s ease;
   white-space: nowrap;
-  overflow: hidden;
-  text-overflow: ellipsis;
 }
 
-.fav-gallery-card .card-sheet {
-  font-size: 0.7rem;
-  color: #64748b;
-  white-space: nowrap;
-  overflow: hidden;
-  text-overflow: ellipsis;
+.btn-fav-nav-btn:hover {
+  background: rgba(244, 63, 94, 0.22);
+  border-color: rgba(244, 63, 94, 0.65);
+  color: #fff;
+  transform: translateY(-1px);
 }
 
-.fav-gallery-card .card-actions-row {
-  margin-top: 0.45rem;
-  padding-top: 0.4rem;
-  border-top: 1px solid rgba(255, 255, 255, 0.06);
+.favorites-view {
+  width: 100%;
+  max-width: 1200px;
+  margin: 0 auto;
+  padding: 1.5rem 1rem 4rem;
+  box-sizing: border-box;
+}
+
+.fav-page-header {
   display: flex;
   align-items: center;
   justify-content: space-between;
-  gap: 0.3rem;
+  gap: 1.25rem;
+  flex-wrap: wrap;
+  margin-bottom: 1.75rem;
+  padding-bottom: 1.25rem;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.08);
 }
 
-.fav-status-pill {
-  font-size: 0.68rem;
-  font-weight: 700;
-  padding: 2px 6px;
-  border-radius: 4px;
-  cursor: pointer;
-  transition: all 0.15s ease;
-  user-select: none;
-}
-.fav-status-pill.is-owned {
-  background: rgba(16, 185, 129, 0.18);
-  color: #34d399;
-  border: 1px solid rgba(16, 185, 129, 0.35);
-}
-.fav-status-pill.is-unowned {
-  background: rgba(148, 163, 184, 0.12);
-  color: #94a3b8;
-  border: 1px solid rgba(148, 163, 184, 0.25);
+.fav-header-left {
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+  flex-wrap: wrap;
 }
 
-.fav-jump-btn {
-  font-size: 0.68rem;
-  color: #a5b4fc;
-  background: rgba(99, 102, 241, 0.12);
-  border: 1px solid rgba(99, 102, 241, 0.25);
-  border-radius: 4px;
-  padding: 2px 6px;
-  text-decoration: none;
+.btn-fav-back {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.35rem;
+  padding: 0.45rem 0.85rem;
+  background: rgba(255, 255, 255, 0.08);
+  border: 1px solid rgba(255, 255, 255, 0.16);
+  color: #e2e8f0;
+  border-radius: var(--radius-sm);
+  font-size: 0.82rem;
+  font-weight: 600;
   cursor: pointer;
   transition: all 0.15s ease;
   white-space: nowrap;
 }
-.fav-jump-btn:hover {
-  background: rgba(99, 102, 241, 0.25);
-  color: #ffffff;
+
+.btn-fav-back:hover {
+  background: rgba(255, 255, 255, 0.16);
+  color: #fff;
+  border-color: rgba(255, 255, 255, 0.32);
 }
+
+.fav-page-title-group {
+  display: flex;
+  flex-direction: column;
+  gap: 0.25rem;
+}
+
+.fav-page-title {
+  margin: 0;
+  font-size: 1.3rem;
+  font-weight: 700;
+  color: #fff;
+  display: flex;
+  align-items: center;
+  gap: 0.6rem;
+  flex-wrap: wrap;
+}
+
+.fav-page-desc {
+  margin: 0;
+  font-size: 0.82rem;
+  color: var(--text-secondary);
+}
+
+.fav-page-actions {
+  display: flex;
+  align-items: center;
+  gap: 0.6rem;
+  flex-wrap: wrap;
+}
+
+.btn-fav-action-card {
+  background: linear-gradient(135deg, rgba(239, 68, 68, 0.2), rgba(244, 63, 94, 0.25));
+  border: 1px solid rgba(244, 63, 94, 0.5);
+  color: #fda4af;
+  font-weight: 600;
+  padding: 0.45rem 0.85rem;
+}
+
+.btn-fav-action-card:hover {
+  background: linear-gradient(135deg, rgba(239, 68, 68, 0.35), rgba(244, 63, 94, 0.4));
+  color: #fff;
+  border-color: #f43f5e;
+}
+
+.fav-cards-grid-container {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(180px, 1fr));
+  gap: 1.25rem;
+  width: 100%;
+}
+
+@media (max-width: 640px) {
+  .fav-cards-grid-container {
+    grid-template-columns: repeat(2, 1fr);
+    gap: 0.75rem;
+  }
+  .fav-page-header {
+    flex-direction: column;
+    align-items: flex-start;
+  }
+  .fav-page-actions {
+    width: 100%;
+  }
+  .fav-page-actions button {
+    flex: 1;
+    justify-content: center;
+  }
+}
+
+.fav-grid-card {
+  background: rgba(22, 27, 46, 0.85);
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  border-radius: 12px;
+  overflow: hidden;
+  display: flex;
+  flex-direction: column;
+  position: relative;
+  transition: all 0.2s ease;
+  box-shadow: 0 4px 16px rgba(0, 0, 0, 0.3);
+}
+
+.fav-grid-card:hover {
+  transform: translateY(-3px);
+  border-color: rgba(244, 63, 94, 0.4);
+  box-shadow: 0 8px 24px rgba(244, 63, 94, 0.15);
+}
+
+.fav-grid-card.is-owned {
+  border-color: rgba(52, 211, 153, 0.4);
+}
+
+.fav-card-rank-badge {
+  position: absolute;
+  top: 8px;
+  left: 8px;
+  background: rgba(15, 23, 42, 0.85);
+  border: 1px solid rgba(244, 63, 94, 0.6);
+  color: #fda4af;
+  font-size: 0.7rem;
+  font-weight: 700;
+  padding: 2px 7px;
+  border-radius: 999px;
+  backdrop-filter: blur(4px);
+  z-index: 2;
+  display: flex;
+  align-items: center;
+  gap: 3px;
+}
+
+.fav-card-remove-btn {
+  position: absolute;
+  top: 8px;
+  right: 8px;
+  width: 24px;
+  height: 24px;
+  border-radius: 50%;
+  background: rgba(15, 23, 42, 0.85);
+  border: 1px solid rgba(255, 255, 255, 0.2);
+  color: #94a3b8;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  z-index: 2;
+  transition: all 0.15s ease;
+}
+
+.fav-card-remove-btn:hover {
+  background: #ef4444;
+  border-color: #ef4444;
+  color: #fff;
+  transform: scale(1.1);
+}
+
+.fav-card-thumb-wrap {
+  width: 100%;
+  aspect-ratio: 55 / 85;
+  background: #0f121d;
+  position: relative;
+  overflow: hidden;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.fav-card-canvas {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  display: block;
+}
+
+.fav-card-body {
+  padding: 0.75rem 0.85rem;
+  display: flex;
+  flex-direction: column;
+  gap: 0.35rem;
+  flex: 1;
+}
+
+.fav-card-name {
+  font-size: 0.88rem;
+  font-weight: 700;
+  color: #f8fafc;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.fav-card-template-title {
+  font-size: 0.74rem;
+  color: var(--text-secondary);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.fav-card-actions {
+  display: flex;
+  gap: 0.4rem;
+  margin-top: 0.35rem;
+}
+
+.btn-fav-toggle-owned {
+  flex: 1;
+  padding: 0.32rem 0.45rem;
+  font-size: 0.72rem;
+  font-weight: 600;
+  border-radius: 6px;
+  border: 1px solid transparent;
+  cursor: pointer;
+  transition: all 0.15s ease;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 4px;
+}
+
+.btn-fav-toggle-owned.owned {
+  background: rgba(52, 211, 153, 0.18);
+  border-color: rgba(52, 211, 153, 0.45);
+  color: #6ee7b7;
+}
+
+.btn-fav-toggle-owned.owned:hover {
+  background: rgba(52, 211, 153, 0.28);
+}
+
+.btn-fav-toggle-owned.unowned {
+  background: rgba(148, 163, 184, 0.12);
+  border-color: rgba(148, 163, 184, 0.25);
+  color: #94a3b8;
+}
+
+.btn-fav-toggle-owned.unowned:hover {
+  background: rgba(148, 163, 184, 0.22);
+  color: #cbd5e1;
+}
+
+.btn-fav-jump-template {
+  padding: 0.32rem 0.5rem;
+  font-size: 0.72rem;
+  background: rgba(255, 255, 255, 0.06);
+  border: 1px solid rgba(255, 255, 255, 0.14);
+  color: #cbd5e1;
+  border-radius: 6px;
+  cursor: pointer;
+  text-decoration: none;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  transition: all 0.15s ease;
+  white-space: nowrap;
+}
+
+.btn-fav-jump-template:hover {
+  background: rgba(255, 255, 255, 0.14);
+  color: #fff;
+  border-color: rgba(255, 255, 255, 0.28);
+}
+
+.fav-empty-state {
+  grid-column: 1 / -1;
+  padding: 4rem 1.5rem;
+  text-align: center;
+  background: rgba(22, 27, 46, 0.45);
+  border: 1px dashed rgba(255, 255, 255, 0.15);
+  border-radius: 16px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 0.85rem;
+}
+
+.fav-empty-icon {
+  font-size: 2.8rem;
+  opacity: 0.7;
+}
+
+.fav-empty-title {
+  font-size: 1.15rem;
+  font-weight: 700;
+  color: #f1f5f9;
+  margin: 0;
+}
+
+.fav-empty-desc {
+  font-size: 0.85rem;
+  color: var(--text-secondary);
+  max-width: 440px;
+  margin: 0 auto;
+  line-height: 1.55;
+}
+
+.link-go-fav-page:hover {
+  color: #f43f5e !important;
+}
+
+
+

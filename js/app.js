@@ -48,7 +48,18 @@ class PhocaCheckerApp {
     // Views
     this.homeView = document.getElementById('home-view');
     this.checkerView = document.getElementById('checker-view');
+    this.favoritesView = document.getElementById('favorites-view');
     this.categoriesGrid = document.getElementById('categories-grid');
+    
+    // Favorites Page Elements & Nav
+    this.btnGoFavoritesPage = document.getElementById('btn-go-favorites-page');
+    this.favNavBadge = document.getElementById('fav-nav-badge');
+    this.favPageCountPill = document.getElementById('fav-page-count-pill');
+    this.btnFavBackToChecker = document.getElementById('btn-fav-back-to-checker');
+    this.btnFavPageShareCard = document.getElementById('btn-fav-page-share-card');
+    this.btnFavPageExportMerged = document.getElementById('btn-fav-page-export-merged');
+    this.favCardsGridContainer = document.getElementById('fav-cards-grid-container');
+    this.linkMergedGoFavPage = document.getElementById('link-merged-go-fav-page');
     
     // Nav & Breadcrumbs
     this.btnNavHome = document.getElementById('btn-nav-home');
@@ -74,7 +85,6 @@ class PhocaCheckerApp {
     this.mergedExportModalBackdrop = document.getElementById('merged-export-modal-backdrop');
     this.btnCloseMergedModal = document.getElementById('close-merged-modal-btn');
     this.mergedFavCount = document.getElementById('merged-fav-count');
-    this.mergedFavCardsStrip = document.getElementById('merged-fav-cards-strip');
     this.btnDoExportFavMerged = document.getElementById('btn-do-export-fav-merged');
     this.mergedCountAll = document.getElementById('merged-count-all');
     this.mergedCountOwned = document.getElementById('merged-count-owned');
@@ -143,26 +153,6 @@ class PhocaCheckerApp {
     // Export PNG
     this.btnExportPng = document.getElementById('btn-export-png');
 
-    // Favorite Photocard Top Controls (상단 최애포카 선택 기능)
-    this.isFavSelectionMode = false;
-    this.btnToggleFavMode = document.getElementById('btn-toggle-fav-mode');
-    this.favModeLabel = document.getElementById('fav-mode-label');
-    this.btnOpenFavCardModal = document.getElementById('btn-open-fav-card-modal') || document.getElementById('btn-open-fav-gallery');
-    this.favCardBadgeCount = document.getElementById('fav-card-badge-count');
-
-    // Favorite Photocards Gallery Modal (최애포카 모아보기)
-    this.favGalleryModalBackdrop = document.getElementById('fav-gallery-modal-backdrop');
-    this.btnCloseFavGalleryModal = document.getElementById('close-fav-gallery-modal-btn');
-    this.favGalleryCountBadge = document.getElementById('fav-gallery-count-badge');
-    this.btnFavGalleryToShare = document.getElementById('btn-fav-gallery-to-share');
-    this.btnFavGalleryToPoster = document.getElementById('btn-fav-gallery-to-poster');
-    this.favGalleryGrid = document.getElementById('fav-gallery-grid');
-    this.btnOpenFavGalleryHeader = document.getElementById('btn-open-fav-gallery-header');
-    this.btnOpenFavGalleryHome = document.getElementById('btn-open-fav-gallery-home');
-    this.btnOpenShareHome = document.getElementById('btn-open-share-home');
-    this.btnOpenFavGallery = document.getElementById('btn-open-fav-gallery');
-    this.btnDrawerOpenFavGallery = document.getElementById('btn-drawer-open-fav-gallery');
-    
     // Custom Image Upload
     this.customImageUpload = document.getElementById('custom-image-upload');
     
@@ -244,6 +234,13 @@ class PhocaCheckerApp {
     if (this.btnDoExportFavMerged) {
       this.btnDoExportFavMerged.addEventListener('click', () => this.exportFavoriteMergedPosterAction());
     }
+    if (this.linkMergedGoFavPage) {
+      this.linkMergedGoFavPage.addEventListener('click', (e) => {
+        e.preventDefault();
+        this.closeMergedExportModal();
+        window.location.hash = '#/favorites';
+      });
+    }
     if (this.btnExportMergedAllUnowned) {
       this.btnExportMergedAllUnowned.addEventListener('click', () => this.exportFilteredMergedImage('all', 'hide-owned'));
     }
@@ -255,6 +252,24 @@ class PhocaCheckerApp {
     }
     if (this.btnDoExportMergedUnowned) {
       this.btnDoExportMergedUnowned.addEventListener('click', () => this.exportFilteredMergedImage('unowned', 'hide-owned'));
+    }
+
+    // Favorites Page Navigation & Actions
+    if (this.btnGoFavoritesPage) {
+      this.btnGoFavoritesPage.addEventListener('click', () => {
+        window.location.hash = '#/favorites';
+      });
+    }
+    if (this.btnFavBackToChecker) {
+      this.btnFavBackToChecker.addEventListener('click', () => {
+        window.location.hash = `#/checker/${this.currentTemplateId || 'fore1'}`;
+      });
+    }
+    if (this.btnFavPageShareCard) {
+      this.btnFavPageShareCard.addEventListener('click', () => this.openSummaryCardModal());
+    }
+    if (this.btnFavPageExportMerged) {
+      this.btnFavPageExportMerged.addEventListener('click', () => this.exportFavoriteMergedPosterAction());
     }
 
     // Share to X
@@ -363,54 +378,6 @@ class PhocaCheckerApp {
       this.btnExportPng.addEventListener('click', () => this.exportImage());
     }
 
-    // Favorite Photocard Top Controls (상단 최애포카 버튼 이벤트)
-    if (this.btnToggleFavMode) {
-      this.btnToggleFavMode.addEventListener('click', () => this.toggleFavSelectionMode());
-    }
-    if (this.btnOpenFavCardModal) {
-      this.btnOpenFavCardModal.addEventListener('click', () => this.openFavGalleryModal());
-    }
-
-    // Favorite Gallery Modal Triggers & Events
-    if (this.btnOpenFavGalleryHeader) {
-      this.btnOpenFavGalleryHeader.addEventListener('click', () => this.openFavGalleryModal());
-    }
-    if (this.btnOpenFavGalleryHome) {
-      this.btnOpenFavGalleryHome.addEventListener('click', () => this.openFavGalleryModal());
-    }
-    if (this.btnOpenShareHome) {
-      this.btnOpenShareHome.addEventListener('click', () => this.openSummaryCardModal());
-    }
-    if (this.btnOpenFavGallery) {
-      this.btnOpenFavGallery.addEventListener('click', () => this.openFavGalleryModal());
-    }
-    if (this.btnDrawerOpenFavGallery) {
-      this.btnDrawerOpenFavGallery.addEventListener('click', () => {
-        this.closeDrawer();
-        this.openFavGalleryModal();
-      });
-    }
-    if (this.btnCloseFavGalleryModal) {
-      this.btnCloseFavGalleryModal.addEventListener('click', () => this.closeFavGalleryModal());
-    }
-    if (this.favGalleryModalBackdrop) {
-      this.favGalleryModalBackdrop.addEventListener('click', (e) => {
-        if (e.target === this.favGalleryModalBackdrop) this.closeFavGalleryModal();
-      });
-    }
-    if (this.btnFavGalleryToShare) {
-      this.btnFavGalleryToShare.addEventListener('click', () => {
-        this.closeFavGalleryModal();
-        this.openSummaryCardModal();
-      });
-    }
-    if (this.btnFavGalleryToPoster) {
-      this.btnFavGalleryToPoster.addEventListener('click', () => {
-        this.closeFavGalleryModal();
-        this.exportAllMergedImage();
-      });
-    }
-
     // Custom Image Upload
     if (this.customImageUpload) {
       this.customImageUpload.addEventListener('change', (e) => {
@@ -454,12 +421,11 @@ class PhocaCheckerApp {
     const parts = hash.replace(/^#\//, '').split('/');
     const view = parts[0] || 'home';
 
-    if (view === 'info' || view === 'about') {
+    if (view === 'favorites' || view === 'favs' || view === 'fav') {
+      this.showFavoritesView();
+    } else if (view === 'info' || view === 'about') {
       this.showHomeView();
       this.openInfoModal();
-    } else if (view === 'favorites' || view === 'favs' || view === 'favorite') {
-      this.showHomeView();
-      this.openFavGalleryModal();
     } else if (view === 'checker' || view === 'fore') {
       const categoryId = 'fore';
       const templateId = parts[1] || 'fore1';
@@ -482,10 +448,15 @@ class PhocaCheckerApp {
       this.checkerView.style.display = 'none';
       this.checkerView.classList.remove('active');
     }
+    if (this.favoritesView) {
+      this.favoritesView.style.display = 'none';
+      this.favoritesView.classList.remove('active');
+    }
     if (this.navCategoryName) this.navCategoryName.style.display = 'none';
     if (this.navTemplateName) this.navTemplateName.style.display = 'none';
     
     this.renderCategoryHub();
+    this.updateFavBadgeCount();
   }
 
   renderCategoryHub() {
@@ -553,6 +524,209 @@ class PhocaCheckerApp {
   }
 
   // --------------------------------------------------------------------------
+  // Favorites View (최애포카 모아보기 페이지)
+  // --------------------------------------------------------------------------
+  showFavoritesView() {
+    this.currentView = 'favorites';
+    if (this.homeView) {
+      this.homeView.style.display = 'none';
+      this.homeView.classList.remove('active');
+    }
+    if (this.checkerView) {
+      this.checkerView.style.display = 'none';
+      this.checkerView.classList.remove('active');
+    }
+    if (this.favoritesView) {
+      this.favoritesView.style.display = 'block';
+      this.favoritesView.classList.add('active');
+    }
+
+    if (this.navCategoryName) {
+      this.navCategoryName.style.display = 'inline';
+      this.navCategoryName.textContent = '> 최애포카 모아보기';
+    }
+    if (this.navTemplateName) {
+      this.navTemplateName.style.display = 'none';
+    }
+
+    this.renderFavoritesPage();
+    this.updateFavCardBadgeCount();
+  }
+
+  renderFavoritesPage() {
+    if (!this.favCardsGridContainer) return;
+    this.favCardsGridContainer.innerHTML = '';
+
+    const favs = this.getAllFavoriteCards();
+    if (favs.length === 0) {
+      const empty = document.createElement('div');
+      empty.className = 'fav-empty-state';
+      empty.innerHTML = `
+        <div class="fav-empty-icon">🤍</div>
+        <h3 class="fav-empty-title">찜한 최애 포카가 없습니다</h3>
+        <p class="fav-empty-desc">
+          체커에서 포토카드 우측 상단의 <strong>하트(♥)</strong>를 클릭해 최대 10장까지 최애 포카로 등록해보세요!<br>
+          등록된 포카는 이곳에서 모아보거나, 합본 포스터 및 자랑하기 카드로 만들 수 있습니다.
+        </p>
+        <button id="btn-empty-go-checker" class="btn btn-primary" style="margin-top: 0.5rem;">
+          포카 체커에서 최애 고르러 가기
+        </button>
+      `;
+      this.favCardsGridContainer.appendChild(empty);
+      const btnEmpty = empty.querySelector('#btn-empty-go-checker');
+      if (btnEmpty) {
+        btnEmpty.addEventListener('click', () => {
+          window.location.hash = `#/checker/${this.currentTemplateId || 'fore1'}`;
+        });
+      }
+      return;
+    }
+
+    favs.forEach((fav, index) => {
+      const isOwned = this.getCheckedSetForTemplate(fav.templateId).has(fav.id);
+      const cardEl = document.createElement('div');
+      cardEl.className = `fav-grid-card ${isOwned ? 'is-owned' : 'is-unowned'}`;
+      cardEl.setAttribute('data-card-id', fav.id);
+
+      // Rank badge
+      const rankBadge = document.createElement('div');
+      rankBadge.className = 'fav-card-rank-badge';
+      rankBadge.innerHTML = `<span style="color:#f43f5e;">♥</span> ${index + 1}`;
+      cardEl.appendChild(rankBadge);
+
+      // Remove button
+      const removeBtn = document.createElement('button');
+      removeBtn.className = 'fav-card-remove-btn';
+      removeBtn.title = '최애 목록에서 제거';
+      removeBtn.innerHTML = `
+        <svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2.5">
+          <line x1="18" y1="6" x2="6" y2="18"></line>
+          <line x1="6" y1="6" x2="18" y2="18"></line>
+        </svg>
+      `;
+      removeBtn.addEventListener('click', (e) => {
+        e.stopPropagation();
+        this.removeFavorite(fav.templateId, fav.id);
+      });
+      cardEl.appendChild(removeBtn);
+
+      // Thumb wrap
+      const thumbWrap = document.createElement('div');
+      thumbWrap.className = 'fav-card-thumb-wrap';
+
+      const canvas = document.createElement('canvas');
+      canvas.className = 'fav-card-canvas';
+      canvas.width = 165;
+      canvas.height = 255;
+      thumbWrap.appendChild(canvas);
+      cardEl.appendChild(thumbWrap);
+
+      // Card Body
+      const bodyEl = document.createElement('div');
+      bodyEl.className = 'fav-card-body';
+
+      const nameEl = document.createElement('div');
+      nameEl.className = 'fav-card-name';
+      nameEl.textContent = fav.name || '포토카드';
+      nameEl.title = fav.name || '포토카드';
+      bodyEl.appendChild(nameEl);
+
+      const templateEl = document.createElement('div');
+      templateEl.className = 'fav-card-template-title';
+      templateEl.textContent = fav.templateTitle || '';
+      templateEl.title = fav.templateTitle || '';
+      bodyEl.appendChild(templateEl);
+
+      // Actions
+      const actionsEl = document.createElement('div');
+      actionsEl.className = 'fav-card-actions';
+
+      // Owned Toggle Button
+      const toggleOwnedBtn = document.createElement('button');
+      toggleOwnedBtn.className = `btn-fav-toggle-owned ${isOwned ? 'owned' : 'unowned'}`;
+      toggleOwnedBtn.innerHTML = isOwned ? '<span>✓ 보유중</span>' : '<span>미보유</span>';
+      toggleOwnedBtn.title = isOwned ? '클릭 시 미보유로 전환' : '클릭 시 보유중으로 전환';
+      toggleOwnedBtn.addEventListener('click', (e) => {
+        e.stopPropagation();
+        this.toggleFavoriteCardOwned(fav.templateId, fav.id);
+      });
+      actionsEl.appendChild(toggleOwnedBtn);
+
+      // Jump to template
+      const jumpBtn = document.createElement('button');
+      jumpBtn.className = 'btn-fav-jump-template';
+      jumpBtn.title = '해당 포카판으로 이동';
+      jumpBtn.innerHTML = `<span>판 이동 ↗</span>`;
+      jumpBtn.addEventListener('click', (e) => {
+        e.stopPropagation();
+        window.location.hash = `#/checker/${fav.templateId}`;
+      });
+      actionsEl.appendChild(jumpBtn);
+
+      bodyEl.appendChild(actionsEl);
+      cardEl.appendChild(bodyEl);
+
+      this.favCardsGridContainer.appendChild(cardEl);
+
+      // Draw canvas thumbnail
+      this.drawThumbCanvas(canvas, fav);
+    });
+  }
+
+  removeFavorite(templateId, cardId) {
+    const favSet = this.getFavoriteSetForTemplate(templateId);
+    if (favSet.has(cardId)) {
+      favSet.delete(cardId);
+      try {
+        localStorage.setItem(`phoca_favorites_${templateId}`, JSON.stringify(Array.from(favSet)));
+      } catch (e) {}
+
+      if (this.currentTemplateId === templateId) {
+        this.favoriteCards.delete(cardId);
+        this.renderCards();
+      }
+
+      if (this.featuredFavoriteId === cardId) {
+        const remaining = this.getAllFavoriteCards();
+        this.featuredFavoriteId = remaining.length > 0 ? remaining[0].id : null;
+        if (this.featuredFavoriteId) {
+          localStorage.setItem('phoca_featured_favorite_id', this.featuredFavoriteId);
+        } else {
+          localStorage.removeItem('phoca_featured_favorite_id');
+        }
+      }
+
+      this.showToast('최애 포카 지정을 해제했습니다.');
+      this.updateFavCardBadgeCount();
+      this.renderFavoritesPage();
+    }
+  }
+
+  toggleFavoriteCardOwned(templateId, cardId) {
+    const checkedSet = this.getCheckedSetForTemplate(templateId);
+    let isNowOwned = false;
+    if (checkedSet.has(cardId)) {
+      checkedSet.delete(cardId);
+      isNowOwned = false;
+    } else {
+      checkedSet.add(cardId);
+      isNowOwned = true;
+    }
+    try {
+      localStorage.setItem(`phoca_checks_${templateId}`, JSON.stringify(Array.from(checkedSet)));
+    } catch (e) {}
+
+    if (this.currentTemplateId === templateId) {
+      this.checkedCards = checkedSet;
+      this.updateStats();
+      this.renderCards();
+    }
+
+    this.renderFavoritesPage();
+    this.showToast(isNowOwned ? '보유 포카로 표시되었습니다.' : '미보유 상태로 변경되었습니다.');
+  }
+
+  // --------------------------------------------------------------------------
   // Checker View & Template Loading
   // --------------------------------------------------------------------------
   showCheckerView(categoryId, templateId) {
@@ -564,6 +738,10 @@ class PhocaCheckerApp {
     if (this.checkerView) {
       this.checkerView.style.display = 'flex';
       this.checkerView.classList.add('active');
+    }
+    if (this.favoritesView) {
+      this.favoritesView.style.display = 'none';
+      this.favoritesView.classList.remove('active');
     }
 
     this.currentCategory = this.categories.find(c => c.id === categoryId) || this.categories[0];
@@ -744,39 +922,21 @@ class PhocaCheckerApp {
     if (this.mergedExportModalBackdrop && this.mergedExportModalBackdrop.classList.contains('open')) {
       this.updateMergedExportModalCounts();
     }
-    if (this.favGalleryModalBackdrop && this.favGalleryModalBackdrop.classList.contains('open')) {
-      this.renderFavGallery();
-    }
-  }
-
-  toggleFavSelectionMode() {
-    this.isFavSelectionMode = !this.isFavSelectionMode;
-    if (this.btnToggleFavMode) {
-      this.btnToggleFavMode.classList.toggle('active', this.isFavSelectionMode);
-      if (this.favModeLabel) {
-        this.favModeLabel.textContent = this.isFavSelectionMode ? '💖 최애 선택 중!' : '최애포카 선택';
-      }
-    }
-    if (this.cardOverlayContainer) {
-      this.cardOverlayContainer.classList.toggle('is-fav-mode-active', this.isFavSelectionMode);
-    }
-    if (this.isFavSelectionMode) {
-      this.showToast('💖 최애포카 선택 모드 켜짐! 카드를 클릭하여 최애 포카(♥)를 지정하세요.');
-    } else {
-      this.showToast('체크 모드로 복귀했습니다.');
-    }
   }
 
   updateFavCardBadgeCount() {
-    const totalFavs = this.getAllFavoriteCards().length;
-    if (this.favCardBadgeCount) {
-      this.favCardBadgeCount.textContent = `${totalFavs}/10`;
+    const count = this.getAllFavoriteCards().length;
+    if (this.favNavBadge) {
+      this.favNavBadge.textContent = count;
     }
-    if (this.favGalleryCountBadge) {
-      this.favGalleryCountBadge.textContent = `${totalFavs} / 10장`;
+    if (this.favPageCountPill) {
+      this.favPageCountPill.textContent = `${count} / 10장`;
     }
-    if (this.btnDrawerOpenFavGallery) {
-      this.btnDrawerOpenFavGallery.textContent = `💖 최애포카 모아보기 (${totalFavs}/10)`;
+    if (this.mergedFavCount) {
+      this.mergedFavCount.textContent = count;
+    }
+    if (this.mergedExportModalBackdrop && this.mergedExportModalBackdrop.classList.contains('open')) {
+      this.updateMergedExportModalCounts();
     }
   }
 
@@ -1306,7 +1466,7 @@ class PhocaCheckerApp {
       // Favorite Heart Button (Top-Right)
       const favBtnHtml = `
         <button class="card-favorite-btn ${isFavorite ? 'is-favorite' : ''}" title="${isFavorite ? '최애 포카 지정 해제' : '내가 좋아하는 최애 포카로 등록 ♥'}">
-          <svg viewBox="0 0 24 24" width="16" height="16" fill="${isFavorite ? '#ef4444' : 'none'}" stroke="${isFavorite ? '#ef4444' : '#ffffff'}" stroke-width="2.3" stroke-linecap="round" stroke-linejoin="round">
+          <svg viewBox="0 0 24 24" width="20" height="20" fill="${isFavorite ? '#ef4444' : 'rgba(0, 0, 0, 0.35)'}" stroke="${isFavorite ? '#ef4444' : '#ffffff'}" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
             <path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z"></path>
           </svg>
         </button>
@@ -1329,12 +1489,7 @@ class PhocaCheckerApp {
           return;
         }
         e.preventDefault();
-        // If Favorite Selection Mode is active at the top, clicking card toggles favorite
-        if (this.isFavSelectionMode) {
-          this.toggleFavorite(card.id);
-        } else {
-          this.toggleCard(card.id);
-        }
+        this.toggleCard(card.id);
       });
 
       this.cardOverlayContainer.appendChild(cardEl);
@@ -1455,11 +1610,46 @@ class PhocaCheckerApp {
   }
 
   updateMergedExportModalCounts() {
+    const catTemplates = this.templates.filter(t => t.categoryId === (this.currentCategory?.id || 'fore'));
+    const totalBoards = catTemplates.length;
+
+    let ownedBoards = 0;
+    let unownedBoards = 0;
+
+    catTemplates.forEach(t => {
+      const total = t.cards?.length || 0;
+      const checkedSet = this.getCheckedSetForTemplate(t.id);
+      const owned = checkedSet.size;
+
+      if (total > 0 && owned === total) {
+        ownedBoards++;
+      } else if (total > 0 && owned < total) {
+        unownedBoards++;
+      }
+    });
+
+    if (this.mergedCountAll) {
+      this.mergedCountAll.textContent = `${totalBoards}개 판`;
+    }
+    if (this.mergedCountOwned) {
+      this.mergedCountOwned.textContent = `${ownedBoards}개 판`;
+      this.mergedCountOwned.className = `badge-count ${ownedBoards > 0 ? 'success' : 'empty'}`;
+    }
+    if (this.mergedCountUnowned) {
+      this.mergedCountUnowned.textContent = `${unownedBoards}개 판`;
+      this.mergedCountUnowned.className = `badge-count ${unownedBoards > 0 ? 'warning' : 'empty'}`;
+    }
+
     const favoriteList = this.getAllFavoriteCards();
     const count = favoriteList.length;
 
     if (this.mergedFavCount) {
       this.mergedFavCount.textContent = count;
+    }
+
+    const mergedFavCountBadge = document.getElementById('merged-fav-count-badge');
+    if (mergedFavCountBadge) {
+      mergedFavCountBadge.style.opacity = count > 0 ? '1' : '0.6';
     }
 
     if (this.btnDoExportFavMerged) {
@@ -1471,61 +1661,6 @@ class PhocaCheckerApp {
         this.btnDoExportFavMerged.disabled = false;
         this.btnDoExportFavMerged.style.opacity = '1';
         this.btnDoExportFavMerged.style.cursor = 'pointer';
-      }
-    }
-
-    if (this.mergedFavCardsStrip) {
-      this.mergedFavCardsStrip.innerHTML = '';
-      if (count === 0) {
-        const emptyMsg = document.createElement('div');
-        emptyMsg.style.cssText = 'padding: 1.5rem 0.5rem; font-size: 0.82rem; color: #94a3b8; text-align: center; width: 100%; line-height: 1.6;';
-        emptyMsg.innerHTML = '아직 선택된 최애 포카가 없습니다.<br>포토카드 판에서 <span style="color:#ef4444; font-weight:700;">하트(♥)</span> 버튼을 눌러<br>최애 포카를 최대 10장까지 선택해보세요!';
-        this.mergedFavCardsStrip.appendChild(emptyMsg);
-      } else {
-        favoriteList.slice(0, 10).forEach((fav, index) => {
-          const chip = document.createElement('div');
-          chip.className = 'featured-card-chip';
-          chip.style.position = 'relative';
-
-          const thumbWrap = document.createElement('div');
-          thumbWrap.className = 'chip-thumb-wrap';
-
-          const thumbCanvas = document.createElement('canvas');
-          thumbCanvas.className = 'chip-thumb-canvas';
-          thumbCanvas.width = 60;
-          thumbCanvas.height = 72;
-          thumbWrap.appendChild(thumbCanvas);
-
-          // Heart number badge
-          const heartBadge = document.createElement('div');
-          heartBadge.style.cssText = 'position:absolute; top:3px; left:3px; background:#ef4444; color:#fff; font-size:9px; font-weight:800; border-radius:50%; width:16px; height:16px; display:flex; align-items:center; justify-content:center; box-shadow:0 1px 3px rgba(0,0,0,0.5);';
-          heartBadge.textContent = `${index + 1}`;
-          thumbWrap.appendChild(heartBadge);
-
-          // Remove 'x' button
-          const removeBtn = document.createElement('button');
-          removeBtn.title = '최애 포카 제외';
-          removeBtn.style.cssText = 'position:absolute; top:3px; right:3px; background:rgba(0,0,0,0.75); border:1px solid rgba(255,255,255,0.3); color:#fff; font-size:11px; font-weight:bold; border-radius:50%; width:16px; height:16px; display:flex; align-items:center; justify-content:center; cursor:pointer; padding:0; line-height:1;';
-          removeBtn.innerHTML = '×';
-          removeBtn.addEventListener('click', (e) => {
-            e.stopPropagation();
-            this.toggleFavorite(fav.id);
-          });
-          thumbWrap.appendChild(removeBtn);
-
-          const nameEl = document.createElement('div');
-          nameEl.className = 'chip-name';
-          nameEl.title = fav.name || '최애 포카';
-          nameEl.textContent = fav.name || '최애';
-
-          chip.appendChild(thumbWrap);
-          chip.appendChild(nameEl);
-
-          this.mergedFavCardsStrip.appendChild(chip);
-
-          // Async draw thumbnail
-          this.drawThumbCanvas(thumbCanvas, fav);
-        });
       }
     }
   }
@@ -1954,8 +2089,8 @@ class PhocaCheckerApp {
     const featuredFav = favoriteList.find(f => f.id === this.featuredFavoriteId);
     const featuredPart = featuredFav ? ` (대표 최애: ${featuredFav.name})` : (favCount > 0 ? ` (최애 포카 ${favCount}장 지정 ♥)` : '');
     const nickPart = this.nickname ? `${this.nickname}님의 ` : '';
-
-    const tweetText = `🌲 ${nickPart}포레스텔라 포토카드를 ${overallPercent}% (${totalChecked}/${totalCards}장) 수집했어요! ✨${featuredPart}\n\n나만의 포카 체크리스트 & 위시리스트 만들기 👇\n\n#포레포카체커`;
+    const tier = CanvasExporter.getCollectorTier(overallPercent);
+    const tweetText = `🌲 ${nickPart}포레스텔라 포토카드를 ${overallPercent}% (${totalChecked}/${totalCards}장) 수집했어요! ✨${featuredPart}\n💬 "${tier.tweetPhrase}"\n\n나만의 포카 체크리스트 & 위시리스트 만들기 👇\n\n#포레포카체커`;
     const shareUrl = 'https://foretissimo.github.io/phoca_checker/';
     const twitterIntentUrl = `https://twitter.com/intent/tweet?text=${encodeURIComponent(tweetText)}&url=${encodeURIComponent(shareUrl)}`;
 
@@ -1984,139 +2119,6 @@ class PhocaCheckerApp {
 
   async shareToX() {
     this.openSummaryCardModal();
-  }
-
-  // --------------------------------------------------------------------------
-  // Favorite Photocards Interactive Gallery Modal (최애포카 모아보기)
-  // --------------------------------------------------------------------------
-  openFavGalleryModal() {
-    if (!this.favGalleryModalBackdrop) return;
-    this.favGalleryModalBackdrop.classList.add('open');
-    this.updateFavCardBadgeCount();
-    this.renderFavGallery();
-  }
-
-  closeFavGalleryModal() {
-    if (this.favGalleryModalBackdrop) {
-      this.favGalleryModalBackdrop.classList.remove('open');
-    }
-  }
-
-  renderFavGallery() {
-    if (!this.favGalleryGrid) return;
-    this.favGalleryGrid.innerHTML = '';
-
-    const favoriteList = this.getAllFavoriteCards();
-
-    if (favoriteList.length === 0) {
-      this.favGalleryGrid.innerHTML = `
-        <div class="fav-gallery-empty" style="grid-column: 1 / -1; text-align: center; padding: 2.8rem 1.5rem; background: #0c0e18; border-radius: var(--radius-md); border: 1px dashed rgba(255,255,255,0.15);">
-          <div style="font-size: 2.4rem; margin-bottom: 0.6rem;">💖</div>
-          <div style="font-size: 1.05rem; font-weight: 700; color: #f1f5f9; margin-bottom: 0.4rem;">등록된 최애 포카가 없습니다</div>
-          <p style="font-size: 0.82rem; color: #94a3b8; line-height: 1.5; margin: 0 auto; max-width: 360px;">
-            포카판에서 <span style="color:#ef4444; font-weight:700;">[최애포카 선택]</span> 모드를 켜거나 카드 위의 하트(♥)를 눌러 최애 포카를 최대 10장까지 찜해보세요!
-          </p>
-        </div>
-      `;
-      return;
-    }
-
-    favoriteList.forEach(fav => {
-      const checkedSet = this.getCheckedSetForTemplate(fav.templateId);
-      const isOwned = checkedSet.has(fav.id);
-
-      const cardEl = document.createElement('div');
-      cardEl.className = 'fav-gallery-card';
-
-      // Remove / un-favorite button (top-right x)
-      const removeBtn = document.createElement('button');
-      removeBtn.className = 'card-remove-fav-btn';
-      removeBtn.title = '최애 포카 지정 해제';
-      removeBtn.innerHTML = '×';
-      removeBtn.addEventListener('click', (e) => {
-        e.stopPropagation();
-        this.toggleFavorite(fav.id);
-      });
-      cardEl.appendChild(removeBtn);
-
-      // Card thumbnail area with dynamic aspect-ratio fit
-      const thumbArea = document.createElement('div');
-      thumbArea.className = 'card-thumb-area';
-
-      const thumbCanvas = document.createElement('canvas');
-      thumbCanvas.className = 'card-thumb-canvas';
-      thumbCanvas.width = 160;
-      thumbCanvas.height = 190;
-      thumbArea.appendChild(thumbCanvas);
-      cardEl.appendChild(thumbArea);
-
-      // Card info area
-      const infoArea = document.createElement('div');
-      infoArea.className = 'card-info-area';
-
-      const titleEl = document.createElement('div');
-      titleEl.className = 'card-title';
-      titleEl.title = fav.name || '포토카드';
-      titleEl.textContent = fav.name || '포토카드';
-      infoArea.appendChild(titleEl);
-
-      const sheetEl = document.createElement('div');
-      sheetEl.className = 'card-sheet';
-      const cleanSheetName = (fav.templateTitle || '').replace(/^fore\d+\.\s*/, '');
-      sheetEl.title = cleanSheetName;
-      sheetEl.textContent = cleanSheetName;
-      infoArea.appendChild(sheetEl);
-
-      // Card actions row: Owned Status Pill & Jump to Board Button
-      const actionsRow = document.createElement('div');
-      actionsRow.className = 'card-actions-row';
-
-      const statusPill = document.createElement('span');
-      statusPill.className = `fav-status-pill ${isOwned ? 'is-owned' : 'is-unowned'}`;
-      statusPill.title = '클릭하여 보유/미보유 상태 변경';
-      statusPill.textContent = isOwned ? '✓ 보유중' : '미보유';
-      statusPill.addEventListener('click', (e) => {
-        e.stopPropagation();
-        const curSet = this.getCheckedSetForTemplate(fav.templateId);
-        if (curSet.has(fav.id)) {
-          curSet.delete(fav.id);
-          statusPill.className = 'fav-status-pill is-unowned';
-          statusPill.textContent = '미보유';
-          this.showToast(`'${fav.name}'을(를) 미보유로 변경했습니다.`);
-        } else {
-          curSet.add(fav.id);
-          statusPill.className = 'fav-status-pill is-owned';
-          statusPill.textContent = '✓ 보유중';
-          this.showToast(`'${fav.name}'을(를) 보유로 변경했습니다!`);
-        }
-        this.saveCheckedState(fav.templateId, curSet);
-        if (this.currentTemplate && this.currentTemplate.id === fav.templateId) {
-          this.renderCards();
-          this.updateStats();
-        }
-      });
-      actionsRow.appendChild(statusPill);
-
-      const jumpBtn = document.createElement('a');
-      jumpBtn.className = 'fav-jump-btn';
-      jumpBtn.href = `#/checker/${fav.templateId}`;
-      jumpBtn.title = `'${cleanSheetName}' 포카판으로 바로가기`;
-      jumpBtn.textContent = '판 이동 ↗';
-      jumpBtn.addEventListener('click', (e) => {
-        e.preventDefault();
-        this.closeFavGalleryModal();
-        window.location.hash = `#/checker/${fav.templateId}`;
-      });
-      actionsRow.appendChild(jumpBtn);
-
-      infoArea.appendChild(actionsRow);
-      cardEl.appendChild(infoArea);
-
-      this.favGalleryGrid.appendChild(cardEl);
-
-      // Render thumbnail with correct aspect ratio
-      this.drawThumbCanvas(thumbCanvas, fav);
-    });
   }
 
   showToast(message, duration = 2400) {

@@ -4,6 +4,19 @@ All notable functional changes, architecture improvements, and bug fixes for the
 
 ---
 
+## [v2026.11.12-4] - 2026-11-12
+
+### 💬 Witty Collector Tier Badges & 𝕏 Share Quotes (0% ~ 100%)
+- **Dynamic 10% Step Collector Phrases**:
+  - Implemented `CanvasExporter.getCollectorTier(percent)` covering 11 tiers (0% up to 100% in 10% increments).
+  - Designed with realistic K-pop/photocard collector humor (바인더, 앨범깡, 예절샷, 준등기, 통장 요정, 갈망포카, 드볼/올클리어).
+- **Summary Card Badge Pill**:
+  - Canvas summary card dynamically displays the matching collector badge title.
+- **𝕏 (Twitter) Share Intent**:
+  - Automatically incorporates the witty tier quote into the prefilled tweet message along with the user's progress percentage and featured photocard.
+
+---
+
 ## [v2026.11.12-3] - 2026-11-12
 
 ### 💖 Top-Bar Favorite Controls & Card Mask Occlusion Fix

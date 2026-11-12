@@ -337,10 +337,24 @@ body {
   padding: 0.85rem 1.25rem;
   box-shadow: var(--shadow-lg);
   display: flex;
-  flex-wrap: wrap;
+  flex-direction: column;
+  gap: 0.65rem;
+}
+
+.control-bar-main-row {
+  display: flex;
   align-items: center;
   justify-content: space-between;
+  flex-wrap: wrap;
   gap: 0.85rem;
+  width: 100%;
+}
+
+.control-group-left {
+  display: flex;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 0.65rem;
 }
 
 .template-selector-btn {
@@ -389,10 +403,14 @@ body {
   border-radius: var(--radius-md);
   border: 1px solid var(--border-color);
   gap: 3px;
+  height: 40px;
+  box-sizing: border-box;
+  align-items: center;
 }
 
 .seg-btn {
-  padding: 0.5rem 0.85rem;
+  padding: 0 0.85rem;
+  height: 100%;
   font-size: 0.82rem;
   font-weight: 600;
   border: none;
@@ -405,6 +423,7 @@ body {
   gap: 0.4rem;
   transition: all 0.2s ease;
   white-space: nowrap;
+  box-sizing: border-box;
 }
 
 .seg-btn:hover {
@@ -417,11 +436,15 @@ body {
   box-shadow: 0 2px 8px var(--accent-glow);
 }
 
-/* Complete Marker Style Selector (체크 / COMPLETE 도장 / 내 이미지) */
+/* Complete Marker Style Selector (체크 / COMPLETE 도장 / 내 이미지) - 메뉴의 왼쪽 하단 */
 .stamp-style-group {
   display: inline-flex;
   align-items: center;
-  gap: 0.45rem;
+  gap: 0.5rem;
+  align-self: flex-start;
+  padding-top: 0.5rem;
+  border-top: 1px solid rgba(255, 255, 255, 0.08);
+  width: 100%;
 }
 
 .stamp-style-label {
@@ -482,6 +505,7 @@ body {
   display: flex;
   align-items: center;
   gap: 0.45rem;
+  margin-left: auto;
 }
 
 .bulk-select-group {
@@ -1604,24 +1628,45 @@ body {
     padding: 0.75rem;
     gap: 0.65rem;
   }
+  .control-bar-main-row {
+    width: 100%;
+    display: flex;
+    flex-direction: column;
+    gap: 0.65rem;
+  }
+  .control-group-left {
+    width: 100%;
+    display: flex;
+    flex-direction: column;
+    gap: 0.65rem;
+  }
   .template-selector-btn {
     width: 100%;
     justify-content: space-between;
   }
   .segmented-control {
     width: 100%;
+    height: 38px;
   }
   .seg-btn {
     flex: 1;
     justify-content: center;
     font-size: 0.78rem;
-    padding: 0.45rem;
+    padding: 0 0.45rem;
+  }
+  .btn-fav-nav-btn {
+    width: 100%;
+    height: 38px;
+    justify-content: center;
+    font-size: 0.8rem;
   }
   .stamp-style-group {
     width: 100%;
     display: flex;
     align-items: center;
     gap: 0.45rem;
+    padding-top: 0.5rem;
+    border-top: 1px solid rgba(255, 255, 255, 0.08);
   }
   .stamp-style-label {
     font-size: 0.76rem;
@@ -1744,7 +1789,635 @@ body {
   }
 }
 
+/* ==========================================================================
+   Favorite Photocards (최애 포카 ♥) & Summary Card Modal
+   ========================================================================== */
+
+/* Favorite Heart Button on Photocard Slot (하트 배경 완전 제거 & 미선택 시에도 선명한 시인성 확보) */
+.photocard-slot .card-favorite-btn {
+  position: absolute;
+  top: 4px;
+  right: 4px;
+  width: 28px;
+  height: 28px;
+  background: none !important;
+  background-color: transparent !important;
+  border: none !important;
+  outline: none !important;
+  box-shadow: none !important;
+  backdrop-filter: none !important;
+  -webkit-backdrop-filter: none !important;
+  color: #ffffff;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  z-index: 50; /* Always above mask and stamp so it is NEVER covered */
+  padding: 0;
+  margin: 0;
+  transition: transform 0.18s cubic-bezier(0.34, 1.56, 0.64, 1), opacity 0.18s ease;
+  opacity: 0.85; /* 미선택 시에도 선명하게 보이도록 시인성 향상 */
+  pointer-events: auto;
+  -webkit-tap-highlight-color: transparent;
+}
+
+.photocard-slot .card-favorite-btn svg {
+  width: 20px;
+  height: 20px;
+  stroke: #ffffff;
+  fill: rgba(0, 0, 0, 0.35); /* 은은한 반투명 채움으로 어떤 배경 사진에서도 하트 모양이 선명히 보임 */
+  stroke-width: 2.2;
+  filter: drop-shadow(0 1px 3px rgba(0, 0, 0, 0.95)) drop-shadow(0 0 2px rgba(0, 0, 0, 0.9));
+  transition: all 0.18s ease;
+}
+
+/* Show button brightly on hover */
+.photocard-slot:hover .card-favorite-btn,
+.card-overlay-container.is-fav-mode-active .photocard-slot .card-favorite-btn {
+  opacity: 1;
+  transform: scale(1.15);
+}
+
+.photocard-slot .card-favorite-btn:hover {
+  transform: scale(1.25);
+  opacity: 1;
+}
+
+.photocard-slot .card-favorite-btn:hover svg {
+  stroke: #fda4af;
+  fill: rgba(239, 68, 68, 0.45);
+  filter: drop-shadow(0 0 6px rgba(244, 63, 94, 0.8));
+}
+
+/* Selected state: Red heart (선택된 최애 하트는 붉은색) */
+.photocard-slot.is-favorite {
+  box-shadow: 0 0 0 2px rgba(239, 68, 68, 0.9), 0 4px 18px rgba(239, 68, 68, 0.35);
+}
+
+.photocard-slot.is-favorite .card-favorite-btn {
+  opacity: 1;
+  background: none !important;
+  border: none !important;
+  box-shadow: none !important;
+  transform: scale(1.1);
+}
+
+.photocard-slot.is-favorite .card-favorite-btn svg {
+  stroke: #ef4444;
+  fill: #ef4444;
+  filter: drop-shadow(0 0 8px rgba(239, 68, 68, 0.9)) drop-shadow(0 1px 3px rgba(0, 0, 0, 0.8));
+}
+
+.photocard-slot.is-favorite .card-favorite-btn:hover {
+  transform: scale(1.28);
+}
+
+/* Summary Card Modal (Compact 400px card container) */
+.summary-card-modal-box {
+  width: 480px;
+  max-width: 95vw;
+  max-height: 92vh;
+  overflow-y: auto;
+  background: #121520;
+  border: 1px solid rgba(255, 255, 255, 0.12);
+  border-radius: var(--radius-lg);
+  padding: 1.25rem 1.35rem;
+  box-shadow: 0 24px 60px rgba(0, 0, 0, 0.8);
+}
+
+.summary-card-preview-container {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  background: #090a0f;
+  border-radius: var(--radius-md);
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  padding: 0.85rem;
+  margin: 0.85rem 0;
+  overflow: hidden;
+}
+
+.summary-card-preview-canvas {
+  width: 380px;
+  max-width: 100%;
+  height: auto;
+  border-radius: 14px;
+  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.7);
+  display: block;
+}
+
+/* Featured Card Selector Section (하단 대표 최애포카 선택 영역) */
+.featured-card-selector-section {
+  background: rgba(255, 255, 255, 0.03);
+  border: 1px solid rgba(255, 255, 255, 0.07);
+  border-radius: var(--radius-md);
+  padding: 0.75rem 0.85rem;
+  margin-bottom: 0.85rem;
+}
+
+.featured-selector-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 0.45rem;
+  gap: 0.5rem;
+}
+
+.featured-selector-title {
+  font-size: 0.78rem;
+  font-weight: 700;
+  color: #fda4af;
+}
+
+.featured-card-name-hint {
+  font-size: 0.72rem;
+  color: var(--text-muted);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  max-width: 180px;
+}
+
+.featured-cards-strip {
+  display: flex;
+  gap: 0.55rem;
+  overflow-x: auto;
+  padding: 0.25rem 0.15rem 0.5rem 0.15rem;
+  scrollbar-width: thin;
+}
+
+.featured-card-chip {
+  flex-shrink: 0;
+  width: 60px;
+  cursor: pointer;
+  border-radius: 8px;
+  border: 2px solid rgba(255, 255, 255, 0.12);
+  background: #090b12;
+  overflow: hidden;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  transition: all 0.18s cubic-bezier(0.34, 1.56, 0.64, 1);
+  position: relative;
+}
+
+.featured-card-chip:hover {
+  transform: translateY(-2px);
+  border-color: rgba(239, 68, 68, 0.6);
+  box-shadow: 0 4px 12px rgba(239, 68, 68, 0.25);
+}
+
+.featured-card-chip.is-selected {
+  border-color: #ef4444;
+  box-shadow: 0 0 14px rgba(239, 68, 68, 0.65);
+  transform: scale(1.05);
+}
+
+.featured-card-chip .chip-thumb-wrap {
+  width: 100%;
+  height: 72px;
+  overflow: hidden;
+  position: relative;
+  background: #141724;
+}
+
+.featured-card-chip .chip-thumb-canvas {
+  width: 100%;
+  height: 100%;
+  display: block;
+}
+
+.featured-card-chip .chip-thumb-img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  display: block;
+}
+
+.featured-card-chip .chip-name {
+  width: 100%;
+  font-size: 9px;
+  font-weight: 600;
+  color: #cbd5e1;
+  text-align: center;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  padding: 2px 3px;
+  background: #0f121d;
+}
+
+.featured-card-chip.is-selected .chip-name {
+  color: #fecdd3;
+  font-weight: 700;
+  background: rgba(239, 68, 68, 0.2);
+}
+
+.featured-card-chip .chip-selected-badge {
+  position: absolute;
+  top: 3px;
+  right: 3px;
+  width: 15px;
+  height: 15px;
+  border-radius: 50%;
+  background: #ef4444;
+  color: #fff;
+  font-size: 9px;
+  font-weight: 800;
+  display: none;
+  align-items: center;
+  justify-content: center;
+  box-shadow: 0 1px 4px rgba(0,0,0,0.6);
+}
+
+.featured-card-chip.is-selected .chip-selected-badge {
+  display: flex;
+}
+
+.favorite-thumbs-strip {
+  display: flex;
+  gap: 0.6rem;
+  overflow-x: auto;
+  padding: 0.5rem 0.2rem;
+  margin-top: 0.4rem;
+}
+
+.favorite-thumb-chip {
+  flex-shrink: 0;
+  display: flex;
+  align-items: center;
+  gap: 0.45rem;
+  background: rgba(255, 255, 255, 0.06);
+  border: 1px solid rgba(244, 63, 94, 0.3);
+  border-radius: var(--radius-full);
+  padding: 0.25rem 0.7rem 0.25rem 0.35rem;
+  font-size: 0.78rem;
+  color: #f1f5f9;
+}
+
+.favorite-thumb-chip img {
+  width: 22px;
+  height: 28px;
+  object-fit: cover;
+  border-radius: 4px;
+}
+
+/* ==========================================================================
+   Favorites Page & Controls
+   ========================================================================== */
+.btn-fav-nav-btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.45rem;
+  padding: 0 0.85rem;
+  height: 40px;
+  box-sizing: border-box;
+  background: rgba(244, 63, 94, 0.12);
+  border: 1px solid rgba(244, 63, 94, 0.35);
+  color: #fecdd3;
+  border-radius: var(--radius-md);
+  font-size: 0.82rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  white-space: nowrap;
+}
+
+.btn-fav-nav-btn:hover {
+  background: rgba(244, 63, 94, 0.22);
+  border-color: rgba(244, 63, 94, 0.65);
+  color: #fff;
+  transform: translateY(-1px);
+}
+
+.favorites-view {
+  width: 100%;
+  max-width: 1200px;
+  margin: 0 auto;
+  padding: 1.5rem 1rem 4rem;
+  box-sizing: border-box;
+}
+
+.fav-page-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 1.25rem;
+  flex-wrap: wrap;
+  margin-bottom: 1.75rem;
+  padding-bottom: 1.25rem;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.08);
+}
+
+.fav-header-left {
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+  flex-wrap: wrap;
+}
+
+.btn-fav-back {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.35rem;
+  padding: 0.45rem 0.85rem;
+  background: rgba(255, 255, 255, 0.08);
+  border: 1px solid rgba(255, 255, 255, 0.16);
+  color: #e2e8f0;
+  border-radius: var(--radius-sm);
+  font-size: 0.82rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.15s ease;
+  white-space: nowrap;
+}
+
+.btn-fav-back:hover {
+  background: rgba(255, 255, 255, 0.16);
+  color: #fff;
+  border-color: rgba(255, 255, 255, 0.32);
+}
+
+.fav-page-title-group {
+  display: flex;
+  flex-direction: column;
+  gap: 0.25rem;
+}
+
+.fav-page-title {
+  margin: 0;
+  font-size: 1.3rem;
+  font-weight: 700;
+  color: #fff;
+  display: flex;
+  align-items: center;
+  gap: 0.6rem;
+  flex-wrap: wrap;
+}
+
+.fav-page-desc {
+  margin: 0;
+  font-size: 0.82rem;
+  color: var(--text-secondary);
+}
+
+.fav-page-actions {
+  display: flex;
+  align-items: center;
+  gap: 0.6rem;
+  flex-wrap: wrap;
+}
+
+.btn-fav-action-card {
+  background: linear-gradient(135deg, rgba(239, 68, 68, 0.2), rgba(244, 63, 94, 0.25));
+  border: 1px solid rgba(244, 63, 94, 0.5);
+  color: #fda4af;
+  font-weight: 600;
+  padding: 0.45rem 0.85rem;
+}
+
+.btn-fav-action-card:hover {
+  background: linear-gradient(135deg, rgba(239, 68, 68, 0.35), rgba(244, 63, 94, 0.4));
+  color: #fff;
+  border-color: #f43f5e;
+}
+
+.fav-cards-grid-container {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(180px, 1fr));
+  gap: 1.25rem;
+  width: 100%;
+}
+
+@media (max-width: 640px) {
+  .fav-cards-grid-container {
+    grid-template-columns: repeat(2, 1fr);
+    gap: 0.75rem;
+  }
+  .fav-page-header {
+    flex-direction: column;
+    align-items: flex-start;
+  }
+  .fav-page-actions {
+    width: 100%;
+  }
+  .fav-page-actions button {
+    flex: 1;
+    justify-content: center;
+  }
+}
+
+.fav-grid-card {
+  background: rgba(22, 27, 46, 0.85);
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  border-radius: 12px;
+  overflow: hidden;
+  display: flex;
+  flex-direction: column;
+  position: relative;
+  transition: all 0.2s ease;
+  box-shadow: 0 4px 16px rgba(0, 0, 0, 0.3);
+}
+
+.fav-grid-card:hover {
+  transform: translateY(-3px);
+  border-color: rgba(244, 63, 94, 0.4);
+  box-shadow: 0 8px 24px rgba(244, 63, 94, 0.15);
+}
+
+.fav-grid-card.is-owned {
+  border-color: rgba(52, 211, 153, 0.4);
+}
+
+.fav-card-rank-badge {
+  position: absolute;
+  top: 8px;
+  left: 8px;
+  background: rgba(15, 23, 42, 0.85);
+  border: 1px solid rgba(244, 63, 94, 0.6);
+  color: #fda4af;
+  font-size: 0.7rem;
+  font-weight: 700;
+  padding: 2px 7px;
+  border-radius: 999px;
+  backdrop-filter: blur(4px);
+  z-index: 2;
+  display: flex;
+  align-items: center;
+  gap: 3px;
+}
+
+.fav-card-remove-btn {
+  position: absolute;
+  top: 8px;
+  right: 8px;
+  width: 24px;
+  height: 24px;
+  border-radius: 50%;
+  background: rgba(15, 23, 42, 0.85);
+  border: 1px solid rgba(255, 255, 255, 0.2);
+  color: #94a3b8;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  z-index: 2;
+  transition: all 0.15s ease;
+}
+
+.fav-card-remove-btn:hover {
+  background: #ef4444;
+  border-color: #ef4444;
+  color: #fff;
+  transform: scale(1.1);
+}
+
+.fav-card-thumb-wrap {
+  width: 100%;
+  aspect-ratio: 55 / 85;
+  background: #0f121d;
+  position: relative;
+  overflow: hidden;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.fav-card-canvas {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  display: block;
+}
+
+.fav-card-body {
+  padding: 0.75rem 0.85rem;
+  display: flex;
+  flex-direction: column;
+  gap: 0.35rem;
+  flex: 1;
+}
+
+.fav-card-name {
+  font-size: 0.88rem;
+  font-weight: 700;
+  color: #f8fafc;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.fav-card-template-title {
+  font-size: 0.74rem;
+  color: var(--text-secondary);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.fav-card-actions {
+  display: flex;
+  gap: 0.4rem;
+  margin-top: 0.35rem;
+}
+
+.btn-fav-toggle-owned {
+  flex: 1;
+  padding: 0.32rem 0.45rem;
+  font-size: 0.72rem;
+  font-weight: 600;
+  border-radius: 6px;
+  border: 1px solid transparent;
+  cursor: pointer;
+  transition: all 0.15s ease;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 4px;
+}
+
+.btn-fav-toggle-owned.owned {
+  background: rgba(52, 211, 153, 0.18);
+  border-color: rgba(52, 211, 153, 0.45);
+  color: #6ee7b7;
+}
+
+.btn-fav-toggle-owned.owned:hover {
+  background: rgba(52, 211, 153, 0.28);
+}
+
+.btn-fav-toggle-owned.unowned {
+  background: rgba(148, 163, 184, 0.12);
+  border-color: rgba(148, 163, 184, 0.25);
+  color: #94a3b8;
+}
+
+.btn-fav-toggle-owned.unowned:hover {
+  background: rgba(148, 163, 184, 0.22);
+  color: #cbd5e1;
+}
+
+.btn-fav-jump-template {
+  padding: 0.32rem 0.5rem;
+  font-size: 0.72rem;
+  background: rgba(255, 255, 255, 0.06);
+  border: 1px solid rgba(255, 255, 255, 0.14);
+  color: #cbd5e1;
+  border-radius: 6px;
+  cursor: pointer;
+  text-decoration: none;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  transition: all 0.15s ease;
+  white-space: nowrap;
+}
+
+.btn-fav-jump-template:hover {
+  background: rgba(255, 255, 255, 0.14);
+  color: #fff;
+  border-color: rgba(255, 255, 255, 0.28);
+}
+
+.fav-empty-state {
+  grid-column: 1 / -1;
+  padding: 4rem 1.5rem;
+  text-align: center;
+  background: rgba(22, 27, 46, 0.45);
+  border: 1px dashed rgba(255, 255, 255, 0.15);
+  border-radius: 16px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 0.85rem;
+}
+
+.fav-empty-icon {
+  font-size: 2.8rem;
+  opacity: 0.7;
+}
+
+.fav-empty-title {
+  font-size: 1.15rem;
+  font-weight: 700;
+  color: #f1f5f9;
+  margin: 0;
+}
+
+.fav-empty-desc {
+  font-size: 0.85rem;
+  color: var(--text-secondary);
+  max-width: 440px;
+  margin: 0 auto;
+  line-height: 1.55;
+}
+
+.link-go-fav-page:hover {
+  color: #f43f5e !important;
+}
   </style>
+  <link rel="stylesheet" href="css/style.css">
 </head>
 <body>
   <!-- Header & Navbar -->
@@ -1778,18 +2451,13 @@ body {
         공지사항
       </button>
 
-      <button id="btn-open-fav-gallery-header" class="btn btn-sm" title="내가 선택한 최애 포카(최대 10장) 모아보기" style="border-color: rgba(239, 68, 68, 0.4); color: #fda4af;">
-        <svg viewBox="0 0 24 24" width="13" height="13" fill="currentColor" style="color: #ef4444;">
-          <path d="M12 21.35l-1.45-1.32C5.4 15.36 2 12.28 2 8.5 2 5.42 4.42 3 7.5 3c1.74 0 3.41.81 4.5 2.09C13.09 3.81 14.76 3 16.5 3 19.58 3 22 5.42 22 8.5c0 3.78-3.4 6.86-8.55 11.54L12 21.35z"/>
-        </svg>
-        💖 최애 모아보기
-      </button>
-
-      <button id="btn-export-all-merged" class="btn btn-purple btn-sm" title="내가 선택한 최애 포카(최대 10장)를 1장의 고화질 합본 포스터로 일괄 다운로드">
+      <button id="btn-export-all-merged" class="btn btn-purple btn-sm" title="고화질 합본 포스터 일괄 다운로드">
         <svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-          <path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z"></path>
+          <rect x="3" y="3" width="18" height="18" rx="2" ry="2"></rect>
+          <circle cx="8.5" cy="8.5" r="1.5"></circle>
+          <polyline points="21 15 16 10 5 21"></polyline>
         </svg>
-        💖 최애포카 합본 다운로드
+        합본 포스터
       </button>
 
       <button id="btn-open-backup" class="btn btn-sm" title="내 체크리스트 데이터 백업 및 복원 (기기 이동/공유)">
@@ -1801,11 +2469,11 @@ body {
         백업 / 복원
       </button>
 
-      <button id="btn-share-x" class="btn btn-x-share btn-sm" title="내 수집 진행률과 최애 포카 카드를 생성하고 공유하기">
+      <button id="btn-share-x" class="btn btn-x-share btn-sm" title="내 수집 진행률과 자랑하기 카드를 생성하고 공유하기">
         <svg viewBox="0 0 24 24" width="13" height="13" fill="currentColor">
           <path d="M18.244 2.25h3.308l-7.227 8.26 8.502 11.24H16.17l-5.214-6.817L4.99 21.75H1.68l7.73-8.835L1.254 2.25H8.08l4.713 6.231zm-1.161 17.52h1.833L7.084 4.126H5.117z"></path>
         </svg>
-        💖 최애 카드 / 자랑하기
+        자랑하기
       </button>
 
       <button id="toggle-editor-btn" class="btn btn-sm" style="display: none;" title="영역 편집 / 자석 스냅 / 깃헙 직접 저장">
@@ -1829,19 +2497,10 @@ body {
       <h2 class="hero-title">카테고리를 선택하세요</h2>
       <p class="hero-desc">보유한 포토카드를 클릭하여 체크하고, 1장 개별 다운로드 또는 전체 44종 합본 포스터로 다운로드하세요.</p>
       
-      <div style="display: flex; gap: 0.5rem; justify-content: center; flex-wrap: wrap; margin-top: 0.85rem; margin-bottom: 0.35rem;">
-        <button id="btn-open-fav-gallery-home" class="btn btn-sm" style="background: rgba(239, 68, 68, 0.15); border: 1px solid rgba(239, 68, 68, 0.35); color: #fecdd3; font-weight: 700;">
-          💖 최애포카 모아보기
-        </button>
-        <button id="btn-open-share-home" class="btn btn-sm btn-x-share">
-          ✨ 나만의 수집 카드 / 자랑하기
-        </button>
-      </div>
-
       <!-- Single-line Interactive Notice Bar -->
       <div id="btn-notice-ticker" class="notice-ticker-bar" title="공지사항 및 사용 도움말 열기">
         <span class="notice-ticker-badge">✨ [업데이트]</span>
-        <span>합본 분리 다운로드(전체 / 올클리어 보유 / 미보유 위시) 기능 추가!</span>
+        <span>합본 분리 다운로드(전체 / 올클리어 보유 / 미보유 위시 / 최애포카 합본) 기능 추가!</span>
       </div>
     </div>
 
@@ -1856,40 +2515,70 @@ body {
   <main id="checker-view" class="view-container checker-view" style="display: none;">
     <!-- Top Control Bar -->
     <section class="control-bar">
-      <!-- 1. Current Template Trigger (Opens Drawer) -->
-      <button id="template-selector-btn" class="template-selector-btn" title="포토카드 목록 열기">
-        <svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
-          <line x1="3" y1="12" x2="21" y2="12"></line>
-          <line x1="3" y1="6" x2="21" y2="6"></line>
-          <line x1="3" y1="18" x2="21" y2="18"></line>
-        </svg>
-        <span id="current-template-title">fore1. 미스티크</span>
-        <span id="current-template-tag" class="template-tag-badge">#콘서트/MD</span>
-        <span id="current-template-status" class="template-status-pill badge-status empty">0/8장</span>
-        <svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2">
-          <polyline points="6 9 12 15 18 9"></polyline>
-        </svg>
-      </button>
+      <div class="control-bar-main-row">
+        <div class="control-group-left">
+          <!-- 1. Current Template Trigger (Opens Drawer) -->
+          <button id="template-selector-btn" class="template-selector-btn" title="포토카드 목록 열기">
+            <svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
+              <line x1="3" y1="12" x2="21" y2="12"></line>
+              <line x1="3" y1="6" x2="21" y2="6"></line>
+              <line x1="3" y1="18" x2="21" y2="18"></line>
+            </svg>
+            <span id="current-template-title">fore1. 미스티크</span>
+            <span id="current-template-tag" class="template-tag-badge">#콘서트/MD</span>
+            <span id="current-template-status" class="template-status-pill badge-status empty">0/8장</span>
+            <svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2">
+              <polyline points="6 9 12 15 18 9"></polyline>
+            </svg>
+          </button>
 
-      <!-- 2. Display Mode Toggle -->
-      <div class="segmented-control">
-        <button id="mode-hide-owned" class="seg-btn active" title="보유 포카를 회색으로 가려 미보유 위시리스트 강조">
-          <svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2.5">
-            <path d="M17.94 17.94A10.07 10.07 0 0 1 12 20c-7 0-11-8-11-8a18.45 18.45 0 0 1 5.06-5.94M9.9 4.24A9.12 9.12 0 0 1 12 4c7 0 11 8 11 8a18.5 18.5 0 0 1-2.16 3.19m-6.72-1.07a3 3 0 1 1-4.24-4.24"></path>
-            <line x1="1" y1="1" x2="23" y2="23"></line>
-          </svg>
-          보유 포카 가리기
-        </button>
-        <button id="mode-hide-unowned" class="seg-btn" title="미보유 포카를 회색으로 가려 보유 컬렉션 강조">
-          <svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2.5">
-            <path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"></path>
-            <circle cx="12" cy="12" r="3"></circle>
-          </svg>
-          미보유 포카 가리기
-        </button>
+          <!-- 2. Display Mode Toggle -->
+          <div class="segmented-control">
+            <button id="mode-hide-owned" class="seg-btn active" title="보유 포카를 회색으로 가려 미보유 위시리스트 강조">
+              <svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2.5">
+                <path d="M17.94 17.94A10.07 10.07 0 0 1 12 20c-7 0-11-8-11-8a18.45 18.45 0 0 1 5.06-5.94M9.9 4.24A9.12 9.12 0 0 1 12 4c7 0 11 8 11 8a18.5 18.5 0 0 1-2.16 3.19m-6.72-1.07a3 3 0 1 1-4.24-4.24"></path>
+                <line x1="1" y1="1" x2="23" y2="23"></line>
+              </svg>
+              보유 포카 가리기
+            </button>
+            <button id="mode-hide-unowned" class="seg-btn" title="미보유 포카를 회색으로 가려 보유 컬렉션 강조">
+              <svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2.5">
+                <path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"></path>
+                <circle cx="12" cy="12" r="3"></circle>
+              </svg>
+              미보유 포카 가리기
+            </button>
+          </div>
+
+          <!-- 2.2 Go to Favorites Page -->
+          <button id="btn-go-favorites-page" class="btn btn-fav-nav-btn" title="내가 찜한 최애 포카 모아보기 페이지로 이동">
+            <svg viewBox="0 0 24 24" width="14" height="14" fill="#ef4444" stroke="#ef4444" stroke-width="1.5">
+              <path d="M12 21.35l-1.45-1.32C5.4 15.36 2 12.28 2 8.5 2 5.42 4.42 3 7.5 3c1.74 0 3.41.81 4.5 2.09C13.09 3.81 14.76 3 16.5 3 19.58 3 22 5.42 22 8.5c0 3.78-3.4 6.86-8.55 11.54L12 21.35z"/>
+            </svg>
+            <span>최애포카 모아보기</span>
+            <span id="fav-nav-badge" class="badge-count rose" style="font-size: 0.7rem; padding: 1px 6px;">0</span>
+          </button>
+        </div>
+
+        <!-- 3. Bulk Actions & Export -->
+        <div class="control-group-actions">
+          <div class="bulk-select-group">
+            <button id="btn-select-all" class="btn btn-sm btn-action-select" title="모두 보유로 선택">전체 선택</button>
+            <button id="btn-deselect-all" class="btn btn-sm btn-action-select" title="선택 해제">전체 해제</button>
+            <button id="btn-invert-selection" class="btn btn-sm btn-action-select" title="선택 반전">반전</button>
+          </div>
+          <button id="btn-export-png" class="btn btn-success btn-sm btn-export-single" title="완성된 체크리스트 고화질 PNG 다운로드 (1장)">
+            <svg viewBox="0 0 24 24" width="15" height="15" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+              <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path>
+              <polyline points="7 10 12 15 17 10"></polyline>
+              <line x1="12" y1="15" x2="12" y2="3"></line>
+            </svg>
+            다운로드 (1장)
+          </button>
+        </div>
       </div>
 
-      <!-- 2.5 Complete Marker Style (체크 / 도장 / 내 이미지) -->
+      <!-- 2.5 Complete Marker Style (체크 / 도장 / 내 이미지) - 메뉴의 왼쪽 하단 -->
       <div id="stamp-style-group" class="stamp-style-group" title="보유 포카 표시 스타일 선택">
         <span class="stamp-style-label">완료 표시:</span>
         <div class="stamp-btn-group">
@@ -1917,37 +2606,6 @@ body {
           </button>
         </div>
         <input type="file" id="stamp-image-input" accept="image/*" style="display: none;">
-      </div>
-
-      <!-- 2.8 Favorite Photocard Controls (상단 최애포카 선택 기능) -->
-      <div class="favorite-top-control-group" title="내가 좋아하는 최애 포카(♥) 선택 및 나만의 수집 카드 생성">
-        <button id="btn-toggle-fav-mode" class="btn btn-sm btn-fav-mode" title="클릭하여 최애 포카(♥) 선택 모드 켜기/끄기">
-          <svg viewBox="0 0 24 24" width="13" height="13" fill="currentColor">
-            <path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z"></path>
-          </svg>
-          <span id="fav-mode-label">최애포카 선택</span>
-        </button>
-        <button id="btn-open-fav-gallery" class="btn btn-sm btn-fav-card-open" title="내가 선택한 최애 포카 모아보기">
-          <span>💖 최애 모아보기</span>
-          <span id="fav-card-badge-count" class="badge-count fav-count-badge">0/10</span>
-        </button>
-      </div>
-
-      <!-- 3. Bulk Actions & Export -->
-      <div class="control-group-actions">
-        <div class="bulk-select-group">
-          <button id="btn-select-all" class="btn btn-sm btn-action-select" title="모두 보유로 선택">전체 선택</button>
-          <button id="btn-deselect-all" class="btn btn-sm btn-action-select" title="선택 해제">전체 해제</button>
-          <button id="btn-invert-selection" class="btn btn-sm btn-action-select" title="선택 반전">반전</button>
-        </div>
-        <button id="btn-export-png" class="btn btn-success btn-sm btn-export-single" title="완성된 체크리스트 고화질 PNG 다운로드 (1장)">
-          <svg viewBox="0 0 24 24" width="15" height="15" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-            <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path>
-            <polyline points="7 10 12 15 17 10"></polyline>
-            <line x1="12" y1="15" x2="12" y2="3"></line>
-          </svg>
-          다운로드 (1장)
-        </button>
       </div>
     </section>
 
@@ -2072,7 +2730,44 @@ body {
   </main>
 
   <!-- ========================================================================
-       Template Drawer / Bottom Sheet Modal
+       VIEW 3: Favorites View (최애포카 모아보기 페이지)
+       ======================================================================== -->
+  <main id="favorites-view" class="view-container favorites-view" style="display: none;">
+    <section class="fav-page-header">
+      <div class="fav-header-left">
+        <button id="btn-fav-back-to-checker" class="btn btn-sm btn-fav-back" title="체커 화면으로 돌아가기">
+          <svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+            <polyline points="15 18 9 12 15 6"></polyline>
+          </svg>
+          <span>체커로 돌아가기</span>
+        </button>
+        <div class="fav-page-title-group">
+          <h2 class="fav-page-title">
+            <span>💖 내가 찜한 최애 포토카드</span>
+            <span id="fav-page-count-pill" class="badge-count rose">0 / 10장</span>
+          </h2>
+          <p class="fav-page-desc">체커에서 하트(♥)로 등록한 최애 포토카드를 한곳에서 모아보고, 보유 여부를 관리하거나 합본으로 다운로드합니다.</p>
+        </div>
+      </div>
+
+      <div class="fav-page-actions">
+        <button id="btn-fav-page-share-card" class="btn btn-sm btn-fav-action-card">
+          <span>✨ 자랑하기 카드</span>
+        </button>
+        <button id="btn-fav-page-export-merged" class="btn btn-purple btn-sm">
+          <span>🖼️ 최애 합본 다운로드</span>
+        </button>
+      </div>
+    </section>
+
+    <!-- Favorites Grid Container -->
+    <section id="fav-cards-grid-container" class="fav-cards-grid-container">
+      <!-- Dynamically filled by app.js: renderFavoritesPage() -->
+    </section>
+  </main>
+
+  <!-- ========================================================================
+       Drawer: Templates Navigation Drawer
        ======================================================================== -->
   <div id="drawer-backdrop" class="drawer-backdrop">
     <div class="template-drawer">
@@ -2099,12 +2794,8 @@ body {
         </div>
 
         <div class="filter-pills-row" id="drawer-tags-container"></div>
-
-        <button id="btn-drawer-open-fav-gallery" class="btn btn-sm" style="width: 100%; justify-content: center; margin-top: 0.3rem; background: rgba(239, 68, 68, 0.15); border: 1px solid rgba(239, 68, 68, 0.35); color: #fecdd3; font-weight: 700;">
-          💖 최애포카 모아보기
-        </button>
         <button id="btn-drawer-export-merged" class="btn btn-purple btn-sm" style="width: 100%; justify-content: center; margin-top: 0.3rem;">
-          💖 최애포카 합본 포스터 다운로드 (최대 10장)
+          🖼️ 합본 포스터 다운로드
         </button>
       </div>
 
@@ -2300,12 +2991,12 @@ body {
   </div>
 
   <!-- ========================================================================
-       Favorite Merged Export Modal Dialog
+       Merged Export Selection Modal Dialog
        ======================================================================== -->
   <div id="merged-export-modal-backdrop" class="modal-backdrop">
     <div class="modal-box" style="width: 520px; max-width: 95vw;">
       <div class="modal-header">
-        <h3 class="modal-title">💖 최애포카 합본 포스터 다운로드</h3>
+        <h3 class="modal-title">🖼️ 합본 포스터 다운로드</h3>
         <button id="close-merged-modal-btn" class="btn btn-sm btn-icon-only">
           <svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2">
             <line x1="18" y1="6" x2="6" y2="18"></line>
@@ -2314,40 +3005,88 @@ body {
         </button>
       </div>
 
-      <p style="font-size: 0.84rem; color: var(--text-secondary); margin-bottom: 0.85rem; line-height: 1.45;">
-        내가 하트(♥)로 선택한 <strong>최애 포카(최대 10장)</strong>를 1장의 고화질 포스터로 다운로드합니다.
+      <p style="font-size: 0.84rem; color: var(--text-secondary); margin-bottom: 1rem; line-height: 1.45;">
+        원하는 목적에 맞는 이미지판 또는 최애 포카를 골라 1장의 고화질 포스터로 다운로드합니다.
       </p>
 
-      <!-- Selected Count Banner -->
-      <div style="background: rgba(239, 68, 68, 0.08); border: 1px solid rgba(239, 68, 68, 0.25); border-radius: var(--radius-md); padding: 0.75rem 1rem; margin-bottom: 0.85rem; display: flex; align-items: center; justify-content: space-between;">
-        <span style="font-size: 0.82rem; color: #fda4af; font-weight: 700;">선택된 최애 포카</span>
-        <span style="font-size: 0.95rem; font-weight: 800; color: #ffffff;">
-          <span id="merged-fav-count" style="color: #ef4444; font-size: 1.15rem;">0</span> / 10장
-        </span>
+      <!-- Option 1: All Templates (Choose Wishlist vs Collection) -->
+      <div class="merged-option-card" style="flex-direction: column; align-items: stretch; gap: 0.65rem;">
+        <div style="display: flex; align-items: center; justify-content: space-between;">
+          <div class="merged-card-info">
+            <div class="merged-card-title">
+              <span>🗂️ 전체 이미지판 합본</span>
+              <span id="merged-count-all" class="badge-count">44개 판</span>
+            </div>
+            <div class="merged-card-desc">모든 이미지판을 모아 1장의 대형 포스터로 생성</div>
+          </div>
+        </div>
+        <div style="display: flex; gap: 0.5rem; justify-content: flex-end; padding-top: 0.35rem; border-top: 1px solid rgba(255,255,255,0.06);">
+          <button id="btn-export-merged-all-unowned" class="btn btn-sm" style="flex: 1; justify-content: center; font-size: 0.78rem; background: rgba(56, 189, 248, 0.12); border: 1px solid rgba(56, 189, 248, 0.35); color: #38bdf8;" title="보유한 포카를 가려 미보유 위시리스트를 강조하는 전체 합본">
+            미보유 위시 합본
+          </button>
+          <button id="btn-export-merged-all-owned" class="btn btn-sm" style="flex: 1; justify-content: center; font-size: 0.78rem; background: rgba(52, 211, 153, 0.12); border: 1px solid rgba(52, 211, 153, 0.35); color: #34d399;" title="모은 포카를 보여주는 보유 컬렉션 강조 전체 합본">
+            보유 컬렉션 합본
+          </button>
+        </div>
       </div>
 
-      <!-- Selected Cards Strip / Grid -->
-      <div id="merged-fav-cards-strip" class="featured-cards-strip" style="min-height: 95px; max-height: 220px; overflow-y: auto; background: #0c0e18; border-radius: var(--radius-md); border: 1px solid rgba(255,255,255,0.08); padding: 0.6rem; margin-bottom: 1rem;">
-        <!-- Filled dynamically by app.js -->
+      <!-- Option 2: Owned / Completed Templates only (Always Owned Collection mode) -->
+      <div class="merged-option-card">
+        <div class="merged-card-info">
+          <div class="merged-card-title">
+            <span>✨ 올클리어 (전체 보유판)</span>
+            <span id="merged-count-owned" class="badge-count success">0개 판</span>
+          </div>
+          <div class="merged-card-desc">100% 수집 완료한 판만 골라 <strong>보유 컬렉션</strong>으로 생성</div>
+        </div>
+        <button id="btn-do-export-merged-owned" class="btn btn-success btn-sm">보유 합본 다운로드</button>
       </div>
 
-      <!-- Download Action Button -->
-      <button id="btn-do-export-fav-merged" class="btn btn-purple" style="width: 100%; justify-content: center; padding: 0.75rem; font-size: 0.92rem; font-weight: 700; gap: 0.5rem;">
-        <svg viewBox="0 0 24 24" width="16" height="16" fill="currentColor">
-          <path d="M12 21.35l-1.45-1.32C5.4 15.36 2 12.28 2 8.5 2 5.42 4.42 3 7.5 3c1.74 0 3.41.81 4.5 2.09C13.09 3.81 14.76 3 16.5 3 19.58 3 22 5.42 22 8.5c0 3.78-3.4 6.86-8.55 11.54L12 21.35z"/>
-        </svg>
-        고화질 최애포카 합본 포스터 다운로드 (PNG)
-      </button>
+      <!-- Option 3: Unowned / Incomplete Templates only (Always Unowned Wishlist mode) -->
+      <div class="merged-option-card">
+        <div class="merged-card-info">
+          <div class="merged-card-title">
+            <span>🔍 미보유 (위시리스트판)</span>
+            <span id="merged-count-unowned" class="badge-count warning">0개 판</span>
+          </div>
+          <div class="merged-card-desc">미보유 포카가 남은 판만 골라 <strong>미보유 위시</strong>로 생성</div>
+        </div>
+        <button id="btn-do-export-merged-unowned" class="btn btn-purple btn-sm">미보유 합본 다운로드</button>
+      </div>
+
+      <!-- Option 4: Favorite Photocards Merged Poster (최애 합본 다운) -->
+      <div class="merged-option-card">
+        <div class="merged-card-info">
+          <div class="merged-card-title">
+            <span>💖 최애포카 합본</span>
+            <span id="merged-fav-count-badge" class="badge-count rose" style="background: rgba(244, 63, 94, 0.18); color: #fda4af;">
+              <span id="merged-fav-count">0</span> / 10장
+            </span>
+          </div>
+          <div class="merged-card-desc">찜한 최애 포카(최대 10장)만 모아 <strong>최애 컬렉션</strong> 생성</div>
+          <div style="margin-top: 4px;">
+            <a href="#/favorites" id="link-merged-go-fav-page" class="link-go-fav-page" style="font-size: 0.74rem; color: #fda4af; text-decoration: underline; cursor: pointer; display: inline-flex; align-items: center; gap: 3px;">
+              <span>최애포카 모아보기 페이지로 이동</span>
+              <svg viewBox="0 0 24 24" width="11" height="11" fill="none" stroke="currentColor" stroke-width="2.5">
+                <path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6"></path>
+                <polyline points="15 3 21 3 21 9"></polyline>
+                <line x1="10" y1="14" x2="21" y2="3"></line>
+              </svg>
+            </a>
+          </div>
+        </div>
+        <button id="btn-do-export-fav-merged" class="btn btn-sm btn-export-fav" style="background: linear-gradient(135deg, #f43f5e, #e11d48); border: none; color: #ffffff; white-space: nowrap; font-weight: 600;">최애 합본 다운로드</button>
+      </div>
     </div>
   </div>
 
   <!-- ========================================================================
-       Favorite & Progress Summary Card Modal Dialog
+       Favorite & Progress Summary Card Modal Dialog (자랑하기 카드)
        ======================================================================== -->
   <div id="summary-card-modal-backdrop" class="modal-backdrop">
     <div class="summary-card-modal-box">
       <div class="modal-header">
-        <h3 class="modal-title">✨ 나만의 포카 수집 & 최애 카드</h3>
+        <h3 class="modal-title">✨ 자랑하기 카드</h3>
         <button id="close-summary-card-modal-btn" class="btn btn-sm btn-icon-only">
           <svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2">
             <line x1="18" y1="6" x2="6" y2="18"></line>
@@ -2416,46 +3155,7 @@ body {
     </div>
   </div>
 
-  <!-- ========================================================================
-       Favorite Photocards Gallery Modal Dialog (최애포카 모아보기)
-       ======================================================================== -->
-  <div id="fav-gallery-modal-backdrop" class="modal-backdrop">
-    <div class="modal-box fav-gallery-modal-box">
-      <div class="modal-header">
-        <div style="display: flex; align-items: center; gap: 0.5rem; flex-wrap: wrap;">
-          <h3 class="modal-title" style="display: flex; align-items: center; gap: 0.4rem;">
-            💖 <span>최애포카 모아보기</span>
-          </h3>
-          <span id="fav-gallery-count-badge" class="badge-count fav-count-badge" style="font-size: 0.78rem; padding: 2px 7px;">0 / 10장</span>
-        </div>
-        <button id="close-fav-gallery-modal-btn" class="btn btn-sm btn-icon-only" title="닫기">
-          <svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2">
-            <line x1="18" y1="6" x2="6" y2="18"></line>
-            <line x1="6" y1="6" x2="18" y2="18"></line>
-          </svg>
-        </button>
-      </div>
 
-      <div style="display: flex; align-items: center; justify-content: space-between; flex-wrap: wrap; gap: 0.5rem; margin-top: 0.3rem; margin-bottom: 0.85rem;">
-        <p style="font-size: 0.82rem; color: var(--text-secondary); margin: 0; line-height: 1.4;">
-          내가 하트(♥)로 찜한 최애 포토카드를 한눈에 확인하고, 보유 상태 변경 및 해당 판으로 바로 이동할 수 있습니다.
-        </p>
-        <div style="display: flex; gap: 0.4rem; align-items: center; flex-wrap: wrap;">
-          <button id="btn-fav-gallery-to-share" class="btn btn-sm btn-x-share" title="나만의 수집 & 최애 카드 만들기">
-            ✨ 자랑하기 카드
-          </button>
-          <button id="btn-fav-gallery-to-poster" class="btn btn-sm btn-purple" title="최애포카 합본 포스터 다운로드">
-            🖼️ 합본 포스터
-          </button>
-        </div>
-      </div>
-
-      <!-- Favorite Cards Grid Container -->
-      <div id="fav-gallery-grid" class="fav-gallery-grid">
-        <!-- Rendered dynamically via app.js -->
-      </div>
-    </div>
-  </div>
 
   <!-- Footer -->
   <footer class="app-footer">
@@ -2466,9 +3166,9 @@ body {
   <div id="toast-container" class="toast-container"></div>
 
   <!-- Scripts -->
-  <script src="js/templates.js?v=2026.11.12-fav-gallery"></script>
-  <script src="js/canvas-export.js?v=2026.11.12-fav-gallery"></script>
-  <script src="js/editor.js?v=2026.11.12-fav-gallery"></script>
-  <script src="js/app.js?v=2026.11.12-fav-gallery"></script>
+  <script src="js/templates.js?v=2026.11.12-collector-tiers"></script>
+  <script src="js/canvas-export.js?v=2026.11.12-collector-tiers"></script>
+  <script src="js/editor.js?v=2026.11.12-collector-tiers"></script>
+  <script src="js/app.js?v=2026.11.12-collector-tiers"></script>
 </body>
 </html>
