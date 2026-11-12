@@ -1743,3 +1743,130 @@ body {
     justify-content: center;
   }
 }
+
+/* ==========================================================================
+   Favorite Photocards (최애 포카 ♥) & Summary Card Modal
+   ========================================================================== */
+
+/* Favorite Heart Button on Photocard Slot */
+.photocard-slot .card-favorite-btn {
+  position: absolute;
+  top: 4px;
+  right: 4px;
+  width: 26px;
+  height: 26px;
+  border-radius: 50%;
+  background: rgba(15, 23, 42, 0.72);
+  backdrop-filter: blur(4px);
+  -webkit-backdrop-filter: blur(4px);
+  border: 1px solid rgba(255, 255, 255, 0.25);
+  color: #94a3b8;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  z-index: 30;
+  padding: 0;
+  transition: all 0.18s cubic-bezier(0.34, 1.56, 0.64, 1);
+  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.4);
+  opacity: 0;
+  pointer-events: auto;
+}
+
+/* Show button on hover or when already favorited */
+.photocard-slot:hover .card-favorite-btn,
+.photocard-slot.is-favorite .card-favorite-btn {
+  opacity: 1;
+}
+
+/* On mobile / touch screens, keep visible so user can easily tap */
+@media (hover: none) {
+  .photocard-slot .card-favorite-btn {
+    opacity: 0.65;
+  }
+}
+
+.photocard-slot .card-favorite-btn:hover {
+  transform: scale(1.15);
+  background: rgba(244, 63, 94, 0.25);
+  border-color: rgba(244, 63, 94, 0.6);
+  color: #fb7185;
+}
+
+.photocard-slot.is-favorite {
+  box-shadow: 0 0 0 2px rgba(244, 63, 94, 0.8), 0 4px 16px rgba(244, 63, 94, 0.25);
+}
+
+.photocard-slot.is-favorite .card-favorite-btn {
+  opacity: 1;
+  background: linear-gradient(135deg, #f43f5e, #e11d48);
+  border-color: #fda4af;
+  color: #ffffff;
+  box-shadow: 0 2px 8px rgba(244, 63, 94, 0.65);
+  transform: scale(1);
+}
+
+.photocard-slot.is-favorite .card-favorite-btn:hover {
+  transform: scale(1.18);
+}
+
+/* Summary Card Modal */
+.summary-card-modal-box {
+  width: 900px;
+  max-width: 94vw;
+  max-height: 90vh;
+  overflow-y: auto;
+  background: #121520;
+  border: 1px solid rgba(255, 255, 255, 0.12);
+  border-radius: var(--radius-lg);
+  padding: 1.5rem;
+  box-shadow: 0 24px 60px rgba(0, 0, 0, 0.8);
+}
+
+.summary-card-preview-container {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  background: #090a0f;
+  border-radius: var(--radius-md);
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  padding: 1rem;
+  margin: 1.2rem 0;
+  overflow: hidden;
+}
+
+.summary-card-preview-canvas {
+  max-width: 100%;
+  height: auto;
+  border-radius: 12px;
+  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.6);
+  display: block;
+}
+
+.favorite-thumbs-strip {
+  display: flex;
+  gap: 0.6rem;
+  overflow-x: auto;
+  padding: 0.5rem 0.2rem;
+  margin-top: 0.4rem;
+}
+
+.favorite-thumb-chip {
+  flex-shrink: 0;
+  display: flex;
+  align-items: center;
+  gap: 0.45rem;
+  background: rgba(255, 255, 255, 0.06);
+  border: 1px solid rgba(244, 63, 94, 0.3);
+  border-radius: var(--radius-full);
+  padding: 0.25rem 0.7rem 0.25rem 0.35rem;
+  font-size: 0.78rem;
+  color: #f1f5f9;
+}
+
+.favorite-thumb-chip img {
+  width: 22px;
+  height: 28px;
+  object-fit: cover;
+  border-radius: 4px;
+}

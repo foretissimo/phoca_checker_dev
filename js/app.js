@@ -13,6 +13,12 @@ class PhocaCheckerApp {
     
     // Checked cards set for active template
     this.checkedCards = new Set();
+
+    // Favorite cards set for active template (최애 포카 ♥)
+    this.favoriteCards = new Set();
+
+    // User Nickname for collection card
+    this.nickname = '';
     
     // Display mode: 'hide-owned' | 'hide-unowned'
     this.displayMode = 'hide-owned';
@@ -77,6 +83,16 @@ class PhocaCheckerApp {
 
     // Share to X Button
     this.btnShareX = document.getElementById('btn-share-x');
+
+    // Favorite & Progress Summary Card Modal
+    this.summaryCardModalBackdrop = document.getElementById('summary-card-modal-backdrop');
+    this.btnCloseSummaryCardModal = document.getElementById('close-summary-card-modal-btn');
+    this.summaryNicknameInput = document.getElementById('summary-nickname-input');
+    this.summaryFavCountEl = document.getElementById('summary-fav-count');
+    this.summaryCardCanvas = document.getElementById('summary-card-canvas');
+    this.btnCopySummaryCard = document.getElementById('btn-copy-summary-card');
+    this.btnDownloadSummaryCard = document.getElementById('btn-download-summary-card');
+    this.btnShareSummaryX = document.getElementById('btn-share-summary-x');
 
     // Trigger button for Template Drawer
     this.templateSelectorBtn = document.getElementById('template-selector-btn');
@@ -215,7 +231,35 @@ class PhocaCheckerApp {
 
     // Share to X
     if (this.btnShareX) {
-      this.btnShareX.addEventListener('click', () => this.shareToX());
+      this.btnShareX.addEventListener('click', () => this.openSummaryCardModal());
+    }
+
+    // Summary Card Modal Events
+    if (this.btnCloseSummaryCardModal) {
+      this.btnCloseSummaryCardModal.addEventListener('click', () => this.closeSummaryCardModal());
+    }
+    if (this.summaryCardModalBackdrop) {
+      this.summaryCardModalBackdrop.addEventListener('click', (e) => {
+        if (e.target === this.summaryCardModalBackdrop) this.closeSummaryCardModal();
+      });
+    }
+    if (this.summaryNicknameInput) {
+      this.summaryNicknameInput.addEventListener('input', (e) => {
+        this.nickname = e.target.value.trim();
+        try {
+          localStorage.setItem('phoca_user_nickname', this.nickname);
+        } catch (err) {}
+        this.renderLiveSummaryCard();
+      });
+    }
+    if (this.btnCopySummaryCard) {
+      this.btnCopySummaryCard.addEventListener('click', () => this.copySummaryCardImage());
+    }
+    if (this.btnDownloadSummaryCard) {
+      this.btnDownloadSummaryCard.addEventListener('click', () => this.downloadSummaryCardImage());
+    }
+    if (this.btnShareSummaryX) {
+      this.btnShareSummaryX.addEventListener('click', () => this.shareSummaryCardToX());
     }
 
     // Open Template Drawer
@@ -320,6 +364,11 @@ class PhocaCheckerApp {
       if (['check', 'stamp', 'custom'].includes(savedStampStyle)) this.stampStyle = savedStampStyle;
       this.customStampSrc = localStorage.getItem('phoca_custom_stamp') || null;
       if (this.stampStyle === 'custom' && !this.customStampSrc) this.stampStyle = 'stamp';
+
+      this.nickname = localStorage.getItem('phoca_user_nickname') || '';
+      if (this.summaryNicknameInput) {
+        this.summaryNicknameInput.value = this.nickname;
+      }
     } catch (e) {
       console.warn('LocalStorage load error:', e);
     }
@@ -539,8 +588,10 @@ class PhocaCheckerApp {
 
   loadCheckedStateForCurrent() {
     this.checkedCards = this.getCheckedSetForTemplate(this.currentTemplateId);
+    this.favoriteCards = this.getFavoriteSetForTemplate(this.currentTemplateId);
     // Automatically save cleaned state in case obsolete IDs were pruned
     this.saveCheckedState();
+    this.saveFavoriteState();
   }
 
   saveCheckedState() {
@@ -550,6 +601,74 @@ class PhocaCheckerApp {
       localStorage.setItem(key, JSON.stringify(Array.from(this.checkedCards)));
       localStorage.setItem('phoca_display_mode', this.displayMode);
     } catch (e) {}
+  }
+
+  // --------------------------------------------------------------------------
+  // Favorite Cards Helpers (LocalStorage: phoca_favorites_{templateId})
+  // --------------------------------------------------------------------------
+  getFavoriteSetForTemplate(templateId) {
+    const set = new Set();
+    const template = this.templates.find(t => t.id === templateId);
+    const validCardIds = template ? new Set((template.cards || []).map(c => c.id)) : null;
+
+    try {
+      const key = `phoca_favorites_${templateId}`;
+      const saved = localStorage.getItem(key);
+      if (saved) {
+        JSON.parse(saved).forEach(id => {
+          if (!validCardIds || validCardIds.has(id)) {
+            set.add(id);
+          }
+        });
+      }
+    } catch (e) {}
+    return set;
+  }
+
+  saveFavoriteState() {
+    if (!this.currentTemplate) return;
+    try {
+      const key = `phoca_favorites_${this.currentTemplate.id}`;
+      localStorage.setItem(key, JSON.stringify(Array.from(this.favoriteCards)));
+    } catch (e) {}
+  }
+
+  toggleFavorite(cardId) {
+    if (this.favoriteCards.has(cardId)) {
+      this.favoriteCards.delete(cardId);
+      this.showToast('최애 포카 지정을 해제했습니다.');
+    } else {
+      this.favoriteCards.add(cardId);
+      this.showToast('💖 최애 포카로 등록되었습니다!');
+    }
+    this.saveFavoriteState();
+    this.renderCards();
+  }
+
+  getAllFavoriteCards() {
+    const list = [];
+    this.templates.forEach(t => {
+      const favSet = this.getFavoriteSetForTemplate(t.id);
+      if (favSet.size > 0 && t.cards) {
+        t.cards.forEach(card => {
+          if (favSet.has(card.id)) {
+            list.push({
+              id: card.id,
+              name: card.name || '포토카드',
+              templateId: t.id,
+              templateTitle: t.title,
+              imageSrc: t.image,
+              x: card.x,
+              y: card.y,
+              w: card.w,
+              h: card.h,
+              radius: card.radius || 10
+            });
+          }
+        });
+      }
+    });
+    return list;
   }
 
   // --------------------------------------------------------------------------
@@ -583,10 +702,12 @@ class PhocaCheckerApp {
     try {
       const backupData = {
         app: 'phoca_checker',
-        version: '1.0',
+        version: '1.1',
         exportedAt: new Date().toISOString(),
+        nickname: this.nickname || '',
         displayMode: this.displayMode,
-        checks: {}
+        checks: {},
+        favorites: {}
       };
 
       for (let i = 0; i < localStorage.length; i++) {
@@ -594,6 +715,10 @@ class PhocaCheckerApp {
         if (key && key.startsWith('phoca_checks_')) {
           try {
             backupData.checks[key] = JSON.parse(localStorage.getItem(key));
+          } catch (e) {}
+        } else if (key && key.startsWith('phoca_favorites_')) {
+          try {
+            backupData.favorites[key] = JSON.parse(localStorage.getItem(key));
           } catch (e) {}
         }
       }
@@ -610,7 +735,7 @@ class PhocaCheckerApp {
       document.body.removeChild(link);
       setTimeout(() => URL.revokeObjectURL(url), 2000);
 
-      this.showToast('📁 체크리스트 백업 파일이 저장되었습니다!');
+      this.showToast('📁 체크리스트 백업 파일이 저장되었습니다! (최애 포카 & 닉네임 포함)');
       this.closeBackupModal();
     } catch (e) {
       console.error('Backup export error:', e);
@@ -636,6 +761,24 @@ class PhocaCheckerApp {
           }
         }
 
+        let favRestoredCount = 0;
+        if (data.favorites && typeof data.favorites === 'object') {
+          for (const [key, value] of Object.entries(data.favorites)) {
+            if (key.startsWith('phoca_favorites_') && Array.isArray(value)) {
+              localStorage.setItem(key, JSON.stringify(value));
+              favRestoredCount++;
+            }
+          }
+        }
+
+        if (data.nickname) {
+          this.nickname = data.nickname;
+          localStorage.setItem('phoca_user_nickname', data.nickname);
+          if (this.summaryNicknameInput) {
+            this.summaryNicknameInput.value = data.nickname;
+          }
+        }
+
         if (data.displayMode) {
           this.displayMode = data.displayMode;
           localStorage.setItem('phoca_display_mode', data.displayMode);
@@ -650,7 +793,7 @@ class PhocaCheckerApp {
         this.renderCategoryHub();
         this.closeBackupModal();
 
-        this.showToast(`🎉 백업 복원 완료! (총 ${restoredCount}개 포카판 복원됨)`);
+        this.showToast(`🎉 백업 복원 완료! (포카판 ${restoredCount}개, 최애 포카 동기화됨)`);
       } catch (err) {
         console.error('Backup import error:', err);
         alert(`백업 파일 불러오기 실패: ${err.message}`);
@@ -983,16 +1126,20 @@ class PhocaCheckerApp {
 
     cards.forEach((card) => {
       const isChecked = this.checkedCards.has(card.id);
+      const isFavorite = this.favoriteCards.has(card.id);
       const isMasked = this.displayMode === 'hide-owned' ? isChecked : !isChecked;
 
       const cardEl = document.createElement('div');
-      cardEl.className = 'photocard-slot' + (isMasked ? ' masked' : '') + (isChecked ? ' checked' : '');
+      cardEl.className = 'photocard-slot'
+        + (isMasked ? ' masked' : '')
+        + (isChecked ? ' checked' : '')
+        + (isFavorite ? ' is-favorite' : '');
       cardEl.style.left = `${card.x}%`;
       cardEl.style.top = `${card.y}%`;
       cardEl.style.width = `${card.w}%`;
       cardEl.style.height = `${card.h}%`;
       cardEl.style.borderRadius = `${card.radius || 10}px`;
-      cardEl.title = `${card.name || '포토카드'} (${isChecked ? '보유' : '미보유'}) - 클릭하여 변경`;
+      cardEl.title = `${card.name || '포토카드'} (${isChecked ? '보유' : '미보유'}${isFavorite ? ' • 최애 포카 ♥' : ''}) - 클릭하여 체크`;
 
       // Complete Marker: 보유 포카 가리기 모드(hide-owned)에서 마스킹된 카드(=보유한 카드)에만 적용
       // 미보유 포카 가리기 모드(hide-unowned)에서는 기존 체크 동그라미 유지
@@ -1014,13 +1161,31 @@ class PhocaCheckerApp {
           </div>`;
       }
 
+      // Favorite Heart Button (Top-Right)
+      const favBtnHtml = `
+        <button class="card-favorite-btn" title="${isFavorite ? '최애 포카 지정 해제' : '내가 좋아하는 최애 포카로 등록 ♥'}">
+          <svg viewBox="0 0 24 24" width="13" height="13" fill="${isFavorite ? 'currentColor' : 'none'}" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
+            <path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z"></path>
+          </svg>
+        </button>
+      `;
+
       cardEl.innerHTML = `
         <div class="card-mask" style="border-radius: inherit;">
           ${indicatorHtml}
         </div>
+        ${favBtnHtml}
       `;
 
+      // Handle card check toggle
       cardEl.addEventListener('click', (e) => {
+        // If clicking on favorite button, do not toggle card check
+        if (e.target.closest('.card-favorite-btn')) {
+          e.stopPropagation();
+          e.preventDefault();
+          this.toggleFavorite(card.id);
+          return;
+        }
         e.preventDefault();
         this.toggleCard(card.id);
       });
@@ -1330,7 +1495,27 @@ class PhocaCheckerApp {
     reader.readAsDataURL(file);
   }
 
-  async shareToX() {
+  // --------------------------------------------------------------------------
+  // Summary Card Modal (Nickname & Favorite Photocards)
+  // --------------------------------------------------------------------------
+  openSummaryCardModal() {
+    if (!this.summaryCardModalBackdrop) return;
+    this.summaryCardModalBackdrop.classList.add('open');
+    if (this.summaryNicknameInput) {
+      this.summaryNicknameInput.value = this.nickname || '';
+    }
+    this.renderLiveSummaryCard();
+  }
+
+  closeSummaryCardModal() {
+    if (this.summaryCardModalBackdrop) {
+      this.summaryCardModalBackdrop.classList.remove('open');
+    }
+  }
+
+  async renderLiveSummaryCard() {
+    if (!this.summaryCardCanvas) return;
+
     let totalCards = 0;
     let totalChecked = 0;
     this.templates.forEach(t => {
@@ -1340,13 +1525,82 @@ class PhocaCheckerApp {
     });
 
     const overallPercent = totalCards > 0 ? Math.round((totalChecked / totalCards) * 100) : 0;
+    const favoriteList = this.getAllFavoriteCards();
 
-    // 1. Tweet text with explicit newline before hashtag
-    const tweetText = `🌲 포레스텔라 포토카드를 ${overallPercent}% (${totalChecked}/${totalCards}장) 수집했어요! ✨\n\n나만의 포카 체크리스트 & 위시리스트 만들기 👇\n\n#포레포카체커`;
+    if (this.summaryFavCountEl) {
+      this.summaryFavCountEl.textContent = favoriteList.length;
+    }
+
+    const cat = this.categories.find(c => c.id === 'fore') || this.categories[0] || {};
+
+    try {
+      const generatedCanvas = await CanvasExporter.renderSummaryCardCanvas({
+        categoryName: cat.name || '포레스텔라',
+        subtitle: cat.subtitle || 'Forestella Photocard Collection',
+        badge: cat.badge || (cat.itemCount + '종'),
+        totalCards: totalCards,
+        totalChecked: totalChecked,
+        percent: overallPercent,
+        logoSrc: cat.logoImage || 'images/fore/forestella_logo.jpg',
+        nickname: this.nickname,
+        favoriteCards: favoriteList
+      });
+
+      this.summaryCardCanvas.width = generatedCanvas.width;
+      this.summaryCardCanvas.height = generatedCanvas.height;
+      const ctx = this.summaryCardCanvas.getContext('2d');
+      ctx.drawImage(generatedCanvas, 0, 0);
+      this.activeSummaryCanvas = generatedCanvas;
+    } catch (err) {
+      console.warn('Summary card render error:', err);
+    }
+  }
+
+  async copySummaryCardImage() {
+    const canvas = this.activeSummaryCanvas || this.summaryCardCanvas;
+    if (!canvas) return;
+
+    try {
+      const copied = await CanvasExporter.copyCanvasToClipboard(canvas);
+      if (copied) {
+        this.showToast('📋 수집 카드 이미지가 클립보드에 복사되었습니다! (붙여넣기 가능) ✨');
+      } else {
+        this.showToast('⚠️ 클립보드 복사를 지원하지 않는 브라우저입니다. 다운로드 버튼을 이용해주세요.');
+      }
+    } catch (err) {
+      console.warn('Copy summary card error:', err);
+      this.showToast('이미지 복사 중 오류가 발생했습니다.');
+    }
+  }
+
+  async downloadSummaryCardImage() {
+    const canvas = this.activeSummaryCanvas || this.summaryCardCanvas;
+    if (!canvas) return;
+
+    const nickStr = this.nickname ? `_${this.nickname}` : '';
+    const dateStr = new Date().toISOString().split('T')[0];
+    const filename = `포카체커_수집카드${nickStr}_${dateStr}.png`;
+    CanvasExporter.downloadCanvas(canvas, filename);
+    this.showToast('💾 수집 카드 이미지가 다운로드되었습니다!');
+  }
+
+  async shareSummaryCardToX() {
+    let totalCards = 0;
+    let totalChecked = 0;
+    this.templates.forEach(t => {
+      totalCards += (t.cards?.length || 0);
+      const checkedSet = this.getCheckedSetForTemplate(t.id);
+      totalChecked += checkedSet.size;
+    });
+
+    const overallPercent = totalCards > 0 ? Math.round((totalChecked / totalCards) * 100) : 0;
+    const favCount = this.getAllFavoriteCards().length;
+    const nickPart = this.nickname ? `${this.nickname}님의 ` : '';
+
+    const tweetText = `🌲 ${nickPart}포레스텔라 포토카드를 ${overallPercent}% (${totalChecked}/${totalCards}장) 수집했어요! ✨ (최애 포카 ${favCount}장 지정 ♥)\n\n나만의 포카 체크리스트 & 위시리스트 만들기 👇\n\n#포레포카체커`;
     const shareUrl = 'https://foretissimo.github.io/phoca_checker/';
     const twitterIntentUrl = `https://twitter.com/intent/tweet?text=${encodeURIComponent(tweetText)}&url=${encodeURIComponent(shareUrl)}`;
 
-    // 2. Open Twitter composer immediately (preserves user gesture)
     const width = 580;
     const height = 520;
     const left = Math.max(0, (window.innerWidth - width) / 2 + window.screenX);
@@ -1361,35 +1615,17 @@ class PhocaCheckerApp {
       window.gtag('event', 'share_to_x', {
         total_checked: totalChecked,
         total_cards: totalCards,
-        percent: overallPercent
+        percent: overallPercent,
+        fav_count: favCount
       });
     }
 
-    // 3. Render card & copy image to clipboard
-    try {
-      if (typeof CanvasExporter !== 'undefined' && typeof CanvasExporter.renderSummaryCardCanvas === 'function') {
-        const cat = this.categories.find(c => c.id === 'fore') || this.categories[0] || {};
-        const canvas = await CanvasExporter.renderSummaryCardCanvas({
-          categoryName: cat.name || '포레스텔라',
-          subtitle: cat.subtitle || 'Forestella Photocard Collection',
-          badge: cat.badge || (cat.itemCount + '종'),
-          totalCards: totalCards,
-          totalChecked: totalChecked,
-          percent: overallPercent,
-          logoSrc: cat.logoImage || 'images/fore/forestella_logo.jpg'
-        });
+    // Try auto-copying image to clipboard for easy pasting into tweet
+    this.copySummaryCardImage();
+  }
 
-        const copied = await CanvasExporter.copyCanvasToClipboard(canvas);
-        if (copied) {
-          this.showToast('📋 수집 카드 이미지가 복사되었습니다! 트위터 창에 붙여넣기(Cmd+V / Ctrl+V)하세요 ✨', 5000);
-          return;
-        }
-      }
-    } catch (err) {
-      console.warn('Image clipboard copy notice:', err);
-    }
-
-    this.showToast(`✨ 𝕏(트위터) 자랑하기 창이 열렸습니다!`, 2500);
+  async shareToX() {
+    this.openSummaryCardModal();
   }
 
   showToast(message, duration = 2400) {

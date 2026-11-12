@@ -4,6 +4,24 @@ All notable functional changes, architecture improvements, and bug fixes for the
 
 ---
 
+## [v2026.11.12] - 2026-11-12
+
+### 💖 Favorite Photocards, Nickname & Custom Summary Card
+- **Favorite Photocard (최애 포카 ♥) Selection**:
+  - Interactive mini heart button on top-right of every photocard slot.
+  - Toggling favorite highlights the card with glowing rose outline and animated heart badge.
+  - Real-time persistent sync in `localStorage` under `phoca_favorites_{templateId}`.
+- **Collector Nickname Support**:
+  - Nickname input with real-time browser storage (`phoca_user_nickname`).
+- **Dynamic Favorite & Progress Summary Card Generator**:
+  - High-res 900x560 canvas rendering `"[Nickname]'s Photocard Collection"`, progress bar (`N / 758 cards (%)`), and high-res cropped thumbnails of favorited photocards.
+  - Direct clipboard copy (`ClipboardItem`), PNG file download, and customized 𝕏 (Twitter) share composer integration.
+- **Backup & Restore Compatibility**:
+  - Serializes `nickname` and `favorites` mapping into JSON backup file.
+  - Fully restores all favorites and user nickname on file import without loss.
+
+---
+
 ## [v2026.10.25] - 2026-10-25
 
 ### ✨ Complete Marker Customization & '(완성)' Label Transition
