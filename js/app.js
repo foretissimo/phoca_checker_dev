@@ -73,6 +73,9 @@ class PhocaCheckerApp {
     // Merged Export Modal
     this.mergedExportModalBackdrop = document.getElementById('merged-export-modal-backdrop');
     this.btnCloseMergedModal = document.getElementById('close-merged-modal-btn');
+    this.mergedFavCount = document.getElementById('merged-fav-count');
+    this.mergedFavCardsStrip = document.getElementById('merged-fav-cards-strip');
+    this.btnDoExportFavMerged = document.getElementById('btn-do-export-fav-merged');
     this.mergedCountAll = document.getElementById('merged-count-all');
     this.mergedCountOwned = document.getElementById('merged-count-owned');
     this.mergedCountUnowned = document.getElementById('merged-count-unowned');
@@ -224,6 +227,9 @@ class PhocaCheckerApp {
       this.mergedExportModalBackdrop.addEventListener('click', (e) => {
         if (e.target === this.mergedExportModalBackdrop) this.closeMergedExportModal();
       });
+    }
+    if (this.btnDoExportFavMerged) {
+      this.btnDoExportFavMerged.addEventListener('click', () => this.exportFavoriteMergedPosterAction());
     }
     if (this.btnExportMergedAllUnowned) {
       this.btnExportMergedAllUnowned.addEventListener('click', () => this.exportFilteredMergedImage('all', 'hide-owned'));
@@ -664,16 +670,24 @@ class PhocaCheckerApp {
       }
       this.showToast('최애 포카 지정을 해제했습니다.');
     } else {
+      const allFavs = this.getAllFavoriteCards();
+      if (allFavs.length >= 10) {
+        this.showToast('⚠️ 최애 포카는 최대 10개까지만 선택할 수 있습니다.');
+        return;
+      }
       this.favoriteCards.add(cardId);
       if (!this.featuredFavoriteId) {
         this.featuredFavoriteId = cardId;
         localStorage.setItem('phoca_featured_favorite_id', this.featuredFavoriteId);
       }
-      this.showToast('💖 최애 포카로 등록되었습니다!');
+      this.showToast(`💖 최애 포카로 등록되었습니다! (${allFavs.length + 1}/10)`);
     }
     this.saveFavoriteState();
     this.renderCards();
     this.updateFavCardBadgeCount();
+    if (this.mergedExportModalBackdrop && this.mergedExportModalBackdrop.classList.contains('open')) {
+      this.updateMergedExportModalCounts();
+    }
   }
 
   toggleFavSelectionMode() {
@@ -697,7 +711,7 @@ class PhocaCheckerApp {
   updateFavCardBadgeCount() {
     const totalFavs = this.getAllFavoriteCards().length;
     if (this.favCardBadgeCount) {
-      this.favCardBadgeCount.textContent = totalFavs;
+      this.favCardBadgeCount.textContent = `${totalFavs}/10`;
     }
   }
 
@@ -1376,34 +1390,107 @@ class PhocaCheckerApp {
   }
 
   updateMergedExportModalCounts() {
-    const catTemplates = this.templates.filter(t => t.categoryId === (this.currentCategory?.id || 'fore'));
-    const totalBoards = catTemplates.length;
+    const favoriteList = this.getAllFavoriteCards();
+    const count = favoriteList.length;
 
-    let ownedBoards = 0;
-    let unownedBoards = 0;
+    if (this.mergedFavCount) {
+      this.mergedFavCount.textContent = count;
+    }
 
-    catTemplates.forEach(t => {
-      const total = t.cards?.length || 0;
-      const checkedSet = this.getCheckedSetForTemplate(t.id);
-      const owned = checkedSet.size;
-
-      if (total > 0 && owned === total) {
-        ownedBoards++;
-      } else if (total > 0 && owned < total) {
-        unownedBoards++;
+    if (this.btnDoExportFavMerged) {
+      if (count === 0) {
+        this.btnDoExportFavMerged.disabled = true;
+        this.btnDoExportFavMerged.style.opacity = '0.5';
+        this.btnDoExportFavMerged.style.cursor = 'not-allowed';
+      } else {
+        this.btnDoExportFavMerged.disabled = false;
+        this.btnDoExportFavMerged.style.opacity = '1';
+        this.btnDoExportFavMerged.style.cursor = 'pointer';
       }
-    });
+    }
 
-    if (this.mergedCountAll) {
-      this.mergedCountAll.textContent = `${totalBoards}개 판`;
+    if (this.mergedFavCardsStrip) {
+      this.mergedFavCardsStrip.innerHTML = '';
+      if (count === 0) {
+        const emptyMsg = document.createElement('div');
+        emptyMsg.style.cssText = 'padding: 1.5rem 0.5rem; font-size: 0.82rem; color: #94a3b8; text-align: center; width: 100%; line-height: 1.6;';
+        emptyMsg.innerHTML = '아직 선택된 최애 포카가 없습니다.<br>포토카드 판에서 <span style="color:#ef4444; font-weight:700;">하트(♥)</span> 버튼을 눌러<br>최애 포카를 최대 10장까지 선택해보세요!';
+        this.mergedFavCardsStrip.appendChild(emptyMsg);
+      } else {
+        favoriteList.slice(0, 10).forEach((fav, index) => {
+          const chip = document.createElement('div');
+          chip.className = 'featured-card-chip';
+          chip.style.position = 'relative';
+
+          const thumbWrap = document.createElement('div');
+          thumbWrap.className = 'chip-thumb-wrap';
+
+          const thumbCanvas = document.createElement('canvas');
+          thumbCanvas.className = 'chip-thumb-canvas';
+          thumbCanvas.width = 60;
+          thumbCanvas.height = 72;
+          thumbWrap.appendChild(thumbCanvas);
+
+          // Heart number badge
+          const heartBadge = document.createElement('div');
+          heartBadge.style.cssText = 'position:absolute; top:3px; left:3px; background:#ef4444; color:#fff; font-size:9px; font-weight:800; border-radius:50%; width:16px; height:16px; display:flex; align-items:center; justify-content:center; box-shadow:0 1px 3px rgba(0,0,0,0.5);';
+          heartBadge.textContent = `${index + 1}`;
+          thumbWrap.appendChild(heartBadge);
+
+          // Remove 'x' button
+          const removeBtn = document.createElement('button');
+          removeBtn.title = '최애 포카 제외';
+          removeBtn.style.cssText = 'position:absolute; top:3px; right:3px; background:rgba(0,0,0,0.75); border:1px solid rgba(255,255,255,0.3); color:#fff; font-size:11px; font-weight:bold; border-radius:50%; width:16px; height:16px; display:flex; align-items:center; justify-content:center; cursor:pointer; padding:0; line-height:1;';
+          removeBtn.innerHTML = '×';
+          removeBtn.addEventListener('click', (e) => {
+            e.stopPropagation();
+            this.toggleFavorite(fav.id);
+          });
+          thumbWrap.appendChild(removeBtn);
+
+          const nameEl = document.createElement('div');
+          nameEl.className = 'chip-name';
+          nameEl.title = fav.name || '최애 포카';
+          nameEl.textContent = fav.name || '최애';
+
+          chip.appendChild(thumbWrap);
+          chip.appendChild(nameEl);
+
+          this.mergedFavCardsStrip.appendChild(chip);
+
+          // Async draw thumbnail
+          this.drawThumbCanvas(thumbCanvas, fav);
+        });
+      }
     }
-    if (this.mergedCountOwned) {
-      this.mergedCountOwned.textContent = `${ownedBoards}개 판`;
-      this.mergedCountOwned.className = `badge-count ${ownedBoards > 0 ? 'success' : 'empty'}`;
+  }
+
+  async exportFavoriteMergedPosterAction() {
+    const favoriteList = this.getAllFavoriteCards();
+    if (favoriteList.length === 0) {
+      this.showToast('⚠️ 최애 포카가 선택되지 않았습니다. 하트(♥)를 먼저 눌러주세요!');
+      return;
     }
-    if (this.mergedCountUnowned) {
-      this.mergedCountUnowned.textContent = `${unownedBoards}개 판`;
-      this.mergedCountUnowned.className = `badge-count ${unownedBoards > 0 ? 'warning' : 'empty'}`;
+
+    try {
+      const count = Math.min(favoriteList.length, 10);
+      this.showToast(`💖 최애 포카 ${count}장 고화질 합본 포스터를 생성 중입니다. 잠시만 기다려 주세요...`, 6000);
+      const cat = this.categories.find(c => c.id === 'fore') || this.categories[0] || {};
+
+      await CanvasExporter.exportFavoriteMergedPoster({
+        favoriteCards: favoriteList,
+        nickname: this.nickname,
+        categoryName: cat.name || '포레스텔라',
+        onProgress: (cur, total, msg) => {
+          this.showToast(msg, 2500);
+        }
+      });
+
+      this.showToast('🎉 최애포카 합본 포스터 이미지가 다운로드되었습니다!');
+      this.closeMergedExportModal();
+    } catch (err) {
+      console.error('Favorite merged export error:', err);
+      this.showToast('합본 포스터 생성 중 오류가 발생했습니다.');
     }
   }
 

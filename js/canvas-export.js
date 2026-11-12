@@ -528,6 +528,287 @@ class CanvasExporter {
   }
 
   /**
+   * Export Merged Poster composed of ONLY favorite photocards (up to 10 cards)
+   */
+  static async exportFavoriteMergedPoster({
+    favoriteCards = [],
+    nickname = '',
+    categoryName = '포레스텔라',
+    onProgress = () => {}
+  }) {
+    if (!favoriteCards || favoriteCards.length === 0) return false;
+
+    // Limit to max 10 cards
+    const cardsToExport = favoriteCards.slice(0, 10);
+    const count = cardsToExport.length;
+
+    // Preload all template images
+    const imgCache = new Map();
+    for (let i = 0; i < cardsToExport.length; i++) {
+      const fav = cardsToExport[i];
+      if (onProgress) {
+        onProgress(i + 1, cardsToExport.length, `최애 포카 이미지 불러오는 중 (${i + 1}/${cardsToExport.length})...`);
+      }
+      if (!imgCache.has(fav.imageSrc)) {
+        const img = new Image();
+        img.crossOrigin = 'anonymous';
+        await new Promise((resolve) => {
+          img.onload = () => resolve(true);
+          img.onerror = () => resolve(false);
+          img.src = fav.imageSrc;
+        });
+        imgCache.set(fav.imageSrc, img);
+      }
+    }
+
+    if (onProgress) {
+      onProgress(count, count, '고화질 최애포카 합본 포스터 합성 중...');
+    }
+
+    // Grid configuration:
+    // 1~5 cards: 1 row with 'count' columns
+    // 6 cards: 3 columns x 2 rows
+    // 7~8 cards: 4 columns x 2 rows
+    // 9~10 cards: 5 columns x 2 rows
+    let cols = 5;
+    let rows = 1;
+    if (count <= 5) {
+      cols = count;
+      rows = 1;
+    } else if (count === 6) {
+      cols = 3;
+      rows = 2;
+    } else if (count <= 8) {
+      cols = 4;
+      rows = 2;
+    } else {
+      cols = 5;
+      rows = 2;
+    }
+
+    const cardW = 240;
+    const cardH = 356;
+    const cardRadius = 14;
+    const labelH = 54;
+    const cellW = cardW;
+    const cellH = cardH + labelH;
+
+    const gapX = 30;
+    const gapY = 36;
+    const padX = 54;
+    const headerH = 170;
+    const footerH = 80;
+
+    const posterWidth = Math.max(900, padX * 2 + cols * cellW + (cols - 1) * gapX);
+    const contentH = rows * cellH + (rows - 1) * gapY;
+    const posterHeight = headerH + contentH + footerH;
+
+    const canvas = document.createElement('canvas');
+    canvas.width = posterWidth;
+    canvas.height = posterHeight;
+    const ctx = canvas.getContext('2d');
+
+    // 1. Background (Dark elegant gradient)
+    const bgGrad = ctx.createLinearGradient(0, 0, 0, posterHeight);
+    bgGrad.addColorStop(0, '#090b14');
+    bgGrad.addColorStop(0.5, '#101424');
+    bgGrad.addColorStop(1, '#090a12');
+    ctx.fillStyle = bgGrad;
+    ctx.fillRect(0, 0, posterWidth, posterHeight);
+
+    // Ambient radial glow from top-center
+    const radialGlow = ctx.createRadialGradient(posterWidth / 2, headerH / 2, 10, posterWidth / 2, headerH / 2, posterWidth * 0.6);
+    radialGlow.addColorStop(0, 'rgba(239, 68, 68, 0.16)');
+    radialGlow.addColorStop(0.4, 'rgba(99, 102, 241, 0.12)');
+    radialGlow.addColorStop(1, 'rgba(9, 11, 20, 0)');
+    ctx.fillStyle = radialGlow;
+    ctx.fillRect(0, 0, posterWidth, posterHeight);
+
+    // Decorative outer card border
+    ctx.save();
+    ctx.beginPath();
+    const outerMargin = 16;
+    if (typeof ctx.roundRect === 'function') {
+      ctx.roundRect(outerMargin, outerMargin, posterWidth - outerMargin * 2, posterHeight - outerMargin * 2, 20);
+    } else {
+      CanvasExporter.drawRoundRectPath(ctx, outerMargin, outerMargin, posterWidth - outerMargin * 2, posterHeight - outerMargin * 2, 20);
+    }
+    ctx.strokeStyle = 'rgba(255, 255, 255, 0.1)';
+    ctx.lineWidth = 1.5;
+    ctx.stroke();
+    ctx.restore();
+
+    // 2. Header
+    ctx.save();
+    ctx.textAlign = 'center';
+
+    // Pill Badge
+    const badgeW = 240;
+    const badgeH = 26;
+    const badgeX = (posterWidth - badgeW) / 2;
+    const badgeY = 38;
+    ctx.beginPath();
+    if (typeof ctx.roundRect === 'function') {
+      ctx.roundRect(badgeX, badgeY, badgeW, badgeH, 13);
+    } else {
+      CanvasExporter.drawRoundRectPath(ctx, badgeX, badgeY, badgeW, badgeH, 13);
+    }
+    ctx.fillStyle = 'rgba(239, 68, 68, 0.16)';
+    ctx.fill();
+    ctx.strokeStyle = 'rgba(248, 113, 113, 0.4)';
+    ctx.lineWidth = 1;
+    ctx.stroke();
+
+    ctx.font = '700 11px -apple-system, BlinkMacSystemFont, "Pretendard", sans-serif';
+    ctx.fillStyle = '#fda4af';
+    ctx.fillText(`💖 MY FAVORITE PHOTOCARDS • TOP ${count}`, posterWidth / 2, badgeY + 17);
+
+    // Title
+    ctx.font = '800 28px -apple-system, BlinkMacSystemFont, "Pretendard", sans-serif';
+    ctx.fillStyle = '#ffffff';
+    const titleText = nickname && nickname.trim()
+      ? `${nickname.trim()}님의 ${categoryName} 최애 포토카드`
+      : `${categoryName} 최애 포토카드 컬렉션`;
+    ctx.fillText(titleText, posterWidth / 2, 102);
+
+    // Subtitle
+    ctx.font = '500 13px -apple-system, BlinkMacSystemFont, "Pretendard", sans-serif';
+    ctx.fillStyle = '#94a3b8';
+    ctx.fillText(`Phoca Checker • 총 ${count}장 수록 (최대 10선) • ${categoryName}`, posterWidth / 2, 130);
+    ctx.restore();
+
+    // 3. Grid of Favorite Photocards (Centered per row)
+    const rowCards = [];
+    if (rows === 1) {
+      rowCards.push(cardsToExport);
+    } else {
+      const topCount = Math.ceil(count / 2);
+      rowCards.push(cardsToExport.slice(0, topCount));
+      rowCards.push(cardsToExport.slice(topCount));
+    }
+
+    let globalCardIndex = 0;
+    for (let r = 0; r < rowCards.length; r++) {
+      const cardsInThisRow = rowCards[r];
+      const rowWidth = cardsInThisRow.length * cellW + (cardsInThisRow.length - 1) * gapX;
+      const startX = (posterWidth - rowWidth) / 2;
+      const startY = headerH + r * (cellH + gapY);
+
+      for (let c = 0; c < cardsInThisRow.length; c++) {
+        const fav = cardsInThisRow[c];
+        const cardX = startX + c * (cellW + gapX);
+        const cardY = startY;
+
+        const img = imgCache.get(fav.imageSrc);
+        if (img) {
+          const imgW = img.naturalWidth || img.width;
+          const imgH = img.naturalHeight || img.height;
+          const sx = (fav.x / 100) * imgW;
+          const sy = (fav.y / 100) * imgH;
+          const sw = (fav.w / 100) * imgW;
+          const sh = (fav.h / 100) * imgH;
+
+          // Shadow under card
+          ctx.save();
+          ctx.shadowColor = 'rgba(0, 0, 0, 0.65)';
+          ctx.shadowBlur = 18;
+          ctx.shadowOffsetY = 8;
+          ctx.fillStyle = '#171926';
+          ctx.beginPath();
+          if (typeof ctx.roundRect === 'function') {
+            ctx.roundRect(cardX, cardY, cardW, cardH, cardRadius);
+          } else {
+            CanvasExporter.drawRoundRectPath(ctx, cardX, cardY, cardW, cardH, cardRadius);
+          }
+          ctx.fill();
+          ctx.restore();
+
+          // Card image
+          ctx.save();
+          ctx.beginPath();
+          if (typeof ctx.roundRect === 'function') {
+            ctx.roundRect(cardX, cardY, cardW, cardH, cardRadius);
+          } else {
+            CanvasExporter.drawRoundRectPath(ctx, cardX, cardY, cardW, cardH, cardRadius);
+          }
+          ctx.clip();
+          ctx.drawImage(img, sx, sy, sw, sh, cardX, cardY, cardW, cardH);
+          ctx.restore();
+
+          // Card border
+          ctx.save();
+          ctx.beginPath();
+          if (typeof ctx.roundRect === 'function') {
+            ctx.roundRect(cardX, cardY, cardW, cardH, cardRadius);
+          } else {
+            CanvasExporter.drawRoundRectPath(ctx, cardX, cardY, cardW, cardH, cardRadius);
+          }
+          ctx.lineWidth = 2.5;
+          ctx.strokeStyle = '#ef4444';
+          ctx.stroke();
+
+          // Red Heart Badge (Top-Right)
+          const heartBadgeR = 12;
+          const bX = cardX + cardW - 14;
+          const bY = cardY + 14;
+          ctx.beginPath();
+          ctx.arc(bX, bY, heartBadgeR, 0, Math.PI * 2);
+          ctx.fillStyle = '#ef4444';
+          ctx.fill();
+          ctx.fillStyle = '#ffffff';
+          ctx.font = '700 11px -apple-system, BlinkMacSystemFont, "Pretendard", sans-serif';
+          ctx.textAlign = 'center';
+          ctx.textBaseline = 'middle';
+          ctx.fillText(`♥${globalCardIndex + 1}`, bX, bY + 1);
+          ctx.restore();
+
+          // Card Labels
+          ctx.save();
+          ctx.textAlign = 'center';
+          ctx.font = '700 13px -apple-system, BlinkMacSystemFont, "Pretendard", sans-serif';
+          ctx.fillStyle = '#f1f5f9';
+          let nameTxt = fav.name || '최애 포카';
+          if (nameTxt.length > 15) nameTxt = nameTxt.substring(0, 14) + '…';
+          ctx.fillText(nameTxt, cardX + cardW / 2, cardY + cardH + 18);
+
+          ctx.font = '500 11px -apple-system, BlinkMacSystemFont, "Pretendard", sans-serif';
+          ctx.fillStyle = '#64748b';
+          let sheetTxt = (fav.templateTitle || '').replace(/^fore\d+\.\s*/, '');
+          if (sheetTxt.length > 16) sheetTxt = sheetTxt.substring(0, 15) + '…';
+          ctx.fillText(sheetTxt, cardX + cardW / 2, cardY + cardH + 34);
+          ctx.restore();
+        }
+
+        globalCardIndex++;
+      }
+    }
+
+    // 4. Poster Footer
+    const footY = posterHeight - footerH / 2;
+    ctx.save();
+    ctx.fillStyle = 'rgba(255, 255, 255, 0.04)';
+    ctx.fillRect(outerMargin, posterHeight - footerH, posterWidth - outerMargin * 2, footerH - outerMargin);
+
+    ctx.font = '500 12px -apple-system, BlinkMacSystemFont, "Pretendard", sans-serif';
+    ctx.fillStyle = '#64748b';
+    ctx.textAlign = 'left';
+    ctx.textBaseline = 'middle';
+    ctx.fillText('✨ 포카 체커 • 도안: @sy_fore • 제작: @live_in_fore • foretissimo.github.io', padX, footY);
+
+    ctx.textAlign = 'right';
+    ctx.font = '700 12px -apple-system, BlinkMacSystemFont, "Pretendard", sans-serif';
+    ctx.fillStyle = '#818cf8';
+    ctx.fillText('#포레스텔라 #포레포카체커 #최애포카', posterWidth - padX, footY);
+    ctx.restore();
+
+    // 5. Download Master Poster
+    const nickPart = nickname && nickname.trim() ? `_${nickname.trim()}` : '';
+    const dateStr = new Date().toISOString().split('T')[0];
+    const filename = `포카체커_최애포카_합본포스터${nickPart}_${dateStr}.png`;
+    return CanvasExporter.downloadCanvas(canvas, filename);
+  }
+
+  /**
    * Return high-resolution single template canvas object (without automatic download)
    */
   static getSingleTemplateCanvas({
