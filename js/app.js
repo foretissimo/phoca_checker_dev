@@ -137,6 +137,13 @@ class PhocaCheckerApp {
     
     // Export PNG
     this.btnExportPng = document.getElementById('btn-export-png');
+
+    // Favorite Photocard Top Controls (상단 최애포카 선택 기능)
+    this.isFavSelectionMode = false;
+    this.btnToggleFavMode = document.getElementById('btn-toggle-fav-mode');
+    this.favModeLabel = document.getElementById('fav-mode-label');
+    this.btnOpenFavCardModal = document.getElementById('btn-open-fav-card-modal');
+    this.favCardBadgeCount = document.getElementById('fav-card-badge-count');
     
     // Custom Image Upload
     this.customImageUpload = document.getElementById('custom-image-upload');
@@ -335,6 +342,14 @@ class PhocaCheckerApp {
       this.btnExportPng.addEventListener('click', () => this.exportImage());
     }
 
+    // Favorite Photocard Top Controls (상단 최애포카 버튼 이벤트)
+    if (this.btnToggleFavMode) {
+      this.btnToggleFavMode.addEventListener('click', () => this.toggleFavSelectionMode());
+    }
+    if (this.btnOpenFavCardModal) {
+      this.btnOpenFavCardModal.addEventListener('click', () => this.openSummaryCardModal());
+    }
+
     // Custom Image Upload
     if (this.customImageUpload) {
       this.customImageUpload.addEventListener('change', (e) => {
@@ -366,9 +381,7 @@ class PhocaCheckerApp {
       if (this.stampStyle === 'custom' && !this.customStampSrc) this.stampStyle = 'stamp';
 
       this.nickname = localStorage.getItem('phoca_user_nickname') || '';
-      if (this.summaryNicknameInput) {
-        this.summaryNicknameInput.value = this.nickname;
-      }
+      this.updateFavCardBadgeCount();
     } catch (e) {
       console.warn('LocalStorage load error:', e);
     }
@@ -550,6 +563,7 @@ class PhocaCheckerApp {
 
     this.updateModeButtonsUI();
     this.updateImageModeBadge();
+    this.updateFavCardBadgeCount();
   }
 
   goToAdjacentTemplate(delta) {
@@ -643,6 +657,32 @@ class PhocaCheckerApp {
     }
     this.saveFavoriteState();
     this.renderCards();
+    this.updateFavCardBadgeCount();
+  }
+
+  toggleFavSelectionMode() {
+    this.isFavSelectionMode = !this.isFavSelectionMode;
+    if (this.btnToggleFavMode) {
+      this.btnToggleFavMode.classList.toggle('active', this.isFavSelectionMode);
+      if (this.favModeLabel) {
+        this.favModeLabel.textContent = this.isFavSelectionMode ? '💖 최애 선택 중!' : '최애포카 선택';
+      }
+    }
+    if (this.cardOverlayContainer) {
+      this.cardOverlayContainer.classList.toggle('is-fav-mode-active', this.isFavSelectionMode);
+    }
+    if (this.isFavSelectionMode) {
+      this.showToast('💖 최애포카 선택 모드 켜짐! 카드를 클릭하여 최애 포카(♥)를 지정하세요.');
+    } else {
+      this.showToast('체크 모드로 복귀했습니다.');
+    }
+  }
+
+  updateFavCardBadgeCount() {
+    const totalFavs = this.getAllFavoriteCards().length;
+    if (this.favCardBadgeCount) {
+      this.favCardBadgeCount.textContent = totalFavs;
+    }
   }
 
   getAllFavoriteCards() {
@@ -790,6 +830,7 @@ class PhocaCheckerApp {
         this.renderCards();
         this.updateStats();
         this.updateCurrentStatusBadge();
+        this.updateFavCardBadgeCount();
         this.renderCategoryHub();
         this.closeBackupModal();
 
@@ -1177,9 +1218,9 @@ class PhocaCheckerApp {
         ${favBtnHtml}
       `;
 
-      // Handle card check toggle
+      // Handle card check toggle or favorite toggle
       cardEl.addEventListener('click', (e) => {
-        // If clicking on favorite button, do not toggle card check
+        // If clicking on favorite button, always toggle favorite
         if (e.target.closest('.card-favorite-btn')) {
           e.stopPropagation();
           e.preventDefault();
@@ -1187,7 +1228,12 @@ class PhocaCheckerApp {
           return;
         }
         e.preventDefault();
-        this.toggleCard(card.id);
+        // If Favorite Selection Mode is active at the top, clicking card toggles favorite
+        if (this.isFavSelectionMode) {
+          this.toggleFavorite(card.id);
+        } else {
+          this.toggleCard(card.id);
+        }
       });
 
       this.cardOverlayContainer.appendChild(cardEl);

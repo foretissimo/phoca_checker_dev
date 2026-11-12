@@ -1641,6 +1641,26 @@ body {
     font-size: 0.76rem;
     padding: 0.45rem 0.25rem;
   }
+  .favorite-top-control-group {
+    width: 100%;
+    display: flex;
+    align-items: center;
+    gap: 0.4rem;
+  }
+  .btn-fav-mode {
+    flex: 1.1;
+    justify-content: center;
+    font-size: 0.78rem;
+    padding: 0.5rem 0.35rem;
+    white-space: nowrap;
+  }
+  .btn-fav-card-open {
+    flex: 1;
+    justify-content: center;
+    font-size: 0.78rem;
+    padding: 0.5rem 0.35rem;
+    white-space: nowrap;
+  }
   .control-group-actions {
     width: 100%;
     display: flex;
@@ -1748,6 +1768,74 @@ body {
    Favorite Photocards (최애 포카 ♥) & Summary Card Modal
    ========================================================================== */
 
+/* Top Control Bar: Favorite Photocard Group */
+.favorite-top-control-group {
+  display: flex;
+  align-items: center;
+  gap: 0.45rem;
+}
+
+.btn-fav-mode {
+  background: rgba(244, 63, 94, 0.12);
+  border: 1px solid rgba(244, 63, 94, 0.4);
+  color: #fda4af;
+  font-weight: 600;
+  transition: all 0.2s ease;
+  display: inline-flex;
+  align-items: center;
+  gap: 0.35rem;
+}
+
+.btn-fav-mode:hover {
+  background: rgba(244, 63, 94, 0.25);
+  border-color: #fb7185;
+  color: #ffffff;
+  transform: translateY(-1px);
+}
+
+.btn-fav-mode.active {
+  background: linear-gradient(135deg, #f43f5e, #e11d48);
+  border-color: #fda4af;
+  color: #ffffff;
+  box-shadow: 0 0 16px rgba(244, 63, 94, 0.65);
+  animation: pulseFavBtn 1.8s infinite;
+}
+
+@keyframes pulseFavBtn {
+  0%, 100% { box-shadow: 0 0 12px rgba(244, 63, 94, 0.55); }
+  50% { box-shadow: 0 0 22px rgba(244, 63, 94, 0.9); }
+}
+
+.btn-fav-card-open {
+  background: rgba(139, 92, 246, 0.14);
+  border: 1px solid rgba(139, 92, 246, 0.4);
+  color: #c4b5fd;
+  font-weight: 600;
+  display: inline-flex;
+  align-items: center;
+  gap: 0.45rem;
+  transition: all 0.2s ease;
+}
+
+.btn-fav-card-open:hover {
+  background: rgba(139, 92, 246, 0.28);
+  border-color: #a78bfa;
+  color: #ffffff;
+  transform: translateY(-1px);
+}
+
+.fav-count-badge {
+  background: rgba(244, 63, 94, 0.3);
+  color: #ffffff;
+  border: 1px solid rgba(244, 63, 94, 0.55);
+  padding: 1px 7px;
+  border-radius: var(--radius-full);
+  font-size: 0.72rem;
+  font-weight: 700;
+  min-width: 18px;
+  text-align: center;
+}
+
 /* Favorite Heart Button on Photocard Slot */
 .photocard-slot .card-favorite-btn {
   position: absolute;
@@ -1756,45 +1844,53 @@ body {
   width: 26px;
   height: 26px;
   border-radius: 50%;
-  background: rgba(15, 23, 42, 0.72);
+  background: rgba(15, 23, 42, 0.85);
   backdrop-filter: blur(4px);
   -webkit-backdrop-filter: blur(4px);
-  border: 1px solid rgba(255, 255, 255, 0.25);
-  color: #94a3b8;
+  border: 1px solid rgba(255, 255, 255, 0.35);
+  color: #cbd5e1;
   display: flex;
   align-items: center;
   justify-content: center;
   cursor: pointer;
-  z-index: 30;
+  z-index: 50; /* Always above mask and stamp so it is NEVER covered */
   padding: 0;
   transition: all 0.18s cubic-bezier(0.34, 1.56, 0.64, 1);
-  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.4);
-  opacity: 0;
+  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.5);
+  opacity: 0.85; /* Clearly visible on all cards */
   pointer-events: auto;
 }
 
-/* Show button on hover or when already favorited */
+/* Show button brightly on hover, when favorited, or when in favorite mode */
 .photocard-slot:hover .card-favorite-btn,
-.photocard-slot.is-favorite .card-favorite-btn {
+.photocard-slot.is-favorite .card-favorite-btn,
+.card-overlay-container.is-fav-mode-active .photocard-slot .card-favorite-btn {
   opacity: 1;
 }
 
-/* On mobile / touch screens, keep visible so user can easily tap */
-@media (hover: none) {
-  .photocard-slot .card-favorite-btn {
-    opacity: 0.65;
-  }
-}
-
 .photocard-slot .card-favorite-btn:hover {
-  transform: scale(1.15);
-  background: rgba(244, 63, 94, 0.25);
-  border-color: rgba(244, 63, 94, 0.6);
+  transform: scale(1.18);
+  background: rgba(244, 63, 94, 0.3);
+  border-color: #fb7185;
   color: #fb7185;
+  box-shadow: 0 0 10px rgba(244, 63, 94, 0.5);
 }
 
+/* Card Slot when Favorite Mode is active */
+.card-overlay-container.is-fav-mode-active .photocard-slot {
+  cursor: pointer;
+}
+.card-overlay-container.is-fav-mode-active .photocard-slot:hover {
+  box-shadow: 0 0 0 2px #f43f5e, 0 8px 24px rgba(244, 63, 94, 0.35);
+}
+.card-overlay-container.is-fav-mode-active .photocard-slot .card-favorite-btn {
+  border-color: #fb7185;
+  box-shadow: 0 0 8px rgba(244, 63, 94, 0.5);
+}
+
+/* When favorited */
 .photocard-slot.is-favorite {
-  box-shadow: 0 0 0 2px rgba(244, 63, 94, 0.8), 0 4px 16px rgba(244, 63, 94, 0.25);
+  box-shadow: 0 0 0 2px rgba(244, 63, 94, 0.9), 0 4px 18px rgba(244, 63, 94, 0.35);
 }
 
 .photocard-slot.is-favorite .card-favorite-btn {
@@ -1802,12 +1898,12 @@ body {
   background: linear-gradient(135deg, #f43f5e, #e11d48);
   border-color: #fda4af;
   color: #ffffff;
-  box-shadow: 0 2px 8px rgba(244, 63, 94, 0.65);
+  box-shadow: 0 2px 10px rgba(244, 63, 94, 0.75);
   transform: scale(1);
 }
 
 .photocard-slot.is-favorite .card-favorite-btn:hover {
-  transform: scale(1.18);
+  transform: scale(1.2);
 }
 
 /* Summary Card Modal */

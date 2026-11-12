@@ -203,22 +203,26 @@ async function syncToRepo(targetRepo, customCommitMessage = null) {
       console.log(`done (${blobSha.substring(0, 7)})`);
     }
 
-    // Add deleted entries (sha: null deletes from tree)
-    for (const delPath of deletedFiles) {
-      console.log(`  🗑️ Removing deleted file: ${delPath}`);
-      treeEntries.push({
-        path: delPath,
+    // 6. Create clean new Git tree
+    console.log('\n🌲 Creating new Git tree...');
+    // If there are deleted files or invalid characters, build a complete tree without base_tree
+    // to cleanly prune obsolete or corrupted entries without 422 BadObjectState errors.
+    const uploadedMap = new Map();
+    treeEntries.forEach(e => uploadedMap.set(e.path, e.sha));
+
+    const fullTreeEntries = [];
+    for (const [relPath, info] of localMap) {
+      const sha = uploadedMap.get(relPath) || info.sha;
+      fullTreeEntries.push({
+        path: relPath,
         mode: '100644',
         type: 'blob',
-        sha: null
+        sha
       });
     }
 
-    // 6. Create single new tree layered on base_tree
-    console.log('\n🌲 Creating new Git tree...');
     const newTree = await githubRequest('POST', `/repos/${OWNER}/${repoName}/git/trees`, {
-      base_tree: baseTreeSha,
-      tree: treeEntries
+      tree: fullTreeEntries
     });
     console.log(`Tree created: ${newTree.sha.substring(0, 7)}`);
 

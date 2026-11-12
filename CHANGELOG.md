@@ -4,6 +4,20 @@ All notable functional changes, architecture improvements, and bug fixes for the
 
 ---
 
+## [v2026.11.12-3] - 2026-11-12
+
+### 💖 Top-Bar Favorite Controls & Card Mask Occlusion Fix
+- **Top Control Bar Favorite Mode**:
+  - Added dedicated `[최애포카 선택]` mode toggle in the top control bar.
+  - When active, clicking anywhere on a photocard toggles its favorite state directly without requiring precise aiming at the corner icon.
+- **Top Bar `[💖 최애 카드]` Quick Access & Live Badge**:
+  - Added direct button in the control bar displaying live count of favorited cards (`[💖 최애 카드 (N)]`), opening the collection summary modal immediately.
+- **Occlusion Fix on Checked Cards**:
+  - Elevated photocard heart icon z-index to `50` (always above card mask and complete stamp).
+  - Set baseline button opacity to `0.85` so it remains clearly visible and clickable even after cards are marked as owned.
+
+---
+
 ## [v2026.11.12-2] - 2026-11-12
 
 ### 📸 Added 5 New Photocard Templates (fore40 ~ fore44)
