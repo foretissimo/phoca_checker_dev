@@ -57,7 +57,15 @@
   --shadow-lg: 0 16px 40px rgba(0, 0, 0, 0.6);
 }
 
-* {
+html {
+  box-sizing: border-box;
+  width: 100%;
+  max-width: 100%;
+  overflow-x: hidden;
+  -webkit-text-size-adjust: 100%;
+}
+
+*, *::before, *::after {
   box-sizing: border-box;
   margin: 0;
   padding: 0;
@@ -72,7 +80,10 @@ body {
   display: flex;
   flex-direction: column;
   line-height: 1.5;
+  width: 100%;
+  max-width: 100%;
   overflow-x: hidden;
+  position: relative;
 }
 
 /* --------------------------------------------------------------------------
@@ -91,6 +102,9 @@ body {
   top: 0;
   z-index: 100;
   gap: 1rem;
+  width: 100%;
+  max-width: 100%;
+  box-sizing: border-box;
 }
 
 .brand-section {
@@ -724,6 +738,9 @@ body {
   align-items: center;
   min-height: 480px;
   position: relative;
+  width: 100%;
+  max-width: 100%;
+  box-sizing: border-box;
 }
 
 .image-wrapper {
@@ -924,8 +941,10 @@ body {
   position: fixed;
   top: 0;
   left: 0;
-  width: 100vw;
-  height: 100vh;
+  right: 0;
+  bottom: 0;
+  width: 100%;
+  height: 100%;
   background: rgba(0, 0, 0, 0.7);
   backdrop-filter: blur(8px);
   -webkit-backdrop-filter: blur(8px);
@@ -1212,8 +1231,10 @@ body {
   position: fixed;
   top: 0;
   left: 0;
-  width: 100vw;
-  height: 100vh;
+  right: 0;
+  bottom: 0;
+  width: 100%;
+  height: 100%;
   background: rgba(0, 0, 0, 0.65);
   backdrop-filter: blur(6px);
   -webkit-backdrop-filter: blur(6px);
@@ -1633,14 +1654,27 @@ body {
   100% { transform: rotate(360deg); }
 }
 
-/* Medium Desktop / Tablet (<= 1024px) */
-@media (max-width: 1024px) {
+/* Medium Desktop / Laptop (<= 1200px) */
+@media (max-width: 1200px) {
+  .header-credits {
+    display: none !important;
+  }
+  .nav-breadcrumbs #nav-category-name {
+    display: none !important;
+  }
   .app-header {
     padding: 0.65rem 1rem;
     gap: 0.65rem;
   }
-  .nav-breadcrumbs #nav-category-name {
+}
+
+/* Tablet (<= 900px) */
+@media (max-width: 900px) {
+  .btn-text-full {
     display: none !important;
+  }
+  .btn-text-short {
+    display: inline !important;
   }
   .header-actions {
     gap: 0.35rem;
@@ -1657,9 +1691,10 @@ body {
     padding: 0.5rem 0.75rem;
     flex-wrap: wrap;
     gap: 0.45rem;
+    overflow: hidden;
   }
   .header-credits {
-    display: none;
+    display: none !important;
   }
   .brand-section {
     flex-shrink: 0;
@@ -1694,17 +1729,16 @@ body {
     font-weight: 600;
   }
 
-  /* Row 2: Action buttons row */
+  /* Row 2: Action buttons row - strict 100% width, no horizontal scroll wobble */
   .header-actions {
     width: 100%;
     display: flex;
     align-items: center;
     justify-content: space-between;
-    gap: 0.35rem;
-    overflow-x: auto;
-    -webkit-overflow-scrolling: touch;
-    scrollbar-width: none;
-    padding: 0.1rem 0;
+    gap: 0.3rem;
+    overflow: hidden;
+    padding: 0;
+    box-sizing: border-box;
   }
   .header-actions::-webkit-scrollbar {
     display: none;
@@ -1712,12 +1746,12 @@ body {
   .header-actions .btn {
     flex: 1 1 0px;
     min-width: 0;
-    padding: 0.45rem 0.25rem;
-    font-size: 0.76rem;
+    padding: 0.45rem 0.15rem;
+    font-size: 0.74rem;
     justify-content: center;
     text-align: center;
     white-space: nowrap;
-    gap: 0.25rem;
+    gap: 0.2rem;
   }
   .header-actions .btn svg {
     flex-shrink: 0;
@@ -1840,8 +1874,8 @@ body {
     left: 0;
     top: auto;
     bottom: 0;
-    width: 100vw;
-    max-width: 100vw;
+    width: 100%;
+    max-width: 100%;
     height: 82vh;
     border-radius: 20px 20px 0 0;
     border-left: none;
@@ -2770,7 +2804,7 @@ body {
   vertical-align: middle;
 }
   </style>
-  <link rel="stylesheet" href="css/style.css">
+  <link rel="stylesheet" href="css/style.css?v=2026.11.12-overflow-fix">
 </head>
 <body>
   <!-- Top Mobile App Shortcut Banner (최상단 바로가기 링크 배너) -->
@@ -3698,6 +3732,6 @@ body {
   <script src="js/templates.js?v=2026.11.12-nav-fix"></script>
   <script src="js/canvas-export.js?v=2026.11.12-nav-fix"></script>
   <script src="js/editor.js?v=2026.11.12-nav-fix"></script>
-  <script src="js/app.js?v=2026.11.12-nav-fix"></script>
+  <script src="js/app.js?v=2026.11.12-overflow-fix"></script>
 </body>
 </html>
