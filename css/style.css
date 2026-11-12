@@ -36,6 +36,7 @@ html {
   width: 100%;
   max-width: 100%;
   overflow-x: hidden;
+  overflow-x: clip;
   -webkit-text-size-adjust: 100%;
 }
 
@@ -57,6 +58,7 @@ body {
   width: 100%;
   max-width: 100%;
   overflow-x: hidden;
+  overflow-x: clip;
   position: relative;
 }
 
@@ -79,6 +81,7 @@ body {
   width: 100%;
   max-width: 100%;
   box-sizing: border-box;
+  overflow-x: clip;
 }
 
 .brand-section {
@@ -735,6 +738,7 @@ body {
   width: 100%;
   max-width: 100%;
   box-sizing: border-box;
+  overflow-x: clip;
 }
 
 .image-wrapper {

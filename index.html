@@ -62,6 +62,7 @@ html {
   width: 100%;
   max-width: 100%;
   overflow-x: hidden;
+  overflow-x: clip;
   -webkit-text-size-adjust: 100%;
 }
 
@@ -83,6 +84,7 @@ body {
   width: 100%;
   max-width: 100%;
   overflow-x: hidden;
+  overflow-x: clip;
   position: relative;
 }
 
@@ -105,6 +107,7 @@ body {
   width: 100%;
   max-width: 100%;
   box-sizing: border-box;
+  overflow-x: clip;
 }
 
 .brand-section {
@@ -741,6 +744,7 @@ body {
   width: 100%;
   max-width: 100%;
   box-sizing: border-box;
+  overflow-x: clip;
 }
 
 .image-wrapper {
@@ -2804,7 +2808,7 @@ body {
   vertical-align: middle;
 }
   </style>
-  <link rel="stylesheet" href="css/style.css?v=2026.11.12-overflow-fix">
+  <link rel="stylesheet" href="css/style.css?v=2026.11.12-swap-buttons">
 </head>
 <body>
   <!-- Top Mobile App Shortcut Banner (최상단 바로가기 링크 배너) -->
@@ -2856,13 +2860,12 @@ body {
 
     <!-- Header Action Buttons -->
     <div class="header-actions">
-      <button id="btn-open-shortcut-guide" class="btn btn-sm btn-shortcut-nav" title="핸드폰 홈 화면에 바로가기 추가 / 앱 설치">
-        <svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-          <rect x="5" y="2" width="14" height="20" rx="2" ry="2"></rect>
-          <line x1="12" y1="18" x2="12.01" y2="18"></line>
+      <button id="btn-share-x" class="btn btn-x-share btn-sm" title="내 수집 진행률과 자랑하기 카드를 생성하고 공유하기">
+        <svg viewBox="0 0 24 24" width="13" height="13" fill="currentColor">
+          <path d="M18.244 2.25h3.308l-7.227 8.26 8.502 11.24H16.17l-5.214-6.817L4.99 21.75H1.68l7.73-8.835L1.254 2.25H8.08l4.713 6.231zm-1.161 17.52h1.833L7.084 4.126H5.117z"></path>
         </svg>
-        <span class="btn-text-full">홈 화면 추가</span>
-        <span class="btn-text-short">바로가기</span>
+        <span class="btn-text-full">자랑하기</span>
+        <span class="btn-text-short">자랑하기</span>
       </button>
 
       <button id="btn-open-info" class="btn btn-sm" title="공지사항 및 사용 도움말">
@@ -2894,12 +2897,13 @@ body {
         <span class="btn-text-short">백업</span>
       </button>
 
-      <button id="btn-share-x" class="btn btn-x-share btn-sm" title="내 수집 진행률과 자랑하기 카드를 생성하고 공유하기">
-        <svg viewBox="0 0 24 24" width="13" height="13" fill="currentColor">
-          <path d="M18.244 2.25h3.308l-7.227 8.26 8.502 11.24H16.17l-5.214-6.817L4.99 21.75H1.68l7.73-8.835L1.254 2.25H8.08l4.713 6.231zm-1.161 17.52h1.833L7.084 4.126H5.117z"></path>
+      <button id="btn-open-shortcut-guide" class="btn btn-sm btn-shortcut-nav" title="핸드폰 홈 화면에 바로가기 추가 / 앱 설치">
+        <svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+          <rect x="5" y="2" width="14" height="20" rx="2" ry="2"></rect>
+          <line x1="12" y1="18" x2="12.01" y2="18"></line>
         </svg>
-        <span class="btn-text-full">자랑하기</span>
-        <span class="btn-text-short">자랑하기</span>
+        <span class="btn-text-full">홈 화면 추가</span>
+        <span class="btn-text-short">바로가기</span>
       </button>
 
       <button id="toggle-editor-btn" class="btn btn-sm" style="display: none;" title="영역 편집 / 자석 스냅 / 깃헙 직접 저장">
@@ -3732,6 +3736,6 @@ body {
   <script src="js/templates.js?v=2026.11.12-nav-fix"></script>
   <script src="js/canvas-export.js?v=2026.11.12-nav-fix"></script>
   <script src="js/editor.js?v=2026.11.12-nav-fix"></script>
-  <script src="js/app.js?v=2026.11.12-overflow-fix"></script>
+  <script src="js/app.js?v=2026.11.12-swap-buttons"></script>
 </body>
 </html>
