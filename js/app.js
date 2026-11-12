@@ -147,8 +147,21 @@ class PhocaCheckerApp {
     this.isFavSelectionMode = false;
     this.btnToggleFavMode = document.getElementById('btn-toggle-fav-mode');
     this.favModeLabel = document.getElementById('fav-mode-label');
-    this.btnOpenFavCardModal = document.getElementById('btn-open-fav-card-modal');
+    this.btnOpenFavCardModal = document.getElementById('btn-open-fav-card-modal') || document.getElementById('btn-open-fav-gallery');
     this.favCardBadgeCount = document.getElementById('fav-card-badge-count');
+
+    // Favorite Photocards Gallery Modal (최애포카 모아보기)
+    this.favGalleryModalBackdrop = document.getElementById('fav-gallery-modal-backdrop');
+    this.btnCloseFavGalleryModal = document.getElementById('close-fav-gallery-modal-btn');
+    this.favGalleryCountBadge = document.getElementById('fav-gallery-count-badge');
+    this.btnFavGalleryToShare = document.getElementById('btn-fav-gallery-to-share');
+    this.btnFavGalleryToPoster = document.getElementById('btn-fav-gallery-to-poster');
+    this.favGalleryGrid = document.getElementById('fav-gallery-grid');
+    this.btnOpenFavGalleryHeader = document.getElementById('btn-open-fav-gallery-header');
+    this.btnOpenFavGalleryHome = document.getElementById('btn-open-fav-gallery-home');
+    this.btnOpenShareHome = document.getElementById('btn-open-share-home');
+    this.btnOpenFavGallery = document.getElementById('btn-open-fav-gallery');
+    this.btnDrawerOpenFavGallery = document.getElementById('btn-drawer-open-fav-gallery');
     
     // Custom Image Upload
     this.customImageUpload = document.getElementById('custom-image-upload');
@@ -355,7 +368,47 @@ class PhocaCheckerApp {
       this.btnToggleFavMode.addEventListener('click', () => this.toggleFavSelectionMode());
     }
     if (this.btnOpenFavCardModal) {
-      this.btnOpenFavCardModal.addEventListener('click', () => this.openSummaryCardModal());
+      this.btnOpenFavCardModal.addEventListener('click', () => this.openFavGalleryModal());
+    }
+
+    // Favorite Gallery Modal Triggers & Events
+    if (this.btnOpenFavGalleryHeader) {
+      this.btnOpenFavGalleryHeader.addEventListener('click', () => this.openFavGalleryModal());
+    }
+    if (this.btnOpenFavGalleryHome) {
+      this.btnOpenFavGalleryHome.addEventListener('click', () => this.openFavGalleryModal());
+    }
+    if (this.btnOpenShareHome) {
+      this.btnOpenShareHome.addEventListener('click', () => this.openSummaryCardModal());
+    }
+    if (this.btnOpenFavGallery) {
+      this.btnOpenFavGallery.addEventListener('click', () => this.openFavGalleryModal());
+    }
+    if (this.btnDrawerOpenFavGallery) {
+      this.btnDrawerOpenFavGallery.addEventListener('click', () => {
+        this.closeDrawer();
+        this.openFavGalleryModal();
+      });
+    }
+    if (this.btnCloseFavGalleryModal) {
+      this.btnCloseFavGalleryModal.addEventListener('click', () => this.closeFavGalleryModal());
+    }
+    if (this.favGalleryModalBackdrop) {
+      this.favGalleryModalBackdrop.addEventListener('click', (e) => {
+        if (e.target === this.favGalleryModalBackdrop) this.closeFavGalleryModal();
+      });
+    }
+    if (this.btnFavGalleryToShare) {
+      this.btnFavGalleryToShare.addEventListener('click', () => {
+        this.closeFavGalleryModal();
+        this.openSummaryCardModal();
+      });
+    }
+    if (this.btnFavGalleryToPoster) {
+      this.btnFavGalleryToPoster.addEventListener('click', () => {
+        this.closeFavGalleryModal();
+        this.exportAllMergedImage();
+      });
     }
 
     // Custom Image Upload
@@ -404,6 +457,9 @@ class PhocaCheckerApp {
     if (view === 'info' || view === 'about') {
       this.showHomeView();
       this.openInfoModal();
+    } else if (view === 'favorites' || view === 'favs' || view === 'favorite') {
+      this.showHomeView();
+      this.openFavGalleryModal();
     } else if (view === 'checker' || view === 'fore') {
       const categoryId = 'fore';
       const templateId = parts[1] || 'fore1';
@@ -688,6 +744,9 @@ class PhocaCheckerApp {
     if (this.mergedExportModalBackdrop && this.mergedExportModalBackdrop.classList.contains('open')) {
       this.updateMergedExportModalCounts();
     }
+    if (this.favGalleryModalBackdrop && this.favGalleryModalBackdrop.classList.contains('open')) {
+      this.renderFavGallery();
+    }
   }
 
   toggleFavSelectionMode() {
@@ -712,6 +771,12 @@ class PhocaCheckerApp {
     const totalFavs = this.getAllFavoriteCards().length;
     if (this.favCardBadgeCount) {
       this.favCardBadgeCount.textContent = `${totalFavs}/10`;
+    }
+    if (this.favGalleryCountBadge) {
+      this.favGalleryCountBadge.textContent = `${totalFavs} / 10장`;
+    }
+    if (this.btnDrawerOpenFavGallery) {
+      this.btnDrawerOpenFavGallery.textContent = `💖 최애포카 모아보기 (${totalFavs}/10)`;
     }
   }
 
@@ -1919,6 +1984,139 @@ class PhocaCheckerApp {
 
   async shareToX() {
     this.openSummaryCardModal();
+  }
+
+  // --------------------------------------------------------------------------
+  // Favorite Photocards Interactive Gallery Modal (최애포카 모아보기)
+  // --------------------------------------------------------------------------
+  openFavGalleryModal() {
+    if (!this.favGalleryModalBackdrop) return;
+    this.favGalleryModalBackdrop.classList.add('open');
+    this.updateFavCardBadgeCount();
+    this.renderFavGallery();
+  }
+
+  closeFavGalleryModal() {
+    if (this.favGalleryModalBackdrop) {
+      this.favGalleryModalBackdrop.classList.remove('open');
+    }
+  }
+
+  renderFavGallery() {
+    if (!this.favGalleryGrid) return;
+    this.favGalleryGrid.innerHTML = '';
+
+    const favoriteList = this.getAllFavoriteCards();
+
+    if (favoriteList.length === 0) {
+      this.favGalleryGrid.innerHTML = `
+        <div class="fav-gallery-empty" style="grid-column: 1 / -1; text-align: center; padding: 2.8rem 1.5rem; background: #0c0e18; border-radius: var(--radius-md); border: 1px dashed rgba(255,255,255,0.15);">
+          <div style="font-size: 2.4rem; margin-bottom: 0.6rem;">💖</div>
+          <div style="font-size: 1.05rem; font-weight: 700; color: #f1f5f9; margin-bottom: 0.4rem;">등록된 최애 포카가 없습니다</div>
+          <p style="font-size: 0.82rem; color: #94a3b8; line-height: 1.5; margin: 0 auto; max-width: 360px;">
+            포카판에서 <span style="color:#ef4444; font-weight:700;">[최애포카 선택]</span> 모드를 켜거나 카드 위의 하트(♥)를 눌러 최애 포카를 최대 10장까지 찜해보세요!
+          </p>
+        </div>
+      `;
+      return;
+    }
+
+    favoriteList.forEach(fav => {
+      const checkedSet = this.getCheckedSetForTemplate(fav.templateId);
+      const isOwned = checkedSet.has(fav.id);
+
+      const cardEl = document.createElement('div');
+      cardEl.className = 'fav-gallery-card';
+
+      // Remove / un-favorite button (top-right x)
+      const removeBtn = document.createElement('button');
+      removeBtn.className = 'card-remove-fav-btn';
+      removeBtn.title = '최애 포카 지정 해제';
+      removeBtn.innerHTML = '×';
+      removeBtn.addEventListener('click', (e) => {
+        e.stopPropagation();
+        this.toggleFavorite(fav.id);
+      });
+      cardEl.appendChild(removeBtn);
+
+      // Card thumbnail area with dynamic aspect-ratio fit
+      const thumbArea = document.createElement('div');
+      thumbArea.className = 'card-thumb-area';
+
+      const thumbCanvas = document.createElement('canvas');
+      thumbCanvas.className = 'card-thumb-canvas';
+      thumbCanvas.width = 160;
+      thumbCanvas.height = 190;
+      thumbArea.appendChild(thumbCanvas);
+      cardEl.appendChild(thumbArea);
+
+      // Card info area
+      const infoArea = document.createElement('div');
+      infoArea.className = 'card-info-area';
+
+      const titleEl = document.createElement('div');
+      titleEl.className = 'card-title';
+      titleEl.title = fav.name || '포토카드';
+      titleEl.textContent = fav.name || '포토카드';
+      infoArea.appendChild(titleEl);
+
+      const sheetEl = document.createElement('div');
+      sheetEl.className = 'card-sheet';
+      const cleanSheetName = (fav.templateTitle || '').replace(/^fore\d+\.\s*/, '');
+      sheetEl.title = cleanSheetName;
+      sheetEl.textContent = cleanSheetName;
+      infoArea.appendChild(sheetEl);
+
+      // Card actions row: Owned Status Pill & Jump to Board Button
+      const actionsRow = document.createElement('div');
+      actionsRow.className = 'card-actions-row';
+
+      const statusPill = document.createElement('span');
+      statusPill.className = `fav-status-pill ${isOwned ? 'is-owned' : 'is-unowned'}`;
+      statusPill.title = '클릭하여 보유/미보유 상태 변경';
+      statusPill.textContent = isOwned ? '✓ 보유중' : '미보유';
+      statusPill.addEventListener('click', (e) => {
+        e.stopPropagation();
+        const curSet = this.getCheckedSetForTemplate(fav.templateId);
+        if (curSet.has(fav.id)) {
+          curSet.delete(fav.id);
+          statusPill.className = 'fav-status-pill is-unowned';
+          statusPill.textContent = '미보유';
+          this.showToast(`'${fav.name}'을(를) 미보유로 변경했습니다.`);
+        } else {
+          curSet.add(fav.id);
+          statusPill.className = 'fav-status-pill is-owned';
+          statusPill.textContent = '✓ 보유중';
+          this.showToast(`'${fav.name}'을(를) 보유로 변경했습니다!`);
+        }
+        this.saveCheckedState(fav.templateId, curSet);
+        if (this.currentTemplate && this.currentTemplate.id === fav.templateId) {
+          this.renderCards();
+          this.updateStats();
+        }
+      });
+      actionsRow.appendChild(statusPill);
+
+      const jumpBtn = document.createElement('a');
+      jumpBtn.className = 'fav-jump-btn';
+      jumpBtn.href = `#/checker/${fav.templateId}`;
+      jumpBtn.title = `'${cleanSheetName}' 포카판으로 바로가기`;
+      jumpBtn.textContent = '판 이동 ↗';
+      jumpBtn.addEventListener('click', (e) => {
+        e.preventDefault();
+        this.closeFavGalleryModal();
+        window.location.hash = `#/checker/${fav.templateId}`;
+      });
+      actionsRow.appendChild(jumpBtn);
+
+      infoArea.appendChild(actionsRow);
+      cardEl.appendChild(infoArea);
+
+      this.favGalleryGrid.appendChild(cardEl);
+
+      // Render thumbnail with correct aspect ratio
+      this.drawThumbCanvas(thumbCanvas, fav);
+    });
   }
 
   showToast(message, duration = 2400) {
