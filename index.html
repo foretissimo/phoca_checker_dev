@@ -2382,7 +2382,18 @@ body {
 
       <!-- Live Canvas Preview Container -->
       <div class="summary-card-preview-container">
-        <canvas id="summary-card-canvas" class="summary-card-preview-canvas" width="880" height="540"></canvas>
+        <canvas id="summary-card-canvas" class="summary-card-preview-canvas" width="380" height="230"></canvas>
+      </div>
+
+      <!-- Featured Card Selector Section (하단 영역: 이미지에 들어갈 최애포카 선택) -->
+      <div class="featured-card-selector-section">
+        <div class="featured-selector-header">
+          <span class="featured-selector-title">💖 카드에 담을 최애포카 선택</span>
+          <span id="featured-card-name-hint" class="featured-card-name-hint">선택된 포카 없음</span>
+        </div>
+        <div id="featured-cards-strip" class="featured-cards-strip">
+          <!-- Dynamically populated chips of all favorite photocards -->
+        </div>
       </div>
 
       <!-- Action Buttons -->
@@ -2421,9 +2432,9 @@ body {
   <div id="toast-container" class="toast-container"></div>
 
   <!-- Scripts -->
-  <script src="js/templates.js?v=2026.11.12-fav-top"></script>
-  <script src="js/canvas-export.js?v=2026.11.12-fav-top"></script>
-  <script src="js/editor.js?v=2026.11.12-fav-top"></script>
-  <script src="js/app.js?v=2026.11.12-fav-top"></script>
+  <script src="js/templates.js?v=2026.11.12-fav-compact"></script>
+  <script src="js/canvas-export.js?v=2026.11.12-fav-compact"></script>
+  <script src="js/editor.js?v=2026.11.12-fav-compact"></script>
+  <script src="js/app.js?v=2026.11.12-fav-compact"></script>
 </body>
 </html>
