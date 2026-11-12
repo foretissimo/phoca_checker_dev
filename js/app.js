@@ -10,6 +10,7 @@ class PhocaCheckerApp {
     this.currentCategory = this.categories[0] || null;
     this.currentTemplate = this.templates[0] || null;
     this.currentTemplateId = this.templates[0]?.id || 'fore1';
+    this.lastTemplateId = null;
     
     // Checked cards set for active template
     this.checkedCards = new Set();
@@ -36,6 +37,16 @@ class PhocaCheckerApp {
     this.loadSavedState();
     this.bindEvents();
     
+    // Listen for PWA install prompt (Android Chrome / Edge)
+    this.deferredPrompt = null;
+    window.addEventListener('beforeinstallprompt', (e) => {
+      e.preventDefault();
+      this.deferredPrompt = e;
+      if (this.shortcutNativeInstallArea) {
+        this.shortcutNativeInstallArea.style.display = 'block';
+      }
+    });
+
     // Initialize visual editor
     this.editor = new TemplateEditor(this);
 
@@ -50,6 +61,23 @@ class PhocaCheckerApp {
     this.checkerView = document.getElementById('checker-view');
     this.favoritesView = document.getElementById('favorites-view');
     this.categoriesGrid = document.getElementById('categories-grid');
+
+    // Top App Shortcut Banner & Modal Elements
+    this.shortcutTopBanner = document.getElementById('app-shortcut-top-banner');
+    this.btnBannerAddShortcut = document.getElementById('btn-banner-add-shortcut');
+    this.btnCloseShortcutBanner = document.getElementById('btn-close-shortcut-banner');
+    this.btnOpenShortcutGuide = document.getElementById('btn-open-shortcut-guide');
+    this.shortcutModalBackdrop = document.getElementById('shortcut-modal-backdrop');
+    this.btnCloseShortcutModal = document.getElementById('close-shortcut-modal-btn');
+    this.btnShortcutModalDone = document.getElementById('btn-shortcut-modal-done');
+    this.tabShortcutIos = document.getElementById('tab-shortcut-ios');
+    this.tabShortcutAndroid = document.getElementById('tab-shortcut-android');
+    this.guideShortcutIos = document.getElementById('shortcut-guide-ios');
+    this.guideShortcutAndroid = document.getElementById('shortcut-guide-android');
+    this.shortcutInappNotice = document.getElementById('shortcut-inapp-notice');
+    this.shortcutNativeInstallArea = document.getElementById('shortcut-native-install-area');
+    this.btnDoNativeInstall = document.getElementById('btn-do-native-install');
+    this.btnCopySiteUrl = document.getElementById('btn-copy-site-url');
     
     // Favorites Page Elements & Nav
     this.btnGoFavoritesPage = document.getElementById('btn-go-favorites-page');
@@ -166,10 +194,48 @@ class PhocaCheckerApp {
   }
 
   bindEvents() {
+    // Top Shortcut Banner & Modal Events
+    if (this.btnBannerAddShortcut) {
+      this.btnBannerAddShortcut.addEventListener('click', () => this.openShortcutModal());
+    }
+    if (this.btnCloseShortcutBanner) {
+      this.btnCloseShortcutBanner.addEventListener('click', () => this.dismissShortcutBanner());
+    }
+    if (this.btnOpenShortcutGuide) {
+      this.btnOpenShortcutGuide.addEventListener('click', () => this.openShortcutModal());
+    }
+    if (this.btnCloseShortcutModal) {
+      this.btnCloseShortcutModal.addEventListener('click', () => this.closeShortcutModal());
+    }
+    if (this.btnShortcutModalDone) {
+      this.btnShortcutModalDone.addEventListener('click', () => this.closeShortcutModal());
+    }
+    if (this.shortcutModalBackdrop) {
+      this.shortcutModalBackdrop.addEventListener('click', (e) => {
+        if (e.target === this.shortcutModalBackdrop) this.closeShortcutModal();
+      });
+    }
+    if (this.tabShortcutIos) {
+      this.tabShortcutIos.addEventListener('click', () => this.switchShortcutTab('ios'));
+    }
+    if (this.tabShortcutAndroid) {
+      this.tabShortcutAndroid.addEventListener('click', () => this.switchShortcutTab('android'));
+    }
+    if (this.btnDoNativeInstall) {
+      this.btnDoNativeInstall.addEventListener('click', () => this.triggerNativeInstall());
+    }
+    if (this.btnCopySiteUrl) {
+      this.btnCopySiteUrl.addEventListener('click', () => this.copySiteUrl());
+    }
+
     // Nav Home
     if (this.btnNavHome) {
       this.btnNavHome.addEventListener('click', () => {
-        window.location.hash = '#/home';
+        if (window.location.hash === '#/home' || window.location.hash === '' || window.location.hash === '#') {
+          this.showHomeView();
+        } else {
+          window.location.hash = '#/home';
+        }
       });
     }
 
@@ -410,7 +476,12 @@ class PhocaCheckerApp {
 
       this.nickname = localStorage.getItem('phoca_user_nickname') || '';
       this.featuredFavoriteId = localStorage.getItem('phoca_featured_favorite_id') || null;
+      this.lastTemplateId = localStorage.getItem('phoca_last_template_id') || null;
       this.updateFavCardBadgeCount();
+
+      if (localStorage.getItem('phoca_shortcut_banner_dismissed') === 'true') {
+        if (this.shortcutTopBanner) this.shortcutTopBanner.style.display = 'none';
+      }
     } catch (e) {
       console.warn('LocalStorage load error:', e);
     }
@@ -418,7 +489,7 @@ class PhocaCheckerApp {
 
   handleRoute() {
     const hash = window.location.hash || '#/home';
-    const parts = hash.replace(/^#\//, '').split('/');
+    const parts = hash.replace(/^#\/?/, '').split('/');
     const view = parts[0] || 'home';
 
     if (view === 'favorites' || view === 'favs' || view === 'fav') {
@@ -428,7 +499,15 @@ class PhocaCheckerApp {
       this.openInfoModal();
     } else if (view === 'checker' || view === 'fore') {
       const categoryId = 'fore';
-      const templateId = parts[1] || 'fore1';
+      let templateId = parts[1];
+      if (!templateId) {
+        templateId = (this.lastTemplateId && this.templates.some(t => t.id === this.lastTemplateId))
+          ? this.lastTemplateId
+          : (this.templates[0]?.id || 'fore1');
+      } else if (!this.templates.some(t => t.id === templateId)) {
+        // 지정된 페이지가 없을 경우 첫 번째 페이지로 안전하게 폴백
+        templateId = this.templates[0]?.id || 'fore1';
+      }
       this.showCheckerView(categoryId, templateId);
     } else {
       this.showHomeView();
@@ -456,7 +535,7 @@ class PhocaCheckerApp {
     if (this.navTemplateName) this.navTemplateName.style.display = 'none';
     
     this.renderCategoryHub();
-    this.updateFavBadgeCount();
+    this.updateFavCardBadgeCount();
   }
 
   renderCategoryHub() {
@@ -515,7 +594,22 @@ class PhocaCheckerApp {
 
       if (cat.isAvailable) {
         card.addEventListener('click', () => {
-          window.location.hash = `#/checker/fore1`;
+          // 마지막으로 눌렀던 페이지가 있으면 그 페이지로 이동, 없거나 삭제되었으면 첫 페이지로 이동
+          let targetTemplate = null;
+          if (this.lastTemplateId) {
+            targetTemplate = this.templates.find(t => t.id === this.lastTemplateId && t.categoryId === cat.id);
+          }
+          if (!targetTemplate) {
+            targetTemplate = this.templates.find(t => t.categoryId === cat.id) || this.templates[0];
+          }
+          const targetId = targetTemplate ? targetTemplate.id : (this.templates[0]?.id || 'fore1');
+          const targetHash = `#/checker/${targetId}`;
+
+          if (window.location.hash === targetHash) {
+            this.handleRoute();
+          } else {
+            window.location.hash = targetHash;
+          }
         });
       }
 
@@ -762,6 +856,10 @@ class PhocaCheckerApp {
 
     this.currentTemplate = template;
     this.currentTemplateId = template.id;
+    this.lastTemplateId = template.id;
+    try {
+      localStorage.setItem('phoca_last_template_id', template.id);
+    } catch (e) {}
 
     // Load checks from LocalStorage
     this.loadCheckedStateForCurrent();
@@ -940,6 +1038,10 @@ class PhocaCheckerApp {
     }
   }
 
+  updateFavBadgeCount() {
+    this.updateFavCardBadgeCount();
+  }
+
   getAllFavoriteCards() {
     const list = [];
     this.templates.forEach(t => {
@@ -967,7 +1069,100 @@ class PhocaCheckerApp {
   }
 
   // --------------------------------------------------------------------------
-  // Backup / Restore Data (LocalStorage Export & Import)
+  // Mobile Shortcut Banner & Guide Modal
+  // --------------------------------------------------------------------------
+  openShortcutModal() {
+    const isIOS = /iPad|iPhone|iPod/.test(navigator.userAgent) || (navigator.platform === 'MacIntel' && navigator.maxTouchPoints > 1);
+    const isInApp = /KAKAOTALK|Instagram|Twitter|FB_IAB|FBAN|FBAV|Line|Snapchat/i.test(navigator.userAgent);
+
+    if (this.shortcutInappNotice) {
+      this.shortcutInappNotice.style.display = isInApp ? 'flex' : 'none';
+    }
+
+    if (this.deferredPrompt && this.shortcutNativeInstallArea) {
+      this.shortcutNativeInstallArea.style.display = 'block';
+    }
+
+    // Default to detected OS tab
+    this.switchShortcutTab(isIOS ? 'ios' : 'android');
+
+    if (this.shortcutModalBackdrop) {
+      this.shortcutModalBackdrop.classList.add('open');
+    }
+  }
+
+  closeShortcutModal() {
+    if (this.shortcutModalBackdrop) {
+      this.shortcutModalBackdrop.classList.remove('open');
+    }
+  }
+
+  dismissShortcutBanner() {
+    if (this.shortcutTopBanner) {
+      this.shortcutTopBanner.style.display = 'none';
+    }
+    try {
+      localStorage.setItem('phoca_shortcut_banner_dismissed', 'true');
+    } catch (e) {}
+  }
+
+  switchShortcutTab(target) {
+    if (this.tabShortcutIos) {
+      this.tabShortcutIos.classList.toggle('active', target === 'ios');
+    }
+    if (this.tabShortcutAndroid) {
+      this.tabShortcutAndroid.classList.toggle('active', target === 'android');
+    }
+    if (this.guideShortcutIos) {
+      this.guideShortcutIos.style.display = target === 'ios' ? 'flex' : 'none';
+    }
+    if (this.guideShortcutAndroid) {
+      this.guideShortcutAndroid.style.display = target === 'android' ? 'flex' : 'none';
+    }
+  }
+
+  async triggerNativeInstall() {
+    if (!this.deferredPrompt) {
+      this.showToast('ℹ️ 브라우저 메뉴 [⋮] 에서 [홈 화면에 추가]를 눌러주세요.');
+      return;
+    }
+    try {
+      this.deferredPrompt.prompt();
+      const choice = await this.deferredPrompt.userChoice;
+      if (choice && choice.outcome === 'accepted') {
+        this.showToast('🎉 홈 화면에 바로가기가 설치되었습니다!');
+        this.closeShortcutModal();
+      }
+      this.deferredPrompt = null;
+      if (this.shortcutNativeInstallArea) {
+        this.shortcutNativeInstallArea.style.display = 'none';
+      }
+    } catch (err) {
+      console.warn('PWA install error:', err);
+    }
+  }
+
+  async copySiteUrl() {
+    const url = window.location.href.split('#')[0] || 'https://foretissimo.github.io/phoca_checker/';
+    try {
+      if (navigator.clipboard && navigator.clipboard.writeText) {
+        await navigator.clipboard.writeText(url);
+      } else {
+        const input = document.createElement('input');
+        input.value = url;
+        document.body.appendChild(input);
+        input.select();
+        document.execCommand('copy');
+        document.body.removeChild(input);
+      }
+      this.showToast('📋 바로가기 링크 주소가 복사되었습니다!');
+    } catch (e) {
+      this.showToast('링크 복사에 실패했습니다.');
+    }
+  }
+
+  // --------------------------------------------------------------------------
+  // Info & Backup Modal Handlers
   // --------------------------------------------------------------------------
   openInfoModal() {
     if (this.infoModalBackdrop) {

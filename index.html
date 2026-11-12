@@ -17,6 +17,12 @@
   <meta http-equiv="Expires" content="0">
   <title>포카 체커 (Phoca Checker) - 포토카드 컬렉션 & 위시리스트</title>
   <link rel="icon" href="data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 100 100%22><text y=%22.9em%22 font-size=%2290%22>✨</text></svg>">
+  <link rel="manifest" href="manifest.json">
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+  <meta name="apple-mobile-web-app-title" content="포카체커">
+  <link rel="apple-touch-icon" href="images/fore_logo.jpg">
+  <meta name="theme-color" content="#0f1117">
   <style>
 /* ==========================================================================
    Phoca Checker - Complete Robust Responsive Stylesheet
@@ -2416,10 +2422,273 @@ body {
 .link-go-fav-page:hover {
   color: #f43f5e !important;
 }
+
+/* ==========================================================================
+   Top App Shortcut Banner & Modal (최상단 바로가기 링크 배너 & 모달)
+   ========================================================================== */
+.app-shortcut-top-banner {
+  width: 100%;
+  background: linear-gradient(90deg, #131929 0%, #112022 50%, #151a2d 100%);
+  border-bottom: 1px solid rgba(255, 255, 255, 0.12);
+  color: #f1f5f9;
+  font-size: 0.82rem;
+  position: relative;
+  z-index: 101;
+  transition: all 0.25s ease;
+}
+
+.shortcut-banner-inner {
+  max-width: 1200px;
+  margin: 0 auto;
+  padding: 0.55rem 1.25rem;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 1rem;
+}
+
+.shortcut-banner-left {
+  display: flex;
+  align-items: center;
+  gap: 0.55rem;
+  font-size: 0.82rem;
+  color: #e2e8f0;
+  line-height: 1.4;
+}
+
+.shortcut-banner-icon {
+  font-size: 1.1rem;
+  line-height: 1;
+  flex-shrink: 0;
+}
+
+.shortcut-banner-text strong {
+  color: #38bdf8;
+  font-weight: 700;
+}
+
+.shortcut-banner-right {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  flex-shrink: 0;
+}
+
+.btn-shortcut-action {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.35rem;
+  padding: 0.32rem 0.75rem;
+  background: linear-gradient(135deg, rgba(99, 102, 241, 0.3), rgba(236, 72, 153, 0.35));
+  border: 1px solid rgba(165, 180, 252, 0.4);
+  color: #ffffff;
+  border-radius: var(--radius-full);
+  font-size: 0.76rem;
+  font-weight: 700;
+  cursor: pointer;
+  transition: all 0.18s ease;
+  white-space: nowrap;
+}
+
+.btn-shortcut-action:hover {
+  background: linear-gradient(135deg, rgba(99, 102, 241, 0.5), rgba(236, 72, 153, 0.55));
+  border-color: #f43f5e;
+  transform: translateY(-1px);
+  box-shadow: 0 2px 10px rgba(236, 72, 153, 0.3);
+}
+
+.btn-shortcut-dismiss {
+  background: transparent;
+  border: none;
+  color: #94a3b8;
+  width: 26px;
+  height: 26px;
+  border-radius: 50%;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: all 0.15s ease;
+}
+
+.btn-shortcut-dismiss:hover {
+  background: rgba(255, 255, 255, 0.12);
+  color: #fff;
+}
+
+.btn-shortcut-nav {
+  background: rgba(56, 189, 248, 0.12);
+  border: 1px solid rgba(56, 189, 248, 0.35);
+  color: #7dd3fc;
+}
+
+.btn-shortcut-nav:hover {
+  background: rgba(56, 189, 248, 0.22);
+  border-color: rgba(56, 189, 248, 0.6);
+  color: #fff;
+}
+
+@media (max-width: 640px) {
+  .shortcut-banner-inner {
+    padding: 0.45rem 0.75rem;
+    gap: 0.5rem;
+  }
+  .shortcut-banner-left {
+    font-size: 0.75rem;
+  }
+  .btn-shortcut-action {
+    padding: 0.28rem 0.6rem;
+    font-size: 0.72rem;
+  }
+}
+
+/* Modal Styles */
+.shortcut-modal-box {
+  width: 480px;
+  max-width: 95vw;
+}
+
+.shortcut-modal-intro {
+  font-size: 0.84rem;
+  color: var(--text-secondary);
+  margin-bottom: 1rem;
+  line-height: 1.5;
+}
+
+.shortcut-tabs-row {
+  display: flex;
+  background: rgba(255, 255, 255, 0.05);
+  padding: 3px;
+  border-radius: var(--radius-md);
+  margin-bottom: 1.1rem;
+  gap: 4px;
+}
+
+.shortcut-tab-btn {
+  flex: 1;
+  padding: 0.45rem 0.6rem;
+  border: none;
+  background: transparent;
+  color: var(--text-secondary);
+  font-size: 0.8rem;
+  font-weight: 600;
+  border-radius: 8px;
+  cursor: pointer;
+  transition: all 0.15s ease;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  white-space: nowrap;
+}
+
+.shortcut-tab-btn.active {
+  background: var(--bg-card);
+  color: #fff;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.3);
+}
+
+.shortcut-inapp-notice {
+  background: rgba(245, 158, 11, 0.12);
+  border: 1px solid rgba(245, 158, 11, 0.35);
+  border-radius: var(--radius-sm);
+  padding: 0.65rem 0.85rem;
+  display: flex;
+  gap: 0.55rem;
+  align-items: flex-start;
+  margin-bottom: 1rem;
+  font-size: 0.78rem;
+  color: #fde68a;
+  line-height: 1.45;
+}
+
+.shortcut-guide-panel {
+  display: none;
+  flex-direction: column;
+  gap: 0.75rem;
+}
+
+.shortcut-guide-panel.active {
+  display: flex;
+}
+
+.shortcut-step {
+  display: flex;
+  align-items: flex-start;
+  gap: 0.75rem;
+  background: rgba(255, 255, 255, 0.03);
+  border: 1px solid rgba(255, 255, 255, 0.06);
+  border-radius: var(--radius-sm);
+  padding: 0.7rem 0.85rem;
+}
+
+.step-num {
+  width: 22px;
+  height: 22px;
+  border-radius: 50%;
+  background: var(--accent-primary);
+  color: #fff;
+  font-size: 0.75rem;
+  font-weight: 700;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+  margin-top: 1px;
+}
+
+.step-desc {
+  font-size: 0.82rem;
+  color: #f1f5f9;
+  line-height: 1.45;
+  flex: 1;
+}
+
+.step-subtext {
+  font-size: 0.72rem;
+  color: var(--text-muted);
+  margin-top: 2px;
+}
+
+.inline-icon-badge {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  background: rgba(255, 255, 255, 0.12);
+  padding: 2px 5px;
+  border-radius: 4px;
+  margin: 0 2px;
+  vertical-align: middle;
+}
   </style>
   <link rel="stylesheet" href="css/style.css">
 </head>
 <body>
+  <!-- Top Mobile App Shortcut Banner (최상단 바로가기 링크 배너) -->
+  <aside id="app-shortcut-top-banner" class="app-shortcut-top-banner" role="banner" aria-label="모바일 홈 화면 바로가기 추가 안내">
+    <div class="shortcut-banner-inner">
+      <div class="shortcut-banner-left">
+        <span class="shortcut-banner-icon">📱</span>
+        <span class="shortcut-banner-text">
+          핸드폰 홈 화면에 <strong>바로가기</strong>를 추가해 앱처럼 편리하게 사용해보세요!
+        </span>
+      </div>
+      <div class="shortcut-banner-right">
+        <button id="btn-banner-add-shortcut" class="btn-shortcut-action" title="홈 화면 바로가기 추가 방법 보기">
+          <span>홈 화면에 추가</span>
+          <svg viewBox="0 0 24 24" width="13" height="13" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+            <polyline points="9 18 15 12 9 6"></polyline>
+          </svg>
+        </button>
+        <button id="btn-close-shortcut-banner" class="btn-shortcut-dismiss" title="안내 배너 닫기" aria-label="안내 배너 닫기">
+          <svg viewBox="0 0 24 24" width="15" height="15" fill="none" stroke="currentColor" stroke-width="2">
+            <line x1="18" y1="6" x2="6" y2="18"></line>
+            <line x1="6" y1="6" x2="18" y2="18"></line>
+          </svg>
+        </button>
+      </div>
+    </div>
+  </aside>
+
   <!-- Header & Navbar -->
   <header class="app-header">
     <div class="brand-section" id="btn-nav-home">
@@ -2443,6 +2712,14 @@ body {
 
     <!-- Header Action Buttons -->
     <div class="header-actions">
+      <button id="btn-open-shortcut-guide" class="btn btn-sm btn-shortcut-nav" title="핸드폰 홈 화면에 바로가기 추가 / 앱 설치">
+        <svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+          <rect x="5" y="2" width="14" height="20" rx="2" ry="2"></rect>
+          <line x1="12" y1="18" x2="12.01" y2="18"></line>
+        </svg>
+        <span>홈 화면 추가</span>
+      </button>
+
       <button id="btn-open-info" class="btn btn-sm" title="공지사항 및 사용 도움말">
         <svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
           <path d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9"></path>
@@ -2500,7 +2777,7 @@ body {
       <!-- Single-line Interactive Notice Bar -->
       <div id="btn-notice-ticker" class="notice-ticker-bar" title="공지사항 및 사용 도움말 열기">
         <span class="notice-ticker-badge">✨ [업데이트]</span>
-        <span>합본 분리 다운로드(전체 / 올클리어 보유 / 미보유 위시 / 최애포카 합본) 기능 추가!</span>
+        <span>신규 포카 5종 추가(총 44종) &amp; 최애포카 모아보기 / 모바일 바로가기 기능 추가!</span>
       </div>
     </div>
 
@@ -2824,15 +3101,39 @@ body {
           <span>📢</span> 공지사항 &amp; 업데이트 <span style="font-size: 0.76rem; font-weight: 700; color: #fb7185; background: rgba(244, 63, 94, 0.2); padding: 2px 7px; border-radius: 9999px; margin-left: 0.35rem;">v2026.11.12</span>
         </div>
         <div class="info-card">
-          <div style="font-weight: 700; color: #f8fafc; margin-bottom: 0.4rem; display: flex; align-items: center; justify-content: space-between; flex-wrap: wrap; gap: 0.3rem;">
-            <span>💖 [v2026.11.12] 최애 포카(♥) 지정 &amp; 나만의 수집 카드 생성 기능 추가</span>
+          <div style="font-weight: 700; color: #f8fafc; margin-bottom: 0.5rem; display: flex; align-items: center; justify-content: space-between; flex-wrap: wrap; gap: 0.3rem;">
+            <span>✨ [v2026.11.12] 신규 포카 도안 5종 추가 &amp; 최애포카 및 바로가기 업데이트</span>
             <span style="font-size: 0.72rem; color: #fb7185; background: rgba(244, 63, 94, 0.15); padding: 1px 6px; border-radius: 4px; font-weight: 600;">최신 버전</span>
           </div>
-          <ul style="margin: 0 0 0.6rem 0; padding-left: 1.15rem; line-height: 1.55; font-size: 0.83rem; color: #cbd5e1;">
-            <li><strong>최애 포카(♥) 지정</strong>: 각 포토카드 우측 상단 하트(♥)를 눌러 내가 가장 좋아하는 최애 포카를 찜할 수 있습니다. (실시간 localStorage 자동 저장)</li>
-            <li><strong>컬렉터 닉네임 입력</strong>: 상단 [자랑하기]를 누르면 나의 닉네임을 설정하여 보관할 수 있습니다.</li>
-            <li><strong>나만의 포카 수집 카드 생성</strong>: 닉네임 + 전체 수집률(%) + 최애 포카 썸네일들이 예쁘게 담긴 공유용 카드를 실시간 렌더링(클립보드 복사 / 다운로드 / 𝕏 공유)합니다.</li>
-            <li><strong>백업 파일 확장</strong>: 백업 파일(.json)에 닉네임과 최애 포카 목록도 함께 포함되어 기기 간 완벽 복원됩니다.</li>
+
+          <div style="font-weight: 700; color: #38bdf8; font-size: 0.82rem; margin-bottom: 0.3rem;">
+            📸 신규 포토카드 도안 5종 추가 (총 44종 / 770장)
+          </div>
+          <ul style="margin: 0 0 0.65rem 0; padding-left: 1.15rem; line-height: 1.55; font-size: 0.82rem; color: #cbd5e1;">
+            <li><code>fore40</code> <strong>카니버</strong>: CARNIVOR 와인 콜라보 패키지 4장 (배두훈, 강형호, 조민규, 고우림)</li>
+            <li><code>fore41</code> <strong>로얄입장포카</strong>: 21-22 더로얄 앙코르 콘서트 입장 특전 2장 (토/일)</li>
+            <li><code>fore42</code> <strong>더일루셔니스트</strong>: 더일루셔니스트 콘서트 QR 만족도 조사 특전 1장</li>
+            <li><code>fore43</code> <strong>더웨이브</strong>: 더웨이브 콘서트 QR 만족도 조사 특전 1장</li>
+            <li><code>fore44</code> <strong>xscala</strong>: XSCALA 시리즈 콘서트 입장 특전 4장 (배두훈, 강형호, 조민규, 고우림)</li>
+            <li>포레스텔라 전체 도안이 기존 39종(758장)에서 <strong>44종(770장)</strong>으로 확장되었습니다.</li>
+          </ul>
+
+          <div style="font-weight: 700; color: #f43f5e; font-size: 0.82rem; margin-bottom: 0.3rem;">
+            💖 최애 포카(♥) 지정 &amp; 모아보기 / 자랑하기 카드 생성
+          </div>
+          <ul style="margin: 0 0 0.65rem 0; padding-left: 1.15rem; line-height: 1.55; font-size: 0.82rem; color: #cbd5e1;">
+            <li><strong>최애 포카(♥) 지정</strong>: 각 포토카드 우측 상단 하트(♥) 또는 상단 <code>[최애포카 선택]</code> 모드로 간편하게 찜 등록</li>
+            <li><strong>최애포카 모아보기 페이지</strong>: 찜한 최애 포카들을 한눈에 모아보고 순위 확인 및 <code>[최애포카 합본 다운로드]</code> 지원</li>
+            <li><strong>컬렉터 닉네임 &amp; 자랑하기 카드</strong>: '닉네임님의 포토카드 컬렉션' 타이틀과 수집 진행률, 최애 포카가 담긴 카드 이미지 실시간 생성 (다운로드 / 𝕏 공유)</li>
+            <li><strong>백업 파일 확장</strong>: 백업(.json) 시 체크 상태와 함께 닉네임, 최애 포카 목록까지 완전 동기화</li>
+          </ul>
+
+          <div style="font-weight: 700; color: #10b981; font-size: 0.82rem; margin-bottom: 0.3rem;">
+            📱 모바일 바로가기 &amp; 첫화면 최근 포카판 즉시 이동
+          </div>
+          <ul style="margin: 0 0 0.6rem 0; padding-left: 1.15rem; line-height: 1.55; font-size: 0.82rem; color: #cbd5e1;">
+            <li><strong>모바일 홈 화면 추가(PWA)</strong>: 스마트폰 홈 화면에 바로가기 앱 아이콘을 추가할 수 있는 안내 배너 및 가이드 모달 제공</li>
+            <li><strong>마지막 확인 페이지 복원</strong>: 첫 화면의 카테고리 카드를 누르면 가장 최근에 보던 포카판으로 즉시 자동 이동</li>
           </ul>
 
           <div style="font-weight: 700; color: #94a3b8; font-size: 0.8rem; margin-bottom: 0.3rem; border-top: 1px solid rgba(255,255,255,0.08); padding-top: 0.45rem;">
@@ -3155,7 +3456,119 @@ body {
     </div>
   </div>
 
+  <!-- ========================================================================
+       Mobile Home Screen Shortcut Guide Modal (홈 화면 바로가기 추가 안내 모달)
+       ======================================================================== -->
+  <div id="shortcut-modal-backdrop" class="modal-backdrop">
+    <div class="modal-box shortcut-modal-box">
+      <div class="modal-header">
+        <h3 class="modal-title">📱 홈 화면에 바로가기 추가</h3>
+        <button id="close-shortcut-modal-btn" class="btn btn-sm btn-icon-only" aria-label="창 닫기">
+          <svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2">
+            <line x1="18" y1="6" x2="6" y2="18"></line>
+            <line x1="6" y1="6" x2="18" y2="18"></line>
+          </svg>
+        </button>
+      </div>
 
+      <p class="shortcut-modal-intro">
+        핸드폰 홈 화면에 바로가기를 추가하면 브라우저 주소창 없이 <strong>앱처럼 전체화면으로 빠르게 접속</strong>할 수 있습니다.
+      </p>
+
+      <!-- OS Selection Tabs -->
+      <div class="shortcut-tabs-row">
+        <button id="tab-shortcut-ios" class="shortcut-tab-btn active" data-target="ios">
+          <span>🍎 아이폰 / iPad (Safari)</span>
+        </button>
+        <button id="tab-shortcut-android" class="shortcut-tab-btn" data-target="android">
+          <span>🤖 갤럭시 / Android (Chrome)</span>
+        </button>
+      </div>
+
+      <!-- In-app Browser Warning Notice (카카오톡, X/트위터, 인스타그램) -->
+      <div id="shortcut-inapp-notice" class="shortcut-inapp-notice" style="display: none;">
+        <span class="notice-icon">⚠️</span>
+        <div class="notice-text">
+          <strong>현재 카카오톡/SNS 인앱 브라우저로 접속 중입니다.</strong><br>
+          홈 화면 추가를 위해 브라우저 우측 하단/상단 메뉴 [⋮]에서 <strong>[Safari로 열기]</strong> 또는 <strong>[다른 브라우저로 열기]</strong>를 먼저 선택해 주세요!
+        </div>
+      </div>
+
+      <!-- Native Install Button for Android / Supported Browsers -->
+      <div id="shortcut-native-install-area" style="display: none; margin-bottom: 1rem;">
+        <button id="btn-do-native-install" class="btn btn-primary btn-sm" style="width: 100%; justify-content: center; padding: 0.65rem; font-size: 0.9rem; font-weight: 700;">
+          ⚡ 지금 바로 앱으로 설치하기 (원클릭)
+        </button>
+      </div>
+
+      <!-- iOS Safari Instructions -->
+      <div id="shortcut-guide-ios" class="shortcut-guide-panel active">
+        <div class="shortcut-step">
+          <div class="step-num">1</div>
+          <div class="step-desc">
+            Safari 브라우저 하단 바의 <strong>[공유 버튼]</strong>
+            <span class="inline-icon-badge">
+              <svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2.5">
+                <path d="M4 12v8a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2v-8"></path>
+                <polyline points="16 6 12 2 8 6"></polyline>
+                <line x1="12" y1="2" x2="12" y2="15"></line>
+              </svg>
+            </span>
+            을 터치합니다.
+          </div>
+        </div>
+        <div class="shortcut-step">
+          <div class="step-num">2</div>
+          <div class="step-desc">
+            아래로 스크롤하여 <strong>[홈 화면에 추가]</strong> 메뉴를 선택합니다.
+            <div class="step-subtext">('+' 모양 아이콘이 있는 메뉴입니다)</div>
+          </div>
+        </div>
+        <div class="shortcut-step">
+          <div class="step-num">3</div>
+          <div class="step-desc">
+            우측 상단의 <strong>[추가]</strong>를 누르면 홈 화면에 포카 체커 아이콘이 생성됩니다!
+          </div>
+        </div>
+      </div>
+
+      <!-- Android / Chrome / Samsung Internet Instructions -->
+      <div id="shortcut-guide-android" class="shortcut-guide-panel" style="display: none;">
+        <div class="shortcut-step">
+          <div class="step-num">1</div>
+          <div class="step-desc">
+            Chrome 또는 삼성인터넷 우측 상단 <strong>[메뉴 (⋮ 또는 ≡)]</strong>를 터치합니다.
+          </div>
+        </div>
+        <div class="shortcut-step">
+          <div class="step-num">2</div>
+          <div class="step-desc">
+            메뉴 목록에서 <strong>[홈 화면에 추가]</strong> 또는 <strong>[앱 설치]</strong>를 선택합니다.
+          </div>
+        </div>
+        <div class="shortcut-step">
+          <div class="step-num">3</div>
+          <div class="step-desc">
+            팝업창에서 <strong>[추가/설치]</strong>를 누르면 홈 화면에 바로가기 앱이 설치됩니다!
+          </div>
+        </div>
+      </div>
+
+      <!-- Modal Footer Actions -->
+      <div class="modal-actions" style="margin-top: 1.25rem; justify-content: space-between; border-top: 1px solid rgba(255,255,255,0.08); padding-top: 0.85rem;">
+        <button id="btn-copy-site-url" class="btn btn-sm" style="display: inline-flex; align-items: center; gap: 0.4rem;">
+          <svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2">
+            <rect x="9" y="9" width="13" height="13" rx="2" ry="2"></rect>
+            <path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"></path>
+          </svg>
+          <span>사이트 링크 복사</span>
+        </button>
+        <button id="btn-shortcut-modal-done" class="btn btn-primary btn-sm">
+          확인
+        </button>
+      </div>
+    </div>
+  </div>
 
   <!-- Footer -->
   <footer class="app-footer">
@@ -3166,9 +3579,9 @@ body {
   <div id="toast-container" class="toast-container"></div>
 
   <!-- Scripts -->
-  <script src="js/templates.js?v=2026.11.12-collector-tiers"></script>
-  <script src="js/canvas-export.js?v=2026.11.12-collector-tiers"></script>
-  <script src="js/editor.js?v=2026.11.12-collector-tiers"></script>
-  <script src="js/app.js?v=2026.11.12-collector-tiers"></script>
+  <script src="js/templates.js?v=2026.11.12-nav-fix"></script>
+  <script src="js/canvas-export.js?v=2026.11.12-nav-fix"></script>
+  <script src="js/editor.js?v=2026.11.12-nav-fix"></script>
+  <script src="js/app.js?v=2026.11.12-nav-fix"></script>
 </body>
 </html>

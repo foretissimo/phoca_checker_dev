@@ -1,0 +1,19 @@
+{
+  "name": "포카 체커 (Phoca Checker)",
+  "short_name": "포카체커",
+  "description": "포레스텔라 포토카드 컬렉션 & 위시리스트 체커",
+  "start_url": "./",
+  "scope": "./",
+  "display": "standalone",
+  "orientation": "portrait-primary",
+  "background_color": "#0f1117",
+  "theme_color": "#0f1117",
+  "icons": [
+    {
+      "src": "images/fore_logo.jpg",
+      "sizes": "192x192 512x512",
+      "type": "image/jpeg",
+      "purpose": "any maskable"
+    }
+  ]
+}
