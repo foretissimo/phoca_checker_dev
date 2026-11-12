@@ -328,7 +328,7 @@ class TemplateEditor {
         if (this.templateTitleInput?.value) target.title = this.templateTitleInput.value;
       }
 
-      const newContentStr = `// Master Categories and 39 Photocard Templates with Exact Card Regions\nconst PRESET_CATEGORIES = ${JSON.stringify(window.PRESET_CATEGORIES, null, 2)};\n\nconst PRESET_TEMPLATES = ${JSON.stringify(allTemplates, null, 2)};\n\nif (typeof window !== 'undefined') {\n  window.PRESET_CATEGORIES = PRESET_CATEGORIES;\n  window.PRESET_TEMPLATES = PRESET_TEMPLATES;\n}\nif (typeof module !== 'undefined') {\n  module.exports = { PRESET_CATEGORIES, PRESET_TEMPLATES };\n}\n`;
+      const newContentStr = `// Master Categories and ${allTemplates.length} Photocard Templates with Exact Card Regions\nconst PRESET_CATEGORIES = ${JSON.stringify(window.PRESET_CATEGORIES, null, 2)};\n\nconst PRESET_TEMPLATES = ${JSON.stringify(allTemplates, null, 2)};\n\nif (typeof window !== 'undefined') {\n  window.PRESET_CATEGORIES = PRESET_CATEGORIES;\n  window.PRESET_TEMPLATES = PRESET_TEMPLATES;\n}\nif (typeof module !== 'undefined') {\n  module.exports = { PRESET_CATEGORIES, PRESET_TEMPLATES };\n}\n`;
 
       // UTF-8 to Base64
       const base64Content = btoa(unescape(encodeURIComponent(newContentStr)));

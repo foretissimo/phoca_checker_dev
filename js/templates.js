@@ -1,15 +1,15 @@
-// Master Categories and 39 Photocard Templates with Exact Card Regions
+// Master Categories and 44 Photocard Templates with Exact Card Regions
 const PRESET_CATEGORIES = [
   {
     "id": "fore",
     "name": "포레스텔라",
     "subtitle": "Forestella Photocard Collection",
-    "badge": "39종",
+    "badge": "44종",
     "icon": "✨",
     "logoImage": "images/fore/forestella_logo.jpg",
     "color": "linear-gradient(135deg, #6366f1, #8b5cf6)",
     "coverImage": "images/fore/fore1_미스티크 리스트 최최최최종 100.png",
-    "itemCount": 39,
+    "itemCount": 44,
     "isAvailable": true
   }
 ];
@@ -8021,6 +8021,181 @@ const PRESET_TEMPLATES = [
         "w": 11.5,
         "h": 8.5,
         "radius": 6
+      }
+    ]
+  },
+  {
+    "id": "fore40",
+    "order": 40,
+    "categoryId": "fore",
+    "title": "fore40. 카니버",
+    "rawName": "카니버",
+    "tag": "기타",
+    "image": "images/fore/fore40_카니버_리스트.jpg",
+    "cards": [
+      {
+        "id": "fore40_1",
+        "name": "배두훈 (콜라보 패키지)",
+        "section": "콜라보 패키지",
+        "x": 7.42,
+        "y": 65.92,
+        "w": 18.46,
+        "h": 28.52,
+        "radius": 10
+      },
+      {
+        "id": "fore40_2",
+        "name": "강형호 (콜라보 패키지)",
+        "section": "콜라보 패키지",
+        "x": 29.79,
+        "y": 65.92,
+        "w": 18.46,
+        "h": 28.52,
+        "radius": 10
+      },
+      {
+        "id": "fore40_3",
+        "name": "조민규 (콜라보 패키지)",
+        "section": "콜라보 패키지",
+        "x": 51.76,
+        "y": 65.92,
+        "w": 18.46,
+        "h": 28.52,
+        "radius": 10
+      },
+      {
+        "id": "fore40_4",
+        "name": "고우림 (콜라보 패키지)",
+        "section": "콜라보 패키지",
+        "x": 73.73,
+        "y": 65.92,
+        "w": 18.36,
+        "h": 28.52,
+        "radius": 10
+      }
+    ]
+  },
+  {
+    "id": "fore41",
+    "order": 41,
+    "categoryId": "fore",
+    "title": "fore41. 로얄입장포카",
+    "rawName": "로얄입장포카",
+    "tag": "콘서트/MD",
+    "image": "images/fore/fore41_로얄입장포카_리스트.png",
+    "cards": [
+      {
+        "id": "fore41_1",
+        "name": "앙콘 입장 특전 [토요일]",
+        "section": "입장 특전",
+        "x": 16.56,
+        "y": 47.68,
+        "w": 29.73,
+        "h": 44.92,
+        "radius": 10
+      },
+      {
+        "id": "fore41_2",
+        "name": "앙콘 입장 특전 [일요일]",
+        "section": "입장 특전",
+        "x": 53.72,
+        "y": 47.68,
+        "w": 29.73,
+        "h": 44.92,
+        "radius": 10
+      }
+    ]
+  },
+  {
+    "id": "fore42",
+    "order": 42,
+    "categoryId": "fore",
+    "title": "fore42. 더일루셔니스트",
+    "rawName": "더일루셔니스트",
+    "tag": "콘서트/MD",
+    "image": "images/fore/fore42_더일루셔니스트_리스트.png",
+    "cards": [
+      {
+        "id": "fore42_1",
+        "name": "QR 만족도 조사",
+        "section": "만족도 조사 특전",
+        "x": 34.62,
+        "y": 45.28,
+        "w": 30.86,
+        "h": 44.92,
+        "radius": 10
+      }
+    ]
+  },
+  {
+    "id": "fore43",
+    "order": 43,
+    "categoryId": "fore",
+    "title": "fore43. 더웨이브",
+    "rawName": "더웨이브",
+    "tag": "콘서트/MD",
+    "image": "images/fore/fore43_더웨이브_리스트.png",
+    "cards": [
+      {
+        "id": "fore43_1",
+        "name": "QR 만족도 조사",
+        "section": "만족도 조사 특전",
+        "x": 26.43,
+        "y": 61.05,
+        "w": 47.22,
+        "h": 21.12,
+        "radius": 10
+      }
+    ]
+  },
+  {
+    "id": "fore44",
+    "order": 44,
+    "categoryId": "fore",
+    "title": "fore44. xscala",
+    "rawName": "xscala",
+    "tag": "콘서트/MD",
+    "image": "images/fore/fore44_xscala_리스트.png",
+    "cards": [
+      {
+        "id": "fore44_1",
+        "name": "배두훈 (XSCALA 시리즈 입장 특전)",
+        "section": "입장 특전",
+        "x": 7.91,
+        "y": 65.95,
+        "w": 18.35,
+        "h": 28.23,
+        "radius": 10
+      },
+      {
+        "id": "fore44_2",
+        "name": "강형호 (XSCALA 시리즈 입장 특전)",
+        "section": "입장 특전",
+        "x": 29.81,
+        "y": 65.95,
+        "w": 18.35,
+        "h": 28.23,
+        "radius": 10
+      },
+      {
+        "id": "fore44_3",
+        "name": "조민규 (XSCALA 시리즈 입장 특전)",
+        "section": "입장 특전",
+        "x": 51.72,
+        "y": 65.95,
+        "w": 18.35,
+        "h": 28.23,
+        "radius": 10
+      },
+      {
+        "id": "fore44_4",
+        "name": "고우림 (XSCALA 시리즈 입장 특전)",
+        "section": "입장 특전",
+        "x": 73.63,
+        "y": 65.95,
+        "w": 18.35,
+        "h": 28.23,
+        "radius": 10
       }
     ]
   }

@@ -4,6 +4,22 @@ All notable functional changes, architecture improvements, and bug fixes for the
 
 ---
 
+## [v2026.11.12-2] - 2026-11-12
+
+### 📸 Added 5 New Photocard Templates (fore40 ~ fore44)
+- **New Photocard Templates**:
+  - `fore40` (카니버): CARNIVOR Collab Package (4 cards: Bae Doo-hoon, Kang Hyung-ho, Cho Min-gyu, Ko Woo-rim).
+  - `fore41` (로얄입장포카): The Royal Encore Entrance Benefits (2 cards: Saturday, Sunday).
+  - `fore42` (더일루셔니스트): The Illusionist QR Satisfaction Survey Benefit (1 card).
+  - `fore43` (더웨이브): The Wave QR Satisfaction Survey Benefit (1 card).
+  - `fore44` (xscala): XSCALA Series Entrance Benefits (4 cards: Bae Doo-hoon, Kang Hyung-ho, Cho Min-gyu, Ko Woo-rim).
+- **Template Expansion**:
+  - Total templates expanded from 39 to **44**.
+  - Total registered cards expanded from 758 to **770**.
+  - Merged poster generation, drawer listings, and counters automatically synchronized.
+
+---
+
 ## [v2026.11.12] - 2026-11-12
 
 ### 💖 Favorite Photocards, Nickname & Custom Summary Card
